@@ -41,277 +41,100 @@
   .display{font-family:'Fraunces', serif;}
   a{color:inherit;}
 
-  /* ===== Layout shell ===== */
   .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
 
   /* ===== HERO ===== */
-  header.hero{
-    padding:64px 0 48px;
-    color:var(--paper);
-  }
+  header.hero{padding:64px 0 48px; color:var(--paper);}
   .eyebrow{
     font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    letter-spacing:.22em;
-    text-transform:uppercase;
-    color:var(--gold-soft);
-    margin:0 0 18px;
+    font-size:12px; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--gold-soft); margin:0 0 18px;
   }
-  .hero-grid{
-    display:grid;
-    grid-template-columns:auto 1fr;
-    gap:44px;
-    align-items:center;
-  }
-  .hero h1{
-    font-size:clamp(28px, 4vw, 44px);
-    font-weight:500;
-    line-height:1.15;
-    margin:0 0 14px;
-    color:#fff;
-  }
-  .hero p.sub{
-    font-size:16px;
-    color:#B9C2D6;
-    max-width:46ch;
-    line-height:1.6;
-    margin:0;
-  }
-  .seal{ width:172px; height:172px; flex:none; }
-  .seal-pct{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:44px;
-    fill:#fff;
-  }
-  .seal-label{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:9.2px;
-    letter-spacing:.14em;
-    fill:var(--gold-soft);
-  }
+  .hero-grid{display:grid; grid-template-columns:auto 1fr; gap:44px; align-items:center;}
+  .hero h1{font-size:clamp(28px,4vw,44px); font-weight:500; line-height:1.15; margin:0 0 14px; color:#fff;}
+  .hero p.sub{font-size:16px; color:#B9C2D6; max-width:46ch; line-height:1.6; margin:0;}
+  .seal{width:172px; height:172px; flex:none;}
+  .seal-pct{font-family:'Fraunces', serif; font-weight:600; font-size:44px; fill:#fff;}
+  .seal-label{font-family:'IBM Plex Mono', monospace; font-size:9.2px; letter-spacing:.14em; fill:var(--gold-soft);}
 
   .stat-row{
-    display:grid;
-    grid-template-columns:repeat(4, 1fr);
-    gap:1px;
-    margin-top:40px;
-    background:rgba(255,255,255,0.09);
-    border-radius:14px;
-    overflow:hidden;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    margin-top:40px; background:rgba(255,255,255,0.09); border-radius:14px; overflow:hidden;
   }
-  .stat{
-    background:rgba(255,255,255,0.03);
-    padding:20px 22px;
-  }
-  .stat .n{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:30px;
-    color:#fff;
-    display:block;
-  }
-  .stat .l{
-    font-size:11.5px;
-    color:#9AA6BE;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    margin-top:4px;
-  }
+  .stat{background:rgba(255,255,255,0.03); padding:20px 22px;}
+  .stat .n{font-family:'Fraunces', serif; font-weight:600; font-size:30px; color:#fff; display:block;}
+  .stat .l{font-size:11.5px; color:#9AA6BE; text-transform:uppercase; letter-spacing:.08em; margin-top:4px;}
 
-  /* ===== SECTIONS on paper ===== */
-  main{
-    background:var(--paper);
-    border-radius:28px 28px 0 0;
-    box-shadow:0 -6px 40px rgba(0,0,0,0.25);
-  }
+  /* ===== MAIN PAPER ===== */
+  main{background:var(--paper); border-radius:28px 28px 0 0; box-shadow:0 -6px 40px rgba(0,0,0,0.25);}
   section{padding:56px 0;}
   section + section{border-top:1px solid var(--paper-line);}
-  .section-head{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    gap:16px;
-    margin-bottom:28px;
-    flex-wrap:wrap;
-  }
-  .section-head h2{
-    font-family:'Fraunces', serif;
-    font-weight:500;
-    font-style:italic;
-    font-size:26px;
-    margin:0;
-  }
-  .section-head .num{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    color:var(--text-soft);
-    letter-spacing:.12em;
-  }
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap;}
+  .section-head h2{font-family:'Fraunces', serif; font-weight:500; font-style:italic; font-size:26px; margin:0;}
+  .section-head .num{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--text-soft); letter-spacing:.12em;}
 
   /* ===== Year progress ===== */
   .years{display:flex; flex-direction:column; gap:14px;}
-  .year-row{
-    display:grid;
-    grid-template-columns:150px 1fr 64px;
-    align-items:center;
-    gap:16px;
-  }
-  .year-row .yname{
-    font-size:14px;
-    font-weight:600;
-  }
-  .year-row .ymeta{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    color:var(--text-soft);
-    display:block;
-    margin-top:2px;
-  }
-  .track{
-    height:10px;
-    background:var(--paper-2);
-    border:1px solid var(--paper-line);
-    border-radius:5px;
-    overflow:hidden;
-    position:relative;
-  }
-  .fill{
-    height:100%;
-    background:linear-gradient(90deg, var(--approved), #588c6c);
-    border-radius:5px 0 0 5px;
-  }
-  .year-row .pct{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    text-align:right;
-    font-weight:600;
-  }
+  .year-row{display:grid; grid-template-columns:150px 1fr 64px; align-items:center; gap:16px;}
+  .year-row .yname{font-size:14px; font-weight:600;}
+  .year-row .ymeta{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-soft); display:block; margin-top:2px;}
+  .track{height:10px; background:var(--paper-2); border:1px solid var(--paper-line); border-radius:5px; overflow:hidden;}
+  .fill{height:100%; background:linear-gradient(90deg, var(--approved), #588c6c); border-radius:5px 0 0 5px; transition:width .3s ease;}
+  .year-row .pct{font-family:'IBM Plex Mono', monospace; font-size:13px; text-align:right; font-weight:600;}
 
   /* ===== Schedule ===== */
   .sched-wrap{overflow-x:auto;}
-  table.sched{
-    width:100%;
-    border-collapse:collapse;
-    font-size:13.5px;
-    min-width:640px;
-  }
+  table.sched{width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px;}
   table.sched th{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    color:var(--text-soft);
-    text-align:left;
-    padding:0 10px 10px;
-    border-bottom:2px solid var(--ink);
-    font-weight:600;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--text-soft); text-align:left;
+    padding:0 10px 10px; border-bottom:2px solid var(--ink); font-weight:600;
   }
-  table.sched td{
-    padding:16px 10px;
-    border-bottom:1px solid var(--paper-line);
-    vertical-align:top;
-  }
+  table.sched td{padding:16px 10px; border-bottom:1px solid var(--paper-line); vertical-align:top;}
   .class-chip{
-    display:inline-block;
-    background:var(--pending-bg);
-    color:var(--pending);
-    border:1px solid rgba(180,119,43,0.35);
-    padding:5px 10px;
-    border-radius:7px;
-    font-size:12.5px;
-    font-weight:600;
-    line-height:1.3;
+    display:inline-block; background:var(--pending-bg); color:var(--pending);
+    border:1px solid rgba(180,119,43,0.35); padding:5px 10px; border-radius:7px;
+    font-size:12.5px; font-weight:600; line-height:1.3;
   }
   .empty-slot{color:var(--muted); font-size:12.5px; font-style:italic;}
 
   /* ===== Filters ===== */
-  .filters{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
-    align-items:center;
-  }
-  .search{
-    flex:1;
-    min-width:200px;
-    position:relative;
-  }
+  .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; align-items:center;}
+  .search{flex:1; min-width:200px;}
   .search input{
-    width:100%;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size:14px;
-    padding:10px 14px;
-    border-radius:8px;
-    border:1px solid var(--paper-line);
-    background:#fff;
-    color:var(--text);
+    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:14px;
+    padding:10px 14px; border-radius:8px; border:1px solid var(--paper-line);
+    background:#fff; color:var(--text);
   }
   .search input:focus{outline:2px solid var(--gold); outline-offset:1px;}
   .chip-btn{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    padding:8px 14px;
-    border-radius:20px;
-    border:1px solid var(--paper-line);
-    background:#fff;
-    color:var(--text-soft);
-    cursor:pointer;
-    transition:all .15s ease;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; padding:8px 14px;
+    border-radius:20px; border:1px solid var(--paper-line); background:#fff;
+    color:var(--text-soft); cursor:pointer; transition:all .15s ease;
   }
   .chip-btn:hover{border-color:var(--gold);}
-  .chip-btn.active{
-    background:var(--ink);
-    color:var(--paper);
-    border-color:var(--ink);
-  }
+  .chip-btn.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
   .chip-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
 
   /* ===== Table ===== */
-  .table-wrap{
-    border:1px solid var(--paper-line);
-    border-radius:12px;
-    overflow:hidden;
-    background:#fff;
-  }
-  table.legajo{
-    width:100%;
-    border-collapse:collapse;
-    font-size:13.8px;
-  }
+  .table-wrap{border:1px solid var(--paper-line); border-radius:12px; overflow:hidden; background:#fff;}
+  table.legajo{width:100%; border-collapse:collapse; font-size:13.8px;}
   table.legajo thead th{
-    text-align:left;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    color:var(--text-soft);
-    background:var(--paper-2);
-    padding:12px 14px;
-    cursor:pointer;
-    user-select:none;
-    white-space:nowrap;
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--text-soft);
+    background:var(--paper-2); padding:12px 14px; cursor:pointer;
+    user-select:none; white-space:nowrap;
   }
   table.legajo thead th:hover{color:var(--text);}
-  table.legajo tbody td{
-    padding:11px 14px;
-    border-top:1px solid var(--paper-line);
-    vertical-align:middle;
-  }
-  table.legajo tbody tr{transition:background .1s ease;}
-  table.legajo tbody tr:hover{background:#FBF8F0;}
+  table.legajo tbody td{padding:11px 14px; border-top:1px solid var(--paper-line); vertical-align:middle;}
+  table.legajo tbody tr.editable-row{cursor:pointer; transition:background .1s ease;}
+  table.legajo tbody tr.editable-row:hover{background:#FBF8F0;}
+  table.legajo tbody tr.editable-row.modified{border-left:3px solid var(--gold);}
   td.code{font-family:'IBM Plex Mono', monospace; color:var(--text-soft); font-size:12.5px;}
   td.nota{font-family:'IBM Plex Mono', monospace; font-weight:600; text-align:center;}
   .tag{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    font-size:12px;
-    font-weight:600;
-    padding:4px 10px;
-    border-radius:20px;
-    white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; font-size:12px;
+    font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;
   }
   .tag::before{content:''; width:6px; height:6px; border-radius:50%;}
   .tag.aprobada{background:var(--approved-bg); color:var(--approved);}
@@ -322,15 +145,62 @@
   .tag.no-aprobada::before{background:var(--notapproved);}
   .disp{font-size:12px; color:var(--text-soft);}
   .disp.si{color:var(--approved); font-weight:600;}
+  .mod-dot{color:var(--gold); font-size:10px; vertical-align:middle; margin-left:4px;}
   .no-results{padding:40px; text-align:center; color:var(--text-soft); font-style:italic;}
 
-  footer{
-    padding:32px 0 44px;
-    text-align:center;
-    font-size:12px;
-    color:var(--text-soft);
-    font-family:'IBM Plex Mono', monospace;
+  /* ===== MODAL ===== */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(22,35,58,0.72);
+    display:flex; align-items:center; justify-content:center;
+    z-index:1000; padding:24px;
+    backdrop-filter:blur(4px);
   }
+  .modal-box{
+    background:var(--paper); border-radius:20px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    padding:32px; width:100%; max-width:420px;
+  }
+  .modal-box .modal-eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:var(--text-soft); margin:0 0 6px;
+  }
+  .modal-box h3{
+    font-family:'Fraunces', serif; font-weight:500; font-style:italic;
+    font-size:20px; margin:0 0 24px; line-height:1.3;
+    color:var(--ink);
+  }
+  .modal-field{margin-bottom:18px;}
+  .modal-field label{
+    display:block; font-size:11.5px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.08em;
+    color:var(--text-soft); margin-bottom:7px;
+  }
+  .modal-field select,
+  .modal-field input{
+    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:14px;
+    padding:10px 14px; border-radius:8px; border:1.5px solid var(--paper-line);
+    background:#fff; color:var(--text); appearance:none;
+  }
+  .modal-field select:focus,
+  .modal-field input:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);}
+  .modal-field .nota-hint{font-size:11px; color:var(--text-soft); margin-top:5px;}
+  .modal-btns{
+    display:flex; gap:10px; margin-top:28px; flex-wrap:wrap;
+  }
+  .modal-btns .btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size:14px; font-weight:600;
+    padding:10px 20px; border-radius:10px; border:none; cursor:pointer;
+    transition:all .15s ease; flex:1;
+  }
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{background:var(--ink-2);}
+  .btn-secondary{background:var(--paper-2); color:var(--text); border:1px solid var(--paper-line);}
+  .btn-secondary:hover{border-color:var(--text-soft);}
+  .btn-danger{background:#EAD9D3; color:var(--notapproved); border:1px solid rgba(122,59,50,0.25); flex:none; padding:10px 16px;}
+  .btn-danger:hover{background:#DEC5BB;}
+
+  footer{padding:32px 0 44px; text-align:center; font-size:12px; color:var(--text-soft); font-family:'IBM Plex Mono', monospace;}
 
   @media (max-width:640px){
     .hero-grid{grid-template-columns:1fr; text-align:center;}
@@ -338,7 +208,6 @@
     .stat-row{grid-template-columns:repeat(2,1fr);}
     .year-row{grid-template-columns:100px 1fr 44px; gap:10px;}
   }
-
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
     *{transition:none !important;}
@@ -369,7 +238,7 @@
       </svg>
       <div>
         <h1>Tu carrera, en un solo lugar.</h1>
-        <p class="sub">Seguimiento de materias, notas y disponibilidad — armado a partir de tu propia planilla, para saber de un vistazo qué queda y qué podés cursar ya.</p>
+        <p class="sub">Seguimiento de materias, notas y disponibilidad — hacé clic en cualquier fila para actualizar tu estado en tiempo real.</p>
       </div>
     </div>
 
@@ -441,21 +310,119 @@
 </main>
 
 <footer>
-  <div class="wrap">Datos propios · generado a partir de tu planilla de seguimiento</div>
+  <div class="wrap">Datos propios · hacé clic en cualquier fila para editar · cambios guardados en el navegador</div>
 </footer>
+
+<!-- ===== MODAL ===== -->
+<div id="editModal" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <p class="modal-eyebrow" id="modalCodigo">0000</p>
+    <h3 id="modalTitle">Materia</h3>
+    <form id="editForm" novalidate>
+      <div class="modal-field">
+        <label for="inputCondicion">Estado</label>
+        <select id="inputCondicion" name="condicion">
+          <option value="Aprobada">Aprobada</option>
+          <option value="Cursada">Cursando (final pendiente)</option>
+          <option value="No aprobada">No aprobada / pendiente</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label for="inputNota">Nota</label>
+        <input type="number" id="inputNota" name="nota" min="0" max="10" step="0.5" placeholder="0 – 10">
+        <p class="nota-hint">Dejá en 0 si todavía no tenés nota.</p>
+      </div>
+      <div class="modal-field">
+        <label for="inputDisponibilidad">Disponibilidad</label>
+        <select id="inputDisponibilidad" name="disponibilidad">
+          <option value="Disponible">Disponible para cursar</option>
+          <option value="No Disponible">No disponible</option>
+        </select>
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="btn btn-danger" id="resetBtn" style="display:none">Resetear</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
 /* ======= DATA ======= */
-const DATA = [{"codigo": 3621, "nombre": "Matemática Discreta", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 9.0}, {"codigo": 3622, "nombre": "Análisis Matemático I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0}, {"codigo": 3623, "nombre": "Programación Inicial", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0}, {"codigo": 3624, "nombre": "Introducción a los Sistemas de Información", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0}, {"codigo": 3625, "nombre": "Sistemas de Numeración", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0}, {"codigo": 3626, "nombre": "Principios de Calidad de Software", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0}, {"codigo": 3627, "nombre": "Álgebra y Geometría Analítica I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0}, {"codigo": 3628, "nombre": "Física I", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 5.0}, {"codigo": 3629, "nombre": "Programación Estructurada Básica", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0}, {"codigo": 3630, "nombre": "Introducción a la Gestión de Requisitos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0}, {"codigo": 3631, "nombre": "Fundamentos de Sistemas Embebidos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0}, {"codigo": 3632, "nombre": "Introducción a los Proyectos Informáticos", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 10.0}, {"codigo": 3633, "nombre": "Análisis Matemático Ii", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0}, {"codigo": 3634, "nombre": "Física Ii", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3635, "nombre": "Tópicos de Programación", "condicion": "Cursada", "disponibilidad": "Disponible", "nota": 4.0}, {"codigo": 3636, "nombre": "Bases de Datos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0}, {"codigo": 3637, "nombre": "Análisis de Sistemas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0}, {"codigo": 3638, "nombre": "Arquitectura de Computadoras", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0}, {"codigo": 3639, "nombre": "Análisis Matemático Iii", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0}, {"codigo": 3640, "nombre": "Algoritmos y Estructuras de Datos", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3641, "nombre": "Bases de Datos Aplicadas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0}, {"codigo": 3642, "nombre": "Principios de Diseño de Sistemas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 9.0}, {"codigo": 3643, "nombre": "Redes de Computadoras", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3644, "nombre": "Gestión de las Organizaciones", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3676, "nombre": "Responsabilidad Social Universitaria", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3645, "nombre": "Álgebra y Geometría Analítica Ii", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 5.0}, {"codigo": 3646, "nombre": "Paradigmas de Programación", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3647, "nombre": "Requisitos Avanzados", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0}, {"codigo": 3648, "nombre": "Diseño de Software", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3649, "nombre": "Sistemas Operativos", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3650, "nombre": "Seguridad de la Información", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3675, "nombre": "Práctica Profesional Supervisada", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0}, {"codigo": 3651, "nombre": "Probabilidad y Estadística", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 3652, "nombre": "Programación Avanzada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3653, "nombre": "Arquitectura de Sistemas Software", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3654, "nombre": "Virtualización de Hardware", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3655, "nombre": "Auditoría y Legislación", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3656, "nombre": "Estadística Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3657, "nombre": "Autómatas y Gramáticas", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3658, "nombre": "Programación Concurrente", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3659, "nombre": "Gestión Aplicada al Desarrollo de Software I", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3660, "nombre": "Sistemas Operativos Avanzados", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3661, "nombre": "Gestión de Proyectos", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3662, "nombre": "Matemática Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3663, "nombre": "Lenguajes y Compiladores", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3664, "nombre": "Inteligencia Artificial", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3665, "nombre": "Gestión Aplicada al Desarrollo de Software Ii", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3666, "nombre": "Seguridad Aplicada y Forensia", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3667, "nombre": "Gestión de la Calidad en Procesos de Sistemas", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3668, "nombre": "Inteligencia Artificial Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3669, "nombre": "Innovación y Emprendedorismo", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3670, "nombre": "Ciencia de Datos", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3671, "nombre": "Proyecto Final de Carrera", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3677, "nombre": "Lenguaje Orientado a Negocios", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3678, "nombre": "Tecnologías en Seguridad", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 3679, "nombre": "Visión Artificial", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}, {"codigo": 911, "nombre": "Computación I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0}, {"codigo": 912, "nombre": "Computación Ii", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 9.0}, {"codigo": 901, "nombre": "Inglés I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0}, {"codigo": 902, "nombre": "Inglés Ii", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0}, {"codigo": 903, "nombre": "Inglés Iii", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0}, {"codigo": 904, "nombre": "Inglés Iv", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0}]
-;
+const DATA = [
+  {codigo:3621, nombre:"Matemática Discreta",                          condicion:"Aprobada",    disponibilidad:"No Disponible", nota:9},
+  {codigo:3622, nombre:"Análisis Matemático I",                        condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
+  {codigo:3623, nombre:"Programación Inicial",                         condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
+  {codigo:3624, nombre:"Introducción a los Sistemas de Información",   condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
+  {codigo:3625, nombre:"Sistemas de Numeración",                       condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
+  {codigo:3626, nombre:"Principios de Calidad de Software",            condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
+  {codigo:3627, nombre:"Álgebra y Geometría Analítica I",              condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
+  {codigo:3628, nombre:"Física I",                                     condicion:"Aprobada",    disponibilidad:"Disponible",    nota:5},
+  {codigo:3629, nombre:"Programación Estructurada Básica",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
+  {codigo:3630, nombre:"Introducción a la Gestión de Requisitos",      condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
+  {codigo:3631, nombre:"Fundamentos de Sistemas Embebidos",            condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
+  {codigo:3632, nombre:"Introducción a los Proyectos Informáticos",    condicion:"Aprobada",    disponibilidad:"No Disponible", nota:10},
+  {codigo:3633, nombre:"Análisis Matemático II",                       condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
+  {codigo:3634, nombre:"Física II",                                    condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3635, nombre:"Tópicos de Programación",                      condicion:"Cursada",     disponibilidad:"Disponible",    nota:4},
+  {codigo:3636, nombre:"Bases de Datos",                               condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
+  {codigo:3637, nombre:"Análisis de Sistemas",                         condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
+  {codigo:3638, nombre:"Arquitectura de Computadoras",                 condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
+  {codigo:3639, nombre:"Análisis Matemático III",                      condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
+  {codigo:3640, nombre:"Algoritmos y Estructuras de Datos",            condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3641, nombre:"Bases de Datos Aplicadas",                     condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
+  {codigo:3642, nombre:"Principios de Diseño de Sistemas",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:9},
+  {codigo:3643, nombre:"Redes de Computadoras",                        condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3644, nombre:"Gestión de las Organizaciones",                condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3676, nombre:"Responsabilidad Social Universitaria",         condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3645, nombre:"Álgebra y Geometría Analítica II",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:5},
+  {codigo:3646, nombre:"Paradigmas de Programación",                   condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3647, nombre:"Requisitos Avanzados",                         condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
+  {codigo:3648, nombre:"Diseño de Software",                           condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3649, nombre:"Sistemas Operativos",                          condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3650, nombre:"Seguridad de la Información",                  condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3675, nombre:"Práctica Profesional Supervisada",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
+  {codigo:3651, nombre:"Probabilidad y Estadística",                   condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:3652, nombre:"Programación Avanzada",                        condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3653, nombre:"Arquitectura de Sistemas Software",            condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3654, nombre:"Virtualización de Hardware",                   condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3655, nombre:"Auditoría y Legislación",                      condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3656, nombre:"Estadística Aplicada",                         condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3657, nombre:"Autómatas y Gramáticas",                       condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3658, nombre:"Programación Concurrente",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3659, nombre:"Gestión Aplicada al Desarrollo de Software I", condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3660, nombre:"Sistemas Operativos Avanzados",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3661, nombre:"Gestión de Proyectos",                         condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3662, nombre:"Matemática Aplicada",                          condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3663, nombre:"Lenguajes y Compiladores",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3664, nombre:"Inteligencia Artificial",                      condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3665, nombre:"Gestión Aplicada al Desarrollo de Software II",condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3666, nombre:"Seguridad Aplicada y Forensia",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3667, nombre:"Gestión de la Calidad en Procesos de Sistemas",condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3668, nombre:"Inteligencia Artificial Aplicada",             condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3669, nombre:"Innovación y Emprendedorismo",                 condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3670, nombre:"Ciencia de Datos",                             condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3671, nombre:"Proyecto Final de Carrera",                    condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3677, nombre:"Lenguaje Orientado a Negocios",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3678, nombre:"Tecnologías en Seguridad",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3679, nombre:"Visión Artificial",                            condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:911,  nombre:"Computación I",                                condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
+  {codigo:912,  nombre:"Computación II",                               condicion:"Aprobada",    disponibilidad:"Disponible",    nota:9},
+  {codigo:901,  nombre:"Inglés I",                                     condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
+  {codigo:902,  nombre:"Inglés II",                                    condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
+  {codigo:903,  nombre:"Inglés III",                                   condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
+  {codigo:904,  nombre:"Inglés IV",                                    condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+];
 
-const YEARS = [
-  { nombre: "Primer año", aprobadas: 12, faltan: 0 },
-  { nombre: "Segundo año", aprobadas: 7, faltan: 6 },
-  { nombre: "Tercer año", aprobadas: 3, faltan: 9 },
-  { nombre: "Cuarto año", aprobadas: 0, faltan: 12 },
-  { nombre: "Quinto año", aprobadas: 0, faltan: 7 },
-  { nombre: "Transversales", aprobadas: 4, faltan: 2 },
+/* ======= YEAR GROUPS (para progreso dinámico) ======= */
+const YEAR_GROUPS = [
+  {nombre:"Primer año",    codes:[3621,3622,3623,3624,3625,3626,3627,3628,3629,3630,3631,3632]},
+  {nombre:"Segundo año",   codes:[3633,3634,3635,3636,3637,3638,3639,3640,3641,3642,3643,3644,3645]},
+  {nombre:"Tercer año",    codes:[3646,3647,3648,3649,3650,3675,3651,3652,3653,3654,3655,3656]},
+  {nombre:"Cuarto año",    codes:[3657,3658,3659,3660,3661,3662,3663,3664,3665,3666,3667,3668]},
+  {nombre:"Quinto año",    codes:[3669,3670,3671,3676,3677,3678,3679]},
+  {nombre:"Transversales", codes:[911,912,901,902,903,904]},
 ];
 
 const SCHEDULE = {
@@ -464,108 +431,212 @@ const SCHEDULE = {
   clases: ["Física II","Requisitos Avanzados","Gestión de las Organizaciones", null, null, null]
 };
 
-/* ======= STATS ======= */
-const total = DATA.length;
-const aprobadas = DATA.filter(s => s.condicion === "Aprobada");
-const cursando = DATA.filter(s => s.condicion === "Cursada");
-const noAprobadas = DATA.filter(s => s.condicion === "No aprobada");
-const disponiblesYa = DATA.filter(s => s.condicion !== "Aprobada" && s.disponibilidad === "Disponible");
-const notas = aprobadas.map(s => s.nota).filter(n => n > 0);
-const promedio = notas.length ? (notas.reduce((a,b) => a+b, 0) / notas.length) : 0;
-const pctCarrera = Math.round((aprobadas.length / total) * 100);
+/* ======= PERSISTENCE ======= */
+const STORAGE_KEY = 'carrera_overrides';
 
-document.getElementById('sealPct').textContent = pctCarrera + '%';
-document.getElementById('stAprobadas').textContent = aprobadas.length + ' / ' + total;
-document.getElementById('stCursando').textContent = cursando.length;
-document.getElementById('stPromedio').textContent = promedio.toFixed(2);
-document.getElementById('stDisponibles').textContent = disponiblesYa.length;
-document.getElementById('avanceTotal').textContent = total + ' materias en total';
-document.getElementById('legajoCount').textContent = total + ' materias';
+function getOverrides() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
 
-/* ======= YEARS ======= */
-const yearsList = document.getElementById('yearsList');
-YEARS.forEach(y => {
-  const totalY = y.aprobadas + y.faltan;
-  const pct = totalY ? Math.round((y.aprobadas/totalY)*100) : 0;
-  const row = document.createElement('div');
-  row.className = 'year-row';
-  row.innerHTML = `
-    <div>
-      <div class="yname">${y.nombre}</div>
-      <div class="ymeta">${y.aprobadas} / ${totalY}</div>
-    </div>
-    <div class="track"><div class="fill" style="width:${pct}%"></div></div>
-    <div class="pct">${pct}%</div>
-  `;
-  yearsList.appendChild(row);
-});
+function getEffectiveData() {
+  const ov = getOverrides();
+  return DATA.map(s => {
+    const o = ov[String(s.codigo)];
+    return o ? Object.assign({}, s, o) : s;
+  });
+}
+
+function saveOverride(codigo, changes) {
+  const ov = getOverrides();
+  const key = String(codigo);
+  const orig = DATA.find(s => s.codigo === codigo);
+  ov[key] = Object.assign({}, ov[key] || {}, changes);
+  const same = ['condicion','nota','disponibilidad'].every(
+    k => !(k in ov[key]) || ov[key][k] === orig[k]
+  );
+  if (same) delete ov[key];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ov));
+}
+
+function resetOverride(codigo) {
+  const ov = getOverrides();
+  delete ov[String(codigo)];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ov));
+}
 
 /* ======= SCHEDULE ======= */
-const schedTable = document.getElementById('schedTable');
-let theadHtml = '<thead><tr><th>' + SCHEDULE.franja + '</th>';
-SCHEDULE.dias.forEach(d => theadHtml += `<th>${d}</th>`);
-theadHtml += '</tr></thead>';
-let bodyHtml = '<tbody><tr><td style="font-weight:600;">Cursada</td>';
-SCHEDULE.clases.forEach(c => {
-  bodyHtml += c ? `<td><span class="class-chip">${c}</span></td>` : `<td><span class="empty-slot">Libre</span></td>`;
-});
-bodyHtml += '</tr></tbody>';
-schedTable.innerHTML = theadHtml + bodyHtml;
+(function(){
+  const tbl = document.getElementById('schedTable');
+  let h = '<thead><tr><th>' + SCHEDULE.franja + '</th>';
+  SCHEDULE.dias.forEach(d => h += '<th>' + d + '</th>');
+  h += '</tr></thead><tbody><tr><td style="font-weight:600">Cursada</td>';
+  SCHEDULE.clases.forEach(c => {
+    h += c
+      ? '<td><span class="class-chip">' + c + '</span></td>'
+      : '<td><span class="empty-slot">Libre</span></td>';
+  });
+  h += '</tr></tbody>';
+  tbl.innerHTML = h;
+})();
+
+/* ======= STATS ======= */
+function recalcStats() {
+  const eff = getEffectiveData();
+  const total = eff.length;
+  const aprobadas = eff.filter(s => s.condicion === 'Aprobada');
+  const cursando  = eff.filter(s => s.condicion === 'Cursada');
+  const disponibles = eff.filter(s => s.condicion !== 'Aprobada' && s.disponibilidad === 'Disponible');
+  const notas = aprobadas.map(s => s.nota).filter(n => n > 0);
+  const promedio = notas.length ? notas.reduce((a,b) => a+b, 0) / notas.length : 0;
+  const pct = Math.round(aprobadas.length / total * 100);
+
+  document.getElementById('sealPct').textContent      = pct + '%';
+  document.getElementById('stAprobadas').textContent  = aprobadas.length + ' / ' + total;
+  document.getElementById('stCursando').textContent   = cursando.length;
+  document.getElementById('stPromedio').textContent   = promedio.toFixed(2);
+  document.getElementById('stDisponibles').textContent = disponibles.length;
+  document.getElementById('avanceTotal').textContent  = total + ' materias en total';
+  document.getElementById('legajoCount').textContent  = total + ' materias';
+}
+
+/* ======= YEARS ======= */
+function renderYears() {
+  const eff = getEffectiveData();
+  const list = document.getElementById('yearsList');
+  list.innerHTML = '';
+  YEAR_GROUPS.forEach(yg => {
+    const subs = eff.filter(s => yg.codes.includes(s.codigo));
+    const aprobadas = subs.filter(s => s.condicion === 'Aprobada').length;
+    const total = subs.length;
+    const pct = total ? Math.round(aprobadas / total * 100) : 0;
+    const row = document.createElement('div');
+    row.className = 'year-row';
+    row.innerHTML =
+      '<div><div class="yname">' + yg.nombre + '</div><div class="ymeta">' + aprobadas + ' / ' + total + '</div></div>' +
+      '<div class="track"><div class="fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="pct">' + pct + '%</div>';
+    list.appendChild(row);
+  });
+}
 
 /* ======= TABLE ======= */
-const tbody = document.getElementById('tbody');
-const noResults = document.getElementById('noResults');
 let currentFilter = 'todas';
 let currentSearch = '';
 let sortKey = 'codigo';
 let sortAsc = true;
 
-function tagClass(c){
-  if(c === 'Aprobada') return 'aprobada';
-  if(c === 'Cursada') return 'cursada';
+function tagClass(c) {
+  if (c === 'Aprobada')    return 'aprobada';
+  if (c === 'Cursada')     return 'cursada';
   return 'no-aprobada';
 }
 
-function render(){
-  let rows = DATA.filter(s => {
-    if(currentFilter === 'Disponible'){
-      if(!(s.condicion !== 'Aprobada' && s.disponibilidad === 'Disponible')) return false;
-    } else if(currentFilter !== 'todas' && s.condicion !== currentFilter){
+function render() {
+  const eff = getEffectiveData();
+  const ov  = getOverrides();
+
+  let rows = eff.filter(s => {
+    if (currentFilter === 'Disponible') {
+      if (!(s.condicion !== 'Aprobada' && s.disponibilidad === 'Disponible')) return false;
+    } else if (currentFilter !== 'todas' && s.condicion !== currentFilter) {
       return false;
     }
-    if(currentSearch){
+    if (currentSearch) {
       const q = currentSearch.toLowerCase();
-      if(!s.nombre.toLowerCase().includes(q) && !String(s.codigo).includes(q)) return false;
+      if (!s.nombre.toLowerCase().includes(q) && !String(s.codigo).includes(q)) return false;
     }
     return true;
   });
 
-  rows.sort((a,b) => {
+  rows.sort((a, b) => {
     let va = a[sortKey], vb = b[sortKey];
-    if(typeof va === 'string'){ va = va.toLowerCase(); vb = vb.toLowerCase(); }
-    if(va < vb) return sortAsc ? -1 : 1;
-    if(va > vb) return sortAsc ? 1 : -1;
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va < vb) return sortAsc ? -1 :  1;
+    if (va > vb) return sortAsc ?  1 : -1;
     return 0;
   });
 
-  if(rows.length === 0){
+  const tbody    = document.getElementById('tbody');
+  const noResult = document.getElementById('noResults');
+
+  if (!rows.length) {
     tbody.innerHTML = '';
-    noResults.style.display = 'block';
+    noResult.style.display = 'block';
     return;
   }
-  noResults.style.display = 'none';
+  noResult.style.display = 'none';
 
-  tbody.innerHTML = rows.map(s => `
-    <tr>
-      <td class="code">${String(s.codigo).padStart(4,'0')}</td>
-      <td>${s.nombre}</td>
-      <td><span class="tag ${tagClass(s.condicion)}">${s.condicion}</span></td>
-      <td><span class="disp ${s.disponibilidad === 'Disponible' ? 'si' : ''}">${s.disponibilidad}</span></td>
-      <td class="nota">${s.nota > 0 ? s.nota : '—'}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = rows.map(s => {
+    const modified = String(s.codigo) in ov;
+    const dot = modified ? ' <span class="mod-dot" title="Modificado localmente">●</span>' : '';
+    return '<tr class="editable-row' + (modified ? ' modified' : '') + '" data-codigo="' + s.codigo + '" title="Clic para editar">' +
+      '<td class="code">' + String(s.codigo).padStart(4, '0') + '</td>' +
+      '<td>' + s.nombre + dot + '</td>' +
+      '<td><span class="tag ' + tagClass(s.condicion) + '">' + s.condicion + '</span></td>' +
+      '<td><span class="disp' + (s.disponibilidad === 'Disponible' ? ' si' : '') + '">' + s.disponibilidad + '</span></td>' +
+      '<td class="nota">' + (s.nota > 0 ? s.nota : '—') + '</td>' +
+      '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.editable-row').forEach(row => {
+    row.addEventListener('click', () => openModal(Number(row.dataset.codigo)));
+  });
 }
 
+/* ======= MODAL ======= */
+let editingCodigo = null;
+
+function openModal(codigo) {
+  editingCodigo = codigo;
+  const eff   = getEffectiveData();
+  const s     = eff.find(d => d.codigo === codigo);
+  const hasOv = String(codigo) in getOverrides();
+
+  document.getElementById('modalCodigo').textContent            = String(codigo).padStart(4, '0');
+  document.getElementById('modalTitle').textContent             = s.nombre;
+  document.getElementById('inputCondicion').value               = s.condicion;
+  document.getElementById('inputNota').value                    = s.nota;
+  document.getElementById('inputDisponibilidad').value          = s.disponibilidad;
+  document.getElementById('resetBtn').style.display             = hasOv ? 'inline-flex' : 'none';
+  document.getElementById('editModal').style.display            = 'flex';
+  document.getElementById('inputCondicion').focus();
+}
+
+function closeModal() {
+  document.getElementById('editModal').style.display = 'none';
+  editingCodigo = null;
+}
+
+document.getElementById('editForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const nota = parseFloat(document.getElementById('inputNota').value);
+  saveOverride(editingCodigo, {
+    condicion:      document.getElementById('inputCondicion').value,
+    nota:           isNaN(nota) ? 0 : Math.min(10, Math.max(0, nota)),
+    disponibilidad: document.getElementById('inputDisponibilidad').value,
+  });
+  closeModal();
+  refreshAll();
+});
+
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+  resetOverride(editingCodigo);
+  closeModal();
+  refreshAll();
+});
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ======= FILTERS ======= */
 document.querySelectorAll('.chip-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
@@ -575,20 +646,27 @@ document.querySelectorAll('.chip-btn').forEach(btn => {
   });
 });
 
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  currentSearch = e.target.value.trim();
+document.getElementById('searchInput').addEventListener('input', function() {
+  currentSearch = this.value.trim();
   render();
 });
 
 document.querySelectorAll('th[data-sort]').forEach(th => {
   th.addEventListener('click', () => {
     const key = th.dataset.sort;
-    if(sortKey === key){ sortAsc = !sortAsc; } else { sortKey = key; sortAsc = true; }
+    if (sortKey === key) { sortAsc = !sortAsc; } else { sortKey = key; sortAsc = true; }
     render();
   });
 });
 
-render();
+/* ======= INIT ======= */
+function refreshAll() {
+  recalcStats();
+  renderYears();
+  render();
+}
+
+refreshAll();
 </script>
 </body>
 </html>
