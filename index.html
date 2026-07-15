@@ -332,12 +332,9 @@
         <input type="number" id="inputNota" name="nota" min="0" max="10" step="0.5" placeholder="0 – 10">
         <p class="nota-hint">Dejá en 0 si todavía no tenés nota.</p>
       </div>
-      <div class="modal-field">
-        <label for="inputDisponibilidad">Disponibilidad</label>
-        <select id="inputDisponibilidad" name="disponibilidad">
-          <option value="Disponible">Disponible para cursar</option>
-          <option value="No Disponible">No disponible</option>
-        </select>
+      <div class="modal-field" id="prereqsField" style="display:none">
+        <label>Correlativas</label>
+        <div id="prereqsList" style="display:flex;flex-direction:column;gap:6px;margin-top:2px;"></div>
       </div>
       <div class="modal-btns">
         <button type="button" class="btn btn-danger" id="resetBtn" style="display:none">Resetear</button>
@@ -350,69 +347,70 @@
 
 <script>
 /* ======= DATA ======= */
+/* prereqs: lista de códigos de materias correlativas (todas deben ser Aprobada o Cursada) */
 const DATA = [
-  {codigo:3621, nombre:"Matemática Discreta",                          condicion:"Aprobada",    disponibilidad:"No Disponible", nota:9},
-  {codigo:3622, nombre:"Análisis Matemático I",                        condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
-  {codigo:3623, nombre:"Programación Inicial",                         condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
-  {codigo:3624, nombre:"Introducción a los Sistemas de Información",   condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
-  {codigo:3625, nombre:"Sistemas de Numeración",                       condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
-  {codigo:3626, nombre:"Principios de Calidad de Software",            condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
-  {codigo:3627, nombre:"Álgebra y Geometría Analítica I",              condicion:"Aprobada",    disponibilidad:"No Disponible", nota:7},
-  {codigo:3628, nombre:"Física I",                                     condicion:"Aprobada",    disponibilidad:"Disponible",    nota:5},
-  {codigo:3629, nombre:"Programación Estructurada Básica",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
-  {codigo:3630, nombre:"Introducción a la Gestión de Requisitos",      condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
-  {codigo:3631, nombre:"Fundamentos de Sistemas Embebidos",            condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
-  {codigo:3632, nombre:"Introducción a los Proyectos Informáticos",    condicion:"Aprobada",    disponibilidad:"No Disponible", nota:10},
-  {codigo:3633, nombre:"Análisis Matemático II",                       condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
-  {codigo:3634, nombre:"Física II",                                    condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3635, nombre:"Tópicos de Programación",                      condicion:"Cursada",     disponibilidad:"Disponible",    nota:4},
-  {codigo:3636, nombre:"Bases de Datos",                               condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
-  {codigo:3637, nombre:"Análisis de Sistemas",                         condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
-  {codigo:3638, nombre:"Arquitectura de Computadoras",                 condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
-  {codigo:3639, nombre:"Análisis Matemático III",                      condicion:"Aprobada",    disponibilidad:"Disponible",    nota:8},
-  {codigo:3640, nombre:"Algoritmos y Estructuras de Datos",            condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3641, nombre:"Bases de Datos Aplicadas",                     condicion:"Aprobada",    disponibilidad:"Disponible",    nota:4},
-  {codigo:3642, nombre:"Principios de Diseño de Sistemas",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:9},
-  {codigo:3643, nombre:"Redes de Computadoras",                        condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3644, nombre:"Gestión de las Organizaciones",                condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3676, nombre:"Responsabilidad Social Universitaria",         condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3645, nombre:"Álgebra y Geometría Analítica II",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:5},
-  {codigo:3646, nombre:"Paradigmas de Programación",                   condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3647, nombre:"Requisitos Avanzados",                         condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
-  {codigo:3648, nombre:"Diseño de Software",                           condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3649, nombre:"Sistemas Operativos",                          condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3650, nombre:"Seguridad de la Información",                  condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3675, nombre:"Práctica Profesional Supervisada",             condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
-  {codigo:3651, nombre:"Probabilidad y Estadística",                   condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:3652, nombre:"Programación Avanzada",                        condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3653, nombre:"Arquitectura de Sistemas Software",            condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3654, nombre:"Virtualización de Hardware",                   condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3655, nombre:"Auditoría y Legislación",                      condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3656, nombre:"Estadística Aplicada",                         condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3657, nombre:"Autómatas y Gramáticas",                       condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3658, nombre:"Programación Concurrente",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3659, nombre:"Gestión Aplicada al Desarrollo de Software I", condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3660, nombre:"Sistemas Operativos Avanzados",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3661, nombre:"Gestión de Proyectos",                         condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3662, nombre:"Matemática Aplicada",                          condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3663, nombre:"Lenguajes y Compiladores",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3664, nombre:"Inteligencia Artificial",                      condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3665, nombre:"Gestión Aplicada al Desarrollo de Software II",condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3666, nombre:"Seguridad Aplicada y Forensia",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3667, nombre:"Gestión de la Calidad en Procesos de Sistemas",condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3668, nombre:"Inteligencia Artificial Aplicada",             condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3669, nombre:"Innovación y Emprendedorismo",                 condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3670, nombre:"Ciencia de Datos",                             condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3671, nombre:"Proyecto Final de Carrera",                    condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3677, nombre:"Lenguaje Orientado a Negocios",                condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3678, nombre:"Tecnologías en Seguridad",                     condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:3679, nombre:"Visión Artificial",                            condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
-  {codigo:911,  nombre:"Computación I",                                condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
-  {codigo:912,  nombre:"Computación II",                               condicion:"Aprobada",    disponibilidad:"Disponible",    nota:9},
-  {codigo:901,  nombre:"Inglés I",                                     condicion:"Aprobada",    disponibilidad:"No Disponible", nota:8},
-  {codigo:902,  nombre:"Inglés II",                                    condicion:"Aprobada",    disponibilidad:"Disponible",    nota:7},
-  {codigo:903,  nombre:"Inglés III",                                   condicion:"No aprobada", disponibilidad:"Disponible",    nota:0},
-  {codigo:904,  nombre:"Inglés IV",                                    condicion:"No aprobada", disponibilidad:"No Disponible", nota:0},
+  {codigo:3621, nombre:"Matemática Discreta",                          condicion:"Aprobada",    nota:9,  prereqs:[]},
+  {codigo:3622, nombre:"Análisis Matemático I",                        condicion:"Aprobada",    nota:7,  prereqs:[]},
+  {codigo:3623, nombre:"Programación Inicial",                         condicion:"Aprobada",    nota:8,  prereqs:[]},
+  {codigo:3624, nombre:"Introducción a los Sistemas de Información",   condicion:"Aprobada",    nota:7,  prereqs:[]},
+  {codigo:3625, nombre:"Sistemas de Numeración",                       condicion:"Aprobada",    nota:8,  prereqs:[]},
+  {codigo:3626, nombre:"Principios de Calidad de Software",            condicion:"Aprobada",    nota:7,  prereqs:[]},
+  {codigo:3627, nombre:"Álgebra y Geometría Analítica I",              condicion:"Aprobada",    nota:7,  prereqs:[]},
+  {codigo:3628, nombre:"Física I",                                     condicion:"Aprobada",    nota:5,  prereqs:[3622]},
+  {codigo:3629, nombre:"Programación Estructurada Básica",             condicion:"Aprobada",    nota:8,  prereqs:[3623]},
+  {codigo:3630, nombre:"Introducción a la Gestión de Requisitos",      condicion:"Aprobada",    nota:8,  prereqs:[3624]},
+  {codigo:3631, nombre:"Fundamentos de Sistemas Embebidos",            condicion:"Aprobada",    nota:8,  prereqs:[3625]},
+  {codigo:3632, nombre:"Introducción a los Proyectos Informáticos",    condicion:"Aprobada",    nota:10, prereqs:[]},
+  {codigo:3633, nombre:"Análisis Matemático II",                       condicion:"Aprobada",    nota:7,  prereqs:[3622]},
+  {codigo:3634, nombre:"Física II",                                    condicion:"No aprobada", nota:0,  prereqs:[3628]},
+  {codigo:3635, nombre:"Tópicos de Programación",                      condicion:"Cursada",     nota:4,  prereqs:[3629,3621]},
+  {codigo:3636, nombre:"Bases de Datos",                               condicion:"Aprobada",    nota:4,  prereqs:[3629,3621]},
+  {codigo:3637, nombre:"Análisis de Sistemas",                         condicion:"Aprobada",    nota:7,  prereqs:[3630]},
+  {codigo:3638, nombre:"Arquitectura de Computadoras",                 condicion:"Aprobada",    nota:4,  prereqs:[3631]},
+  {codigo:3639, nombre:"Análisis Matemático III",                      condicion:"Aprobada",    nota:8,  prereqs:[3633]},
+  {codigo:3640, nombre:"Algoritmos y Estructuras de Datos",            condicion:"No aprobada", nota:0,  prereqs:[3635]},
+  {codigo:3641, nombre:"Bases de Datos Aplicadas",                     condicion:"Aprobada",    nota:4,  prereqs:[3636,3635]},
+  {codigo:3642, nombre:"Principios de Diseño de Sistemas",             condicion:"Aprobada",    nota:9,  prereqs:[3626,3637]},
+  {codigo:3643, nombre:"Redes de Computadoras",                        condicion:"No aprobada", nota:0,  prereqs:[3638]},
+  {codigo:3644, nombre:"Gestión de las Organizaciones",                condicion:"No aprobada", nota:0,  prereqs:[3632]},
+  {codigo:3676, nombre:"Responsabilidad Social Universitaria",         condicion:"No aprobada", nota:0,  prereqs:[3626]},
+  {codigo:3645, nombre:"Álgebra y Geometría Analítica II",             condicion:"Aprobada",    nota:5,  prereqs:[3627]},
+  {codigo:3646, nombre:"Paradigmas de Programación",                   condicion:"No aprobada", nota:0,  prereqs:[3633,3640]},
+  {codigo:3647, nombre:"Requisitos Avanzados",                         condicion:"Aprobada",    nota:7,  prereqs:[3642]},
+  {codigo:3648, nombre:"Diseño de Software",                           condicion:"No aprobada", nota:0,  prereqs:[3636,3642,3635]},
+  {codigo:3649, nombre:"Sistemas Operativos",                          condicion:"No aprobada", nota:0,  prereqs:[3638,3629]},
+  {codigo:3650, nombre:"Seguridad de la Información",                  condicion:"No aprobada", nota:0,  prereqs:[3643,3635,3638]},
+  {codigo:3675, nombre:"Práctica Profesional Supervisada",             condicion:"Aprobada",    nota:7,  prereqs:[3642]},
+  {codigo:3651, nombre:"Probabilidad y Estadística",                   condicion:"No aprobada", nota:0,  prereqs:[3639,3621,3645]},
+  {codigo:3652, nombre:"Programación Avanzada",                        condicion:"No aprobada", nota:0,  prereqs:[3641,3646]},
+  {codigo:3653, nombre:"Arquitectura de Sistemas Software",            condicion:"No aprobada", nota:0,  prereqs:[3648]},
+  {codigo:3654, nombre:"Virtualización de Hardware",                   condicion:"No aprobada", nota:0,  prereqs:[3643,3649]},
+  {codigo:3655, nombre:"Auditoría y Legislación",                      condicion:"No aprobada", nota:0,  prereqs:[3650]},
+  {codigo:3656, nombre:"Estadística Aplicada",                         condicion:"No aprobada", nota:0,  prereqs:[3651]},
+  {codigo:3657, nombre:"Autómatas y Gramáticas",                       condicion:"No aprobada", nota:0,  prereqs:[3646]},
+  {codigo:3658, nombre:"Programación Concurrente",                     condicion:"No aprobada", nota:0,  prereqs:[3646,3649]},
+  {codigo:3659, nombre:"Gestión Aplicada al Desarrollo de Software I", condicion:"No aprobada", nota:0,  prereqs:[3644,3647,3648]},
+  {codigo:3660, nombre:"Sistemas Operativos Avanzados",                condicion:"No aprobada", nota:0,  prereqs:[3654,3634]},
+  {codigo:3661, nombre:"Gestión de Proyectos",                         condicion:"No aprobada", nota:0,  prereqs:[3644,3650,3651]},
+  {codigo:3662, nombre:"Matemática Aplicada",                          condicion:"No aprobada", nota:0,  prereqs:[3651]},
+  {codigo:3663, nombre:"Lenguajes y Compiladores",                     condicion:"No aprobada", nota:0,  prereqs:[3657]},
+  {codigo:3664, nombre:"Inteligencia Artificial",                      condicion:"No aprobada", nota:0,  prereqs:[3651,3646]},
+  {codigo:3665, nombre:"Gestión Aplicada al Desarrollo de Software II",condicion:"No aprobada", nota:0,  prereqs:[3653,3659]},
+  {codigo:3666, nombre:"Seguridad Aplicada y Forensia",                condicion:"No aprobada", nota:0,  prereqs:[3649,3652,3655]},
+  {codigo:3667, nombre:"Gestión de la Calidad en Procesos de Sistemas",condicion:"No aprobada", nota:0,  prereqs:[3642,3661]},
+  {codigo:3668, nombre:"Inteligencia Artificial Aplicada",             condicion:"No aprobada", nota:0,  prereqs:[3656,3664]},
+  {codigo:3669, nombre:"Innovación y Emprendedorismo",                 condicion:"No aprobada", nota:0,  prereqs:[3661]},
+  {codigo:3670, nombre:"Ciencia de Datos",                             condicion:"No aprobada", nota:0,  prereqs:[3656,3664]},
+  {codigo:3671, nombre:"Proyecto Final de Carrera",                    condicion:"No aprobada", nota:0,  prereqs:[3667,3659,3660,3656]},
+  {codigo:3677, nombre:"Lenguaje Orientado a Negocios",                condicion:"No aprobada", nota:0,  prereqs:[3663,3658,3661]},
+  {codigo:3678, nombre:"Tecnologías en Seguridad",                     condicion:"No aprobada", nota:0,  prereqs:[3666,3662]},
+  {codigo:3679, nombre:"Visión Artificial",                            condicion:"No aprobada", nota:0,  prereqs:[3665,3664]},
+  {codigo:911,  nombre:"Computación I",                                condicion:"Aprobada",    nota:8,  prereqs:[]},
+  {codigo:912,  nombre:"Computación II",                               condicion:"Aprobada",    nota:9,  prereqs:[911]},
+  {codigo:901,  nombre:"Inglés I",                                     condicion:"Aprobada",    nota:8,  prereqs:[]},
+  {codigo:902,  nombre:"Inglés II",                                    condicion:"Aprobada",    nota:7,  prereqs:[901]},
+  {codigo:903,  nombre:"Inglés III",                                   condicion:"No aprobada", nota:0,  prereqs:[902]},
+  {codigo:904,  nombre:"Inglés IV",                                    condicion:"No aprobada", nota:0,  prereqs:[903]},
 ];
 
 /* ======= YEAR GROUPS (para progreso dinámico) ======= */
@@ -439,11 +437,30 @@ function getOverrides() {
   catch { return {}; }
 }
 
+/* Calcula disponibilidad desde correlativas: disponible si todos los prereqs son Aprobada o Cursada */
+function calcDisponibilidad(codigo, condicionMap) {
+  const s = DATA.find(d => d.codigo === codigo);
+  if (!s || !s.prereqs.length) return 'Disponible';
+  return s.prereqs.every(p => {
+    const c = condicionMap[p];
+    return c === 'Aprobada' || c === 'Cursada';
+  }) ? 'Disponible' : 'No Disponible';
+}
+
 function getEffectiveData() {
   const ov = getOverrides();
+  // Primera pasada: condiciones con overrides aplicados
+  const condicionMap = {};
+  DATA.forEach(s => {
+    const o = ov[String(s.codigo)];
+    condicionMap[s.codigo] = (o && o.condicion) ? o.condicion : s.condicion;
+  });
+  // Segunda pasada: calcular disponibilidad desde el mapa de condiciones
   return DATA.map(s => {
     const o = ov[String(s.codigo)];
-    return o ? Object.assign({}, s, o) : s;
+    const base = o ? Object.assign({}, s, o) : Object.assign({}, s);
+    base.disponibilidad = calcDisponibilidad(s.codigo, condicionMap);
+    return base;
   });
 }
 
@@ -452,7 +469,9 @@ function saveOverride(codigo, changes) {
   const key = String(codigo);
   const orig = DATA.find(s => s.codigo === codigo);
   ov[key] = Object.assign({}, ov[key] || {}, changes);
-  const same = ['condicion','nota','disponibilidad'].every(
+  // disponibilidad ya no se guarda — se calcula automáticamente
+  delete ov[key].disponibilidad;
+  const same = ['condicion','nota'].every(
     k => !(k in ov[key]) || ov[key][k] === orig[k]
   );
   if (same) delete ov[key];
@@ -591,15 +610,37 @@ function openModal(codigo) {
   editingCodigo = codigo;
   const eff   = getEffectiveData();
   const s     = eff.find(d => d.codigo === codigo);
+  const orig  = DATA.find(d => d.codigo === codigo);
   const hasOv = String(codigo) in getOverrides();
 
-  document.getElementById('modalCodigo').textContent            = String(codigo).padStart(4, '0');
-  document.getElementById('modalTitle').textContent             = s.nombre;
-  document.getElementById('inputCondicion').value               = s.condicion;
-  document.getElementById('inputNota').value                    = s.nota;
-  document.getElementById('inputDisponibilidad').value          = s.disponibilidad;
-  document.getElementById('resetBtn').style.display             = hasOv ? 'inline-flex' : 'none';
-  document.getElementById('editModal').style.display            = 'flex';
+  document.getElementById('modalCodigo').textContent = String(codigo).padStart(4, '0');
+  document.getElementById('modalTitle').textContent  = s.nombre;
+  document.getElementById('inputCondicion').value    = s.condicion;
+  document.getElementById('inputNota').value         = s.nota;
+  document.getElementById('resetBtn').style.display  = hasOv ? 'inline-flex' : 'none';
+
+  // Correlativas
+  const prereqsField = document.getElementById('prereqsField');
+  const prereqsList  = document.getElementById('prereqsList');
+  if (orig.prereqs.length) {
+    prereqsList.innerHTML = orig.prereqs.map(p => {
+      const ps = eff.find(d => d.codigo === p);
+      const ok = ps && (ps.condicion === 'Aprobada' || ps.condicion === 'Cursada');
+      const color = ok ? 'var(--approved)' : 'var(--notapproved)';
+      const icon  = ok ? '✓' : '✗';
+      return '<div style="font-size:13px;display:flex;align-items:center;gap:8px;">' +
+        '<span style="color:' + color + ';font-weight:700;width:14px">' + icon + '</span>' +
+        '<span>' + (ps ? ps.nombre : p) + '</span>' +
+        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text-soft);">' +
+          (ps ? ps.condicion : '?') + '</span>' +
+        '</div>';
+    }).join('');
+    prereqsField.style.display = 'block';
+  } else {
+    prereqsField.style.display = 'none';
+  }
+
+  document.getElementById('editModal').style.display = 'flex';
   document.getElementById('inputCondicion').focus();
 }
 
@@ -612,9 +653,8 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const nota = parseFloat(document.getElementById('inputNota').value);
   saveOverride(editingCodigo, {
-    condicion:      document.getElementById('inputCondicion').value,
-    nota:           isNaN(nota) ? 0 : Math.min(10, Math.max(0, nota)),
-    disponibilidad: document.getElementById('inputDisponibilidad').value,
+    condicion: document.getElementById('inputCondicion').value,
+    nota:      isNaN(nota) ? 0 : Math.min(10, Math.max(0, nota)),
   });
   closeModal();
   refreshAll();
