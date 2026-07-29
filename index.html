@@ -155,6 +155,15 @@
   .slot select optgroup{background:#171112;color:#9A8A86;font-weight:600;font-style:normal;}
   .slot select:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .slot.taken select{background:rgba(226,77,66,.08);border-color:rgba(226,77,66,.3);color:var(--text);font-weight:600;}
+  .slot-hint{font-family:'JetBrains Mono';font-size:9.5px;color:var(--faint);line-height:1.4;min-height:13px;}
+  .slot.taken .slot-hint{color:var(--done);}
+  .slot-hint.warn{color:#E24D42;}
+  .slot.warn select{border-color:rgba(226,77,66,.5);}
+  .sched-filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:0 2px;}
+  .sfl{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);cursor:pointer;user-select:none;}
+  .sfl input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
+  .sfl:hover{color:var(--text);}
+  .sfl-hint{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);}
   /* Cronograma multi-opción */
   .sched-opt-card{margin-bottom:16px;overflow:hidden;}
   .sched-opt-head{display:flex;align-items:center;gap:10px;padding:14px 18px 12px;border-bottom:1px solid var(--line);}
@@ -478,6 +487,10 @@
           <div id="autoResults" style="margin-top:14px;"></div>
         </div>
         <!-- Opciones manuales -->
+        <div class="sched-filter-bar">
+          <label class="sfl"><input type="checkbox" id="soloDelDia" checked> Mostrar solo las materias que se cursan ese día</label>
+          <span class="sfl-hint" id="sflHint"></span>
+        </div>
         <div id="schedOptions"></div>
         <button class="add-opt-btn" id="addSchedOpt">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -743,8 +756,11 @@ function loadSchedOptions(){
 function persist(){write(KEY,state.subjects);}
 function persistSched(){write(KEY+"-schedOpts",state.schedOptions);}
 function loadPane(){try{const p=localStorage.getItem(KEY+"-pane");if(PANES.includes(p))return p;}catch(e){}return "graph";}
+// Filtro del cronograma: activado por defecto, pero se puede apagar si la oferta
+// cargada está desactualizada y hace falta elegir una materia que no figura.
+function loadSoloDelDia(){try{return localStorage.getItem(KEY+"-soloDia")!=="0";}catch(e){return true;}}
 const PANES = ["graph","avance","cronograma","legajo","planner"];
-const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:"todas", search:"", sortKey:"codigo", sortAsc:true, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:new Set([0,1,2,3,4,5]), autoSelected:new Set() };
+const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:"todas", search:"", sortKey:"codigo", sortAsc:true, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:new Set([0,1,2,3,4,5]), autoSelected:new Set(), schedSoloDelDia:loadSoloDelDia() };
 
 function stateColor(c){ return c==="Aprobada"?"#E8B23E":c==="Cursada"?"#D9663B":"#6F6560"; }
 // Cantidad real de materias que cuentan para el intermedio. INTERMEDIO_CODES tiene
@@ -792,6 +808,16 @@ function renderYears(){
   $("yearMeta").textContent=td+"/"+ta+" aprobadas";
 }
 const DAY_NAMES={Lu:"Lunes",Ma:"Martes",Mi:"Miércoles",Ju:"Jueves",Vi:"Viernes",Sa:"Sábado"};
+const DAY_ORDER=["Lu","Ma","Mi","Ju","Vi","Sa"];   // índice = columna del cronograma
+
+// ── Consultas a la oferta por día ──────────────────────────────────────────
+function ofertaDe(codigo){ const r=(state.oferta||[]).find(x=>x[0]===codigo); return r?r[1]:[]; }
+// Comisiones de una materia que efectivamente se cursan un día dado.
+function comisionesEnDia(codigo,dayCode){ return ofertaDe(codigo).filter(c=>c[1]&&c[1].split(",").includes(dayCode)); }
+// Comisiones a distancia: no ocupan ningún día de la semana.
+function comisionesADistancia(codigo){ return ofertaDe(codigo).filter(c=>!c[1]); }
+// "19–23" o "8–12 / 19–23" si hay varias franjas ese día.
+function fmtHoras(coms){ return [...new Set(coms.map(c=>c[2]+"–"+c[3]))].join(" / "); }
 function getSlots(com){if(!com[1])return[];return com[1].split(",").map(d=>({day:d,ini:com[2],fin:com[3]}));}
 function conflictan(c1,c2){if(!c1[1]||!c2[1])return false;const s1=getSlots(c1),s2=getSlots(c2);return s1.some(a=>s2.some(b=>a.day===b.day&&a.ini<b.fin&&b.ini<a.fin));}
 function filterComs(coms,turno,prefDias){
@@ -993,15 +1019,42 @@ function renderSched(){
   const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
   const dispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
   const noDispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad!=="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  function buildOpts(val){
-    const opt=s=>'<option value="'+esc(s.nombre)+'"'+(s.nombre===val?" selected":"")+'>'+esc(s.nombre)+'</option>';
-    // Si el valor guardado ya no coincide con ninguna materia (renombrada, o backup
-    // viejo), se agrega igual para no perderlo silenciosamente al re-renderizar.
-    const known=dispS.some(s=>s.nombre===val)||noDispS.some(s=>s.nombre===val);
+  // El desplegable de cada día lista solo las materias que realmente se cursan ese
+  // día según la oferta, con su franja horaria al lado, para no tener que ir a
+  // chequear la oferta aparte. El `value` sigue siendo el nombre pelado: es la clave
+  // con la que se guarda en opt.days y con la que después se buscan los tags.
+  function buildOpts(val,dayCode){
+    const soloDelDia=state.schedSoloDelDia;
+    const opt=s=>{
+      const coms=comisionesEnDia(s.codigo,dayCode);
+      const horas=coms.length?"  ·  "+fmtHoras(coms):(comisionesADistancia(s.codigo).length?"  ·  a distancia":"");
+      return'<option value="'+esc(s.nombre)+'"'+(s.nombre===val?" selected":"")+'>'+esc(s.nombre+horas)+'</option>';
+    };
+    const seDaEseDia=s=>comisionesEnDia(s.codigo,dayCode).length>0;
+    const esADistancia=s=>!seDaEseDia(s)&&comisionesADistancia(s.codigo).length>0;
+    const disp   = soloDelDia?dispS.filter(seDaEseDia):dispS;
+    const noDisp = soloDelDia?noDispS.filter(seDaEseDia):noDispS;
+    // Las virtuales no tienen día, pero se ofrecen igual para poder anotarlas.
+    const virt   = soloDelDia?[...dispS,...noDispS].filter(esADistancia):[];
+    // Si el valor guardado no está en ninguna lista se agrega igual para no perderlo en
+    // silencio, aclarando POR QUÉ no figura. Son motivos distintos: una materia ya
+    // aprobada se excluye de las listas aunque sí se curse ese día, así que rotularla
+    // como "no se da este día" sería falso.
+    const listado=[...disp,...noDisp,...virt].some(s=>s.nombre===val);
+    let motivo="";
+    if(val&&!listado){
+      const sv=state.subjects.find(z=>z.nombre===val);
+      if(!sv)                                       motivo="fuera del plan";
+      else if(sv.condicion==="Aprobada")            motivo="ya aprobada";
+      else if(comisionesEnDia(sv.codigo,dayCode).length) motivo="";      // sí se da: no aclarar nada
+      else if(comisionesADistancia(sv.codigo).length)    motivo="a distancia";
+      else                                          motivo="no se da este día";
+    }
     return'<option value="">— Libre —</option>'
-      +(val&&!known?'<option value="'+esc(val)+'" selected>'+esc(val)+' (fuera del plan)</option>':"")
-      +(dispS.length?'<optgroup label="✓ Disponibles para cursar">'+dispS.map(opt).join('')+'</optgroup>':"")
-      +(noDispS.length?'<optgroup label="○ No disponibles aún">'+noDispS.map(opt).join('')+'</optgroup>':"");
+      +(val&&!listado?'<option value="'+esc(val)+'" selected>'+esc(val+(motivo?" ("+motivo+")":""))+'</option>':"")
+      +(disp.length?'<optgroup label="✓ Disponibles para cursar">'+disp.map(opt).join('')+'</optgroup>':"")
+      +(noDisp.length?'<optgroup label="○ Correlativas pendientes">'+noDisp.map(opt).join('')+'</optgroup>':"")
+      +(virt.length?'<optgroup label="@ A distancia (sin día fijo)">'+virt.map(opt).join('')+'</optgroup>':"");
   }
   state.schedOptions.forEach((opt,oi)=>{
     const card=document.createElement("div");card.className="card sched-opt-card";
@@ -1010,9 +1063,28 @@ function renderSched(){
       +'<input class="sched-opt-name" data-oid="'+opt.id+'" value="'+esc(opt.name)+'" maxlength="32" spellcheck="false" title="Clic para renombrar" aria-label="Nombre de la opción '+(oi+1)+'">'
       +(cnt>1?'<button type="button" class="sched-del" data-oid="'+opt.id+'" title="Eliminar opción" aria-label="Eliminar opción '+(oi+1)+'">×</button>':"");
     const grid=document.createElement("div");grid.className="sched";
-    DAYS.forEach((d,di)=>{const val=opt.days[di]||"";const slot=document.createElement("div");
-      slot.className="slot"+(val?" taken":"");
-      slot.innerHTML='<span class="day" id="d'+opt.id+'-'+di+'">'+d+'</span><select data-di="'+di+'" data-oid="'+opt.id+'" aria-labelledby="d'+opt.id+'-'+di+'">'+buildOpts(val)+'</select>';
+    DAYS.forEach((d,di)=>{
+      const val=opt.days[di]||"";
+      const dayCode=DAY_ORDER[di];
+      const slot=document.createElement("div");
+      // El horario de lo elegido se muestra abajo del select, así no hay que
+      // cruzarlo con la oferta a mano.
+      let hint="",warn=false;
+      if(val){
+        const sv=state.subjects.find(z=>z.nombre===val);
+        const coms=sv?comisionesEnDia(sv.codigo,dayCode):[];
+        const virt=sv&&!coms.length?comisionesADistancia(sv.codigo):[];
+        if(coms.length)      hint=fmtHoras(coms)+(coms.length>1?" · "+coms.length+" com.":" · com. "+coms[0][0]);
+        else if(virt.length) hint="a distancia";
+        else {hint=sv?"no se da este día":"fuera del plan";warn=true;}
+      }else{
+        const n=(state.schedSoloDelDia?dispS.filter(s=>comisionesEnDia(s.codigo,dayCode).length):dispS).length;
+        hint=n?n+" disponible"+(n===1?"":"s"):"sin materias este día";
+      }
+      slot.className="slot"+(val?" taken":"")+(warn?" warn":"");
+      slot.innerHTML='<span class="day" id="d'+opt.id+'-'+di+'">'+d+'</span>'
+        +'<select data-di="'+di+'" data-oid="'+opt.id+'" aria-labelledby="d'+opt.id+'-'+di+'">'+buildOpts(val,dayCode)+'</select>'
+        +'<span class="slot-hint'+(warn?" warn":"")+'">'+esc(hint)+'</span>';
       grid.appendChild(slot);});
     const tags=document.createElement("div");tags.className="sched-opt-tags";
     const chosen=opt.days.filter(Boolean);
@@ -1029,6 +1101,14 @@ function renderSched(){
   container.querySelectorAll(".sched-opt-name").forEach(inp=>inp.addEventListener("input",()=>{const o=state.schedOptions.find(x=>x.id===+inp.dataset.oid);if(o)o.name=inp.value;persistSched();}));
   container.querySelectorAll(".sched-del").forEach(btn=>btn.addEventListener("click",()=>{if(!confirm("¿Eliminar esta opción?"))return;state.schedOptions=state.schedOptions.filter(o=>o.id!==+btn.dataset.oid);persistSched();renderSched();}));
   container.querySelectorAll("select[data-di]").forEach(sel=>sel.addEventListener("change",()=>{const o=state.schedOptions.find(x=>x.id===+sel.dataset.oid);if(o)o.days[+sel.dataset.di]=sel.value;persistSched();renderSched();}));
+  // Resumen de cuántas materias quedan visibles por día con el filtro puesto.
+  const hint=$("sflHint");
+  if(hint){
+    if(state.schedSoloDelDia){
+      const porDia=DAY_ORDER.map((dc,i)=>DAYS[i].slice(0,3)+" "+dispS.filter(s=>comisionesEnDia(s.codigo,dc).length).length);
+      hint.textContent="oferta "+state.ofertaNombre+" · podés cursar: "+porDia.join(" · ");
+    }else hint.textContent="mostrando todas las materias del plan";
+  }
 }
 function buildPrereqRow(s){
   const pre=PREREQS[s.codigo]||[];if(!pre.length)return'';
@@ -1700,6 +1780,12 @@ document.addEventListener("click",e=>{
     t.classList.toggle("on");
     t.setAttribute("aria-pressed",t.classList.contains("on")?"true":"false");
   }
+});
+$("soloDelDia").checked=state.schedSoloDelDia;
+$("soloDelDia").addEventListener("change",e=>{
+  state.schedSoloDelDia=e.target.checked;
+  write(KEY+"-soloDia",state.schedSoloDelDia?"1":"0");
+  renderSched();
 });
 $("addSchedOpt").addEventListener("click",()=>{
   state.schedOptions.push({id:Date.now(),name:"Opción "+(state.schedOptions.length+1),days:["","","","","",""]});
