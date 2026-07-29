@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plan de estudios · Graph view</title>
+<title>Plan de estudios · Ing. en Sistemas</title>
+<meta name="description" content="Seguimiento del plan de estudios de Ingeniería en Sistemas: correlativas, avance por año, armado de cronograma y planificador de cuatrimestre.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#120E0E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23120E0E'/%3E%3Ccircle cx='10' cy='9' r='3.2' fill='%23E8B23E'/%3E%3Ccircle cx='22' cy='16' r='3.2' fill='%23D9663B'/%3E%3Ccircle cx='11' cy='24' r='3.2' fill='%23E24D42'/%3E%3Cpath d='M10 9L22 16L11 24' stroke='%236F6560' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,9 +17,14 @@
     --line:#2C2122; --line-2:#3D2E30;
     --text:#EDE4E2; --text-2:#B7A6A4; --muted:#8A7674; --faint:#5E4B4A;
     --violet:#E24D42; --violet-2:#F2685C; --violet-glow:rgba(226,77,66,.42);
+    /* --accent es el color de acción/foco. Alias de --violet: el CSS lo usa
+       indistintamente en hovers, focus rings y estados activos. */
+    --accent:#E24D42; --accent-soft:rgba(226,77,66,.12);
     --red:#FFE9D6;
     --done:#E8B23E; --curse:#D9663B; --todo:#6F6560;
+    --focus:#F2685C;
   }
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px;}
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;color-scheme:dark;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;font-size:14px;}
@@ -55,18 +64,19 @@
   .side-search input{width:100%;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);}
   .side-search input:focus{outline:1px solid var(--violet);}
   .filelist{flex:1;overflow-y:auto;padding:2px 6px 20px;}
-  .folder>.fhead{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;}
+  .folder>.fhead{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;width:100%;text-align:left;}
   .folder>.fhead:hover{background:var(--surface);color:var(--text);}
   .fhead .caret{transition:transform .15s;font-size:9px;color:var(--muted);}
   .folder.collapsed .caret{transform:rotate(-90deg);}
   .folder.collapsed .fitems{display:none;}
   .fcount{margin-left:auto;font-family:'JetBrains Mono';font-size:10px;color:var(--faint);}
   .fitems{padding-left:6px;}
-  .note{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;border-radius:6px;font-size:12.5px;color:var(--text-2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .note{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;border-radius:6px;font-size:12.5px;color:var(--text-2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:left;}
   .note:hover{background:var(--surface);color:var(--text);}
-  .note.active{background:var(--surface-3);color:var(--text);}
+  .note.active{background:var(--surface-3);color:var(--text);box-shadow:inset 2px 0 0 var(--accent);}
   .note .nd{width:7px;height:7px;border-radius:50%;flex:none;}
   .note .nt{overflow:hidden;text-overflow:ellipsis;}
+  mark{background:rgba(232,178,62,.28);color:var(--text);border-radius:3px;padding:0 1px;}
 
   /* ---- CENTER PANES ---- */
   .pane{position:absolute;inset:0;display:none;}
@@ -78,7 +88,11 @@
   .g-tip{position:absolute;pointer-events:none;z-index:3;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;opacity:0;transform:translateY(4px);transition:opacity .12s;max-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.55);}
   .g-tip.on{opacity:1;transform:none;}
   .g-tip .tn{font-weight:600;font-size:12.5px;} .g-tip .tm{font-family:'JetBrains Mono';font-size:10.5px;color:var(--text-2);margin-top:2px;}
-  .g-hint{position:absolute;bottom:38px;left:16px;font-family:'JetBrains Mono';font-size:10.5px;color:var(--faint);z-index:2;pointer-events:none;}
+  .g-hint{position:absolute;bottom:38px;left:16px;font-family:'JetBrains Mono';font-size:10.5px;color:var(--faint);z-index:2;pointer-events:none;max-width:58%;line-height:1.5;}
+  .g-tools{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;z-index:3;}
+  .g-tool{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;border:1px solid var(--line-2);background:rgba(23,17,18,.86);color:var(--text-2);transition:all .12s;}
+  .g-tool:hover{border-color:var(--accent);color:var(--text);background:var(--surface-2);}
+  .g-tool svg{width:15px;height:15px;}
   .yr-filters{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;}
   .yr-f{font-family:'JetBrains Mono';font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--line-2);background:rgba(18,14,14,.75);color:var(--muted);cursor:pointer;transition:all .12s;}
   .yr-f:hover{border-color:var(--accent);color:var(--text);}
@@ -102,8 +116,8 @@
   .plan-col.inter h3::before{background:var(--done);}
   .plan-col.grad h3::before{background:var(--accent);}
   .plan-col h3 .plan-sub{font-size:11px;color:var(--muted);font-weight:400;font-family:'JetBrains Mono';}
-  .prec-card{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:9px;cursor:pointer;transition:border-color .12s;}
-  .prec-card:hover{border-color:var(--line-2);}
+  .prec-card{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:9px;cursor:pointer;transition:border-color .12s;width:100%;text-align:left;}
+  .prec-card:hover{border-color:var(--accent);}
   .prec-num{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);min-width:18px;margin-top:2px;}
   .prec-body{flex:1;}
   .prec-name{font-size:13px;font-weight:500;margin-bottom:4px;}
@@ -174,10 +188,14 @@
   .add-opt-btn{width:100%;padding:12px;border-radius:10px;border:1px dashed var(--line-2);background:none;color:var(--muted);font-size:13px;margin-top:4px;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .add-opt-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(226,77,66,.05);}
   /* ── Oferta & Auto-armado ── */
-  .oferta-bar{display:flex;align-items:center;gap:14px;padding:12px 18px;margin-bottom:14px;flex-wrap:wrap;}
-  .oferta-info{display:flex;align-items:baseline;gap:8px;flex:1;}
-  .oferta-title{font-size:13.5px;font-weight:600;}
-  .oferta-sub{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);}
+  .oferta-bar{display:flex;align-items:center;gap:10px;padding:12px 18px;margin-bottom:14px;flex-wrap:wrap;}
+  .oferta-info{display:flex;flex-direction:column;gap:3px;flex:1 1 150px;min-width:0;}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);transition:all .12s;}
+  .btn:hover{border-color:var(--accent);color:var(--text);background:var(--accent-soft);}
+  .btn svg{flex:none;}
+  .btn.btn-on{border-color:rgba(232,178,62,.4);color:var(--done);background:rgba(232,178,62,.08);}
+  .oferta-title{font-size:13.5px;font-weight:600;white-space:nowrap;}
+  .oferta-sub{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);white-space:nowrap;}
   .auto-box{margin-bottom:14px;padding:18px 20px 14px;}
   .auto-box-head{margin-bottom:14px;}
   .auto-box-head .at{font-size:15px;font-weight:600;display:block;}
@@ -213,7 +231,8 @@
   .chip{font-family:'JetBrains Mono';font-size:11px;padding:7px 12px;border-radius:20px;border:1px solid var(--line-2);background:var(--surface);color:var(--text-2);}
   .chip:hover{border-color:var(--violet);color:var(--text);}
   .chip.active{background:var(--violet);color:#120E0E;border-color:var(--violet);font-weight:600;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:660px;}
   thead th{text-align:left;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);padding:11px 15px;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line);}
   thead th .ar{color:var(--violet);font-size:9px;}
   tbody td{padding:10px 15px;border-bottom:1px solid var(--line);}
@@ -224,9 +243,11 @@
   .idot{width:5px;height:5px;border-radius:50%;background:var(--violet);flex:none;box-shadow:0 0 6px var(--violet-glow);}
   .tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;}
   .tag::before{content:'';width:6px;height:6px;border-radius:50%;}
-  .tag.Aprobada{background:rgba(232,178,62,.15);color:var(--done);} .tag.Aprobada::before{background:var(--done);box-shadow:0 0 6px var(--done);}
-  .tag.Cursada{background:rgba(217,102,59,.15);color:var(--curse);} .tag.Cursada::before{background:var(--curse);box-shadow:0 0 6px var(--curse);}
-  .tag.No\ aprobada{background:rgba(111,101,96,.18);color:var(--todo);} .tag.No\ aprobada::before{background:var(--todo);}
+  /* Una clase por estado. Ojo: NO usar el valor crudo de `condicion` como clase —
+     "No aprobada" tiene un espacio y el navegador lo parsea como dos clases. */
+  .tag.t-ap{background:rgba(232,178,62,.15);color:var(--done);} .tag.t-ap::before{background:var(--done);box-shadow:0 0 6px var(--done);}
+  .tag.t-cu{background:rgba(217,102,59,.15);color:var(--curse);} .tag.t-cu::before{background:var(--curse);box-shadow:0 0 6px var(--curse);}
+  .tag.t-no{background:rgba(111,101,96,.18);color:var(--text-2);} .tag.t-no::before{background:var(--todo);}
   .disp-y{color:var(--done);font-weight:600;font-size:12px;} .disp-n{color:var(--faint);font-size:12px;}
   .noresult{padding:40px;text-align:center;color:var(--muted);font-style:italic;}
   .prq-btn{font-family:'JetBrains Mono';font-size:10px;padding:2px 7px 3px;border-radius:5px;border:1px solid rgba(226,77,66,.3);background:rgba(226,77,66,.07);color:#E86055;margin-left:7px;cursor:pointer;vertical-align:middle;transition:background .12s;line-height:1.6;}
@@ -297,6 +318,9 @@
   .prereq-item .pdot{width:7px;height:7px;border-radius:50%;flex:none;}
   .toggles{display:flex;gap:10px;}
   .tgl{flex:1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);font-size:12.5px;}
+  .tgl.derived{color:var(--text-2);cursor:default;}
+  .dbadge{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;white-space:nowrap;}
+  .derived-note{margin:0;font-size:11px;line-height:1.5;color:var(--faint);}
   .modal-foot{padding:13px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:var(--surface-2);}
   .mbtn{padding:8px 16px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:500;}
   .mbtn:hover{border-color:var(--violet);}
@@ -315,13 +339,13 @@
 </head>
 <body>
 <div class="app">
-  <div class="tabbar" id="tabbar">
+  <div class="tabbar" id="tabbar" role="tablist" aria-label="Vistas">
     <button class="icon-btn panel-toggle" id="tglLeft" title="Explorador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-    <div class="tab active" data-pane="graph"><span class="dot"></span>Graph view</div>
-    <div class="tab" data-pane="avance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Avance</div>
-    <div class="tab" data-pane="cronograma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Cronograma</div>
-    <div class="tab" data-pane="legajo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Legajo</div>
-    <div class="tab" data-pane="planner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4"/></svg>Planificador</div>
+    <button class="tab active" type="button" role="tab" aria-selected="true" data-pane="graph"><span class="dot"></span>Graph view</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-pane="avance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Avance</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-pane="cronograma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Cronograma</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-pane="legajo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Legajo</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-pane="planner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4"/></svg>Planificador</button>
     <div class="spacer"></div>
     <button class="icon-btn" id="btnExport" title="Backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></button>
     <button class="icon-btn" id="btnImport" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 012-2h12a2 2 0 012 2v2"/></svg></button>
@@ -349,7 +373,11 @@
         <div class="graph-title">Graph view</div>
         <canvas id="graph"></canvas>
         <div class="g-tip" id="gTip"></div>
-        <div class="g-hint">Arrastrá nodos · scroll para zoom · click para editar</div>
+        <div class="g-hint">Arrastrá nodos · scroll para zoom · click para editar · doble click en vacío para encuadrar</div>
+        <div class="g-tools">
+          <button class="g-tool" id="btnFit" title="Ajustar a pantalla (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V5a1 1 0 011-1h4M20 9V5a1 1 0 00-1-1h-4M4 15v4a1 1 0 001 1h4M20 15v4a1 1 0 01-1 1h-4"/></svg></button>
+          <button class="g-tool" id="btnReheat" title="Reacomodar grafo (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5"/></svg></button>
+        </div>
         <div class="yr-filters" id="yrFilters">
           <button class="yr-f on" data-yi="0">1°</button>
           <button class="yr-f on" data-yi="1">2°</button>
@@ -401,10 +429,22 @@
             <span class="oferta-title" id="ofertaLbl">Oferta 2C 2026</span>
             <span class="oferta-sub" id="ofertaCnt">cargada</span>
           </div>
-          <button class="btn" id="btnImportPDF">
+          <button class="btn" id="btnImportOferta" title="Cargar una oferta desde un archivo JSON">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 012-2h12a2 2 0 012 2v2"/></svg>
-            Importar nuevo PDF
+            Importar JSON
           </button>
+          <button class="btn" id="btnExportOferta" title="Descargar la oferta actual (sirve de plantilla)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            Exportar
+          </button>
+          <button class="btn" id="btnImportPDF" title="Importar desde el PDF oficial (requiere endpoint propio)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>
+            PDF
+          </button>
+          <button class="btn" id="btnPdfCfg" title="Configurar el endpoint de conversión de PDF" aria-label="Configurar el endpoint de conversión de PDF">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          </button>
+          <input type="file" id="ofertaInput" accept="application/json,.json" hidden>
           <input type="file" id="pdfInput" accept="application/pdf" hidden>
         </div>
         <div class="card auto-box">
@@ -423,10 +463,10 @@
           <div class="auto-filter">
             <div class="af"><label>Turno preferido</label><select id="autoTurno"><option value="any">Cualquiera</option><option value="manana">Mañana (8-12)</option><option value="tarde">Tarde (14-18)</option><option value="noche" selected>Noche (19-23)</option></select></div>
             <div class="af"><label>Días disponibles</label>
-              <div class="day-picks">
-                <button class="dpk on" data-d="Lu">Lu</button><button class="dpk on" data-d="Ma">Ma</button>
-                <button class="dpk on" data-d="Mi">Mi</button><button class="dpk on" data-d="Ju">Ju</button>
-                <button class="dpk on" data-d="Vi">Vi</button><button class="dpk" data-d="Sa">Sa</button>
+              <div class="day-picks" role="group" aria-label="Días disponibles">
+                <button type="button" class="dpk on" data-d="Lu" aria-pressed="true">Lu</button><button type="button" class="dpk on" data-d="Ma" aria-pressed="true">Ma</button>
+                <button type="button" class="dpk on" data-d="Mi" aria-pressed="true">Mi</button><button type="button" class="dpk on" data-d="Ju" aria-pressed="true">Ju</button>
+                <button type="button" class="dpk on" data-d="Vi" aria-pressed="true">Vi</button><button type="button" class="dpk" data-d="Sa" aria-pressed="false">Sa</button>
               </div>
             </div>
           </div>
@@ -457,13 +497,16 @@
           <button class="chip" data-f="inter">Intermedio</button>
         </div>
         <div class="card" style="overflow:hidden;">
+          <div class="tbl-wrap">
           <table><thead><tr>
-            <th data-s="codigo">Código <span class="ar"></span></th>
-            <th data-s="nombre">Materia <span class="ar"></span></th>
-            <th data-s="condicion">Estado <span class="ar"></span></th>
-            <th data-s="disponibilidad">Disponibilidad <span class="ar"></span></th>
-            <th data-s="nota">Nota <span class="ar"></span></th>
+            <th data-s="codigo" scope="col">Código <span class="ar"></span></th>
+            <th data-s="nombre" scope="col">Materia <span class="ar"></span></th>
+            <th data-s="anio" scope="col">Año <span class="ar"></span></th>
+            <th data-s="condicion" scope="col">Estado <span class="ar"></span></th>
+            <th data-s="disponibilidad" scope="col">Disponibilidad <span class="ar"></span></th>
+            <th data-s="nota" scope="col">Nota <span class="ar"></span></th>
           </tr></thead><tbody id="tbody"></tbody></table>
+          </div>
           <div class="noresult" id="noresult" style="display:none;">Sin resultados.</div>
         </div>
       </section>
@@ -517,14 +560,17 @@
       <label>Correlativas necesarias</label>
       <div class="prereq-list" id="prereqList"></div>
     </div>
+    <!-- Ambos son derivados (correlativas / plan oficial), no editables: el switch de
+         intermedio era clickeable pero recalcIntermedio() lo revertía al recargar. -->
     <div class="toggles">
-      <div class="tgl" style="opacity:.65;cursor:default;">Disponible (auto) <span id="swDispBadge" style="font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;"></span></div>
-      <div class="tgl">Intermedio <span class="switch" id="swInter" role="switch" tabindex="0"></span></div>
+      <div class="tgl derived">Disponible <span class="dbadge" id="swDispBadge"></span></div>
+      <div class="tgl derived">Intermedio <span class="dbadge" id="swInterBadge"></span></div>
     </div>
+    <p class="derived-note">Disponibilidad y título intermedio se calculan solos a partir de las correlativas y del plan oficial.</p>
   </div>
   <div class="modal-foot"><button class="mbtn" id="mClose">Listo</button></div>
 </div></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 "use strict";
@@ -568,16 +614,47 @@ function recalcIntermedio(){
 function recalcDisp(){
   const ap=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
   state.subjects.forEach(s=>{
-    if(s.condicion.trim()==="Aprobada"){s.disponibilidad="No Disponible";return;}
-    if(s.condicion.trim()==="Cursada"){s.disponibilidad="Disponible";return;}
+    if(s.condicion==="Aprobada"){s.disponibilidad="No Disponible";return;}
+    if(s.condicion==="Cursada"){s.disponibilidad="Disponible";return;}
     const pre=PREREQS[s.codigo]||[];
     s.disponibilidad=pre.every(p=>ap.has(p))?"Disponible":"No Disponible";
   });
 }
+// Recalcula todo lo derivado. Se llama al iniciar y después de cada import/reset,
+// porque los valores guardados de `disponibilidad`/`intermedio` pueden estar viejos.
+function recalcDerived(){ recalcIntermedio(); recalcDisp(); }
 const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = id => document.getElementById(id);
 
-function load(){ try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){} return JSON.parse(JSON.stringify(SEED)); }
+// Los nombres de materia terminan interpolados en innerHTML y pueden venir de un
+// backup JSON editado a mano, así que se escapan siempre.
+const esc = v => String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CONDS = ["Aprobada","Cursada","No aprobada"];
+const STATE_CLASS = {"Aprobada":"t-ap","Cursada":"t-cu","No aprobada":"t-no"};
+const STATE_LABEL = {"Aprobada":"Aprobada","Cursada":"Cursando","No aprobada":"Pendiente"};
+const YEAR_SHORT = {"Primer año":"1°","Segundo año":"2°","Tercer año":"3°","Cuarto año":"4°","Quinto año":"5°","Transversales":"Trans"};
+
+// Normaliza una materia venida de localStorage / backup: recorta condiciones con
+// espacios sueltos y descarta valores fuera de rango, para que el resto del código
+// pueda comparar con === sin llamar a .trim() en cada punto.
+function normalizeSubject(s){
+  s.codigo = +s.codigo;
+  s.nombre = String(s.nombre||"").trim();
+  s.condicion = String(s.condicion||"").trim();
+  if(!CONDS.includes(s.condicion)) s.condicion = "No aprobada";
+  s.anio = ZONES.includes(String(s.anio||"").trim()) ? String(s.anio).trim() : ZONES[0];
+  const n = Number(s.nota);
+  s.nota = Number.isFinite(n) ? Math.max(0,Math.min(10,n)) : 0;
+  return s;
+}
+function normalizeAll(list){
+  return (Array.isArray(list)?list:[]).filter(s=>s&&Number.isFinite(+s.codigo)).map(normalizeSubject);
+}
+
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r){const d=normalizeAll(JSON.parse(r));if(d.length)return d;}}catch(e){}
+  return normalizeAll(JSON.parse(JSON.stringify(SEED)));
+}
 // Oferta 2C 2026 extraída del PDF oficial UNLaM
 // Formato: [codigo, [[comision, "dias", hIni, hFin], ...]]
 // dias: "Lu"|"Ma"|"Mi"|"Ju"|"Vi"|"Sa"|"Ma,Vi"|"Lu,Ju"|null (A distancia)
@@ -644,23 +721,39 @@ const OFERTA_2C_2026 = [
   [3678,[[5900,"Vi",19,23]]],
   [3679,[[4900,"Ju",19,23]]]
 ];
-function loadOferta(){try{const r=localStorage.getItem(KEY+"-of");if(r)return JSON.parse(r);}catch(e){}return OFERTA_2C_2026;}
+function loadOferta(){try{const r=localStorage.getItem(KEY+"-of");if(r){const d=JSON.parse(r);if(Array.isArray(d)&&d.length)return d;}}catch(e){}return OFERTA_2C_2026;}
 function loadOfertaNombre(){try{const r=localStorage.getItem(KEY+"-ofN");if(r)return r;}catch(e){}return "2C 2026";}
-function persistOferta(){try{localStorage.setItem(KEY+"-of",JSON.stringify(state.oferta));localStorage.setItem(KEY+"-ofN",state.ofertaNombre);}catch(e){}}
+// Un solo punto de escritura para no repetir el try/catch y para avisar si falla
+// (cuota llena o storage bloqueado): antes se perdían datos en silencio.
+let storageWarned=false;
+function write(key,value){
+  try{ localStorage.setItem(key,typeof value==="string"?value:JSON.stringify(value)); return true; }
+  catch(e){
+    if(!storageWarned){ storageWarned=true; toast("No pude guardar: el almacenamiento del navegador está lleno o bloqueado. Exportá un backup."); }
+    return false;
+  }
+}
+function persistOferta(){write(KEY+"-of",state.oferta);write(KEY+"-ofN",state.ofertaNombre);}
 function loadSchedOptions(){
   try{const r=localStorage.getItem(KEY+"-schedOpts");if(r)return JSON.parse(r);}catch(e){}
   let old=["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""];
   try{const r=localStorage.getItem(KEY+"-sched");if(r)old=JSON.parse(r);}catch(e){}
   return [{id:1,name:"Opción 1",days:old}];
 }
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(state.subjects));}catch(e){}}
-function persistSched(){try{localStorage.setItem(KEY+"-schedOpts",JSON.stringify(state.schedOptions));}catch(e){}}
+function persist(){write(KEY,state.subjects);}
+function persistSched(){write(KEY+"-schedOpts",state.schedOptions);}
+function loadPane(){try{const p=localStorage.getItem(KEY+"-pane");if(PANES.includes(p))return p;}catch(e){}return "graph";}
+const PANES = ["graph","avance","cronograma","legajo","planner"];
 const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:"todas", search:"", sortKey:"codigo", sortAsc:true, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:new Set([0,1,2,3,4,5]), autoSelected:new Set() };
 
-function stateColor(c){ c=c.trim(); return c==="Aprobada"?"#E8B23E":c==="Cursada"?"#D9663B":"#6F6560"; }
+function stateColor(c){ return c==="Aprobada"?"#E8B23E":c==="Cursada"?"#D9663B":"#6F6560"; }
+// Cantidad real de materias que cuentan para el intermedio. INTERMEDIO_CODES tiene
+// códigos del plan oficial que no están en los datos (ej. 3680), así que su .size
+// infla el total: se cuenta sobre las materias que existen de verdad.
+function interSubjects(){ return state.subjects.filter(s=>INTERMEDIO_CODES.has(s.codigo)); }
 function getBlockingChain(codigo){
   // Devuelve los códigos de prereqs que faltan (miss) y los ya aprobados (done)
-  const ap=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
+  const ap=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
   const miss=new Set(),done=new Set(),vis=new Set();
   function walk(c){if(vis.has(c))return;vis.add(c);if(ap.has(c)){done.add(c);return;}miss.add(c);(PREREQS[c]||[]).forEach(walk);}
   (PREREQS[codigo]||[]).forEach(walk);
@@ -703,7 +796,11 @@ function getSlots(com){if(!com[1])return[];return com[1].split(",").map(d=>({day
 function conflictan(c1,c2){if(!c1[1]||!c2[1])return false;const s1=getSlots(c1),s2=getSlots(c2);return s1.some(a=>s2.some(b=>a.day===b.day&&a.ini<b.fin&&b.ini<a.fin));}
 function filterComs(coms,turno,prefDias){
   return coms.filter(c=>{
-    if(!c[1])return false;const ini=c[2];
+    // Comisiones a distancia (dias === null) no ocupan un día ni pueden superponerse,
+    // así que pasan cualquier filtro. Descartarlas dejaba materias como Innovación y
+    // Emprendedorismo o la PPS sin ninguna comisión elegible.
+    if(!c[1])return true;
+    const ini=c[2];
     if(turno==="manana"&&ini>=13)return false;
     if(turno==="tarde"&&(ini<12||ini>=19))return false;
     if(turno==="noche"&&ini<18)return false;
@@ -711,8 +808,9 @@ function filterComs(coms,turno,prefDias){
     return true;
   });
 }
+const MAX_COMBS=24;
 function generateCombinations(selectedCodes,turno,prefDias,maxRes){
-  maxRes=maxRes||8;
+  maxRes=maxRes||MAX_COMBS;
   const subComs=selectedCodes.map(code=>{
     const ofRow=(state.oferta||[]).find(r=>r[0]===code);
     const sub=state.subjects.find(s=>s.codigo===code);
@@ -735,7 +833,9 @@ function generateCombinations(selectedCodes,turno,prefDias,maxRes){
     }
   }
   bt(0,[]);
-  return{results,faltantes:[]};
+  // El backtracking corta al llegar al máximo, así que puede haber más combinaciones
+  // de las que se muestran: se avisa en vez de dar el corte por total.
+  return{results,faltantes:[],truncated:results.length>=maxRes};
 }
 function renderAutoResults(res){
   const box=$("autoResults");
@@ -743,95 +843,186 @@ function renderAutoResults(res){
   const faltantes=(res&&res.faltantes)||[];
   if(faltantes.length){box.innerHTML='<div class="auto-empty">Sin comisiones en ese turno/días: <b>'+faltantes.join(", ")+'</b>. Probá con "Cualquiera" o más días.</div>';return;}
   if(!results.length){box.innerHTML='<div class="auto-empty">No se encontraron combinaciones sin superposición. Probá distintos filtros de turno o días.</div>';return;}
-  window._autoRes=results;
-  const cc=$("combCount");if(cc)cc.textContent=results.length+" combinación"+(results.length===1?"":"es")+" encontradas";
+  state.autoRes=results;
+  // "combinación" pierde el acento en plural: concatenar "es" daba "combinaciónes".
+  const cc=$("combCount");
+  if(cc)cc.textContent=res.truncated
+    ?"más de "+results.length+" combinaciones · mostrando las primeras "+results.length
+    :(results.length===1?"1 combinación encontrada":results.length+" combinaciones encontradas");
   const grid=document.createElement("div");grid.className="auto-results-grid";
   results.forEach((chosen,ri)=>{
     const card=document.createElement("div");card.className="ar-opt";
     const items=chosen.map(({sub,com})=>{
-      const dias=com[1]?com[1].split(",").map(d=>DAY_NAMES[d]||d).join(" + "):"Virtual";
-      const time=com[1]?com[2]+":00–"+com[3]+":00":"";
-      return'<div class="ar-item"><span class="ar-day">'+(com[1]||"?")+
-        '</span><div class="ar-info"><div class="ar-nm" title="'+sub.nombre+'">'+sub.nombre+'</div>'+
-        '<div class="ar-tm">'+dias+(time?" · "+time:"")+'</div></div></div>';
+      const dias=com[1]?com[1].split(",").map(d=>DAY_NAMES[d]||d).join(" + "):"A distancia";
+      const time=com[2]!=null?com[2]+":00–"+com[3]+":00":"";
+      return'<div class="ar-item"><span class="ar-day">'+esc(com[1]||"@")+
+        '</span><div class="ar-info"><div class="ar-nm" title="'+esc(sub.nombre)+'">'+esc(sub.nombre)+'</div>'+
+        '<div class="ar-tm">'+esc(dias+(time?" · "+time:""))+' · com. '+esc(com[0])+'</div></div></div>';
     }).join("");
     card.innerHTML='<div class="ar-opt-h">Opción '+(ri+1)+'</div>'+items+
-      '<button class="ar-use" onclick="useAutoOption('+ri+')">Usar esta opción →</button>';
+      '<button type="button" class="ar-use" data-use="'+ri+'">Usar esta opción →</button>';
     grid.appendChild(card);
   });
   box.innerHTML="";box.appendChild(grid);
 }
 
 function useAutoOption(ri){
-  const chosen=window._autoRes[ri];
+  const chosen=(state.autoRes||[])[ri];
+  if(!chosen)return;
   const DAYS=["Lu","Ma","Mi","Ju","Vi","Sa"];
   const days=["","","","","",""];
-  for(const{sub,com}of chosen){if(!com[1])continue;const fd=com[1].split(",")[0];const di=DAYS.indexOf(fd);if(di>=0&&!days[di])days[di]=sub.nombre;}
+  let virtuales=0;
+  for(const{sub,com}of chosen){
+    if(!com[1]){virtuales++;continue;}   // a distancia: no ocupa día de la semana
+    const fd=com[1].split(",")[0];const di=DAYS.indexOf(fd);
+    if(di>=0&&!days[di])days[di]=sub.nombre;
+  }
   const lbl=chosen.map(c=>c.sub.nombre.split(" ").slice(0,2).join(" ")).join(" + ");
-  state.schedOptions.push({id:Date.now(),name:"Auto: "+lbl,days});
+  state.schedOptions.push({id:Date.now(),name:("Auto: "+lbl).slice(0,32),days});
   persistSched();renderSched();
-  toast("Opción agregada al cronograma");
-  $("schedOptions").scrollIntoView({behavior:"smooth"});
+  toast(virtuales?"Opción agregada · "+virtuales+" a distancia sin día fijo":"Opción agregada al cronograma");
+  $("schedOptions").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function renderOfertaBar(){
   const lbl=$("ofertaLbl"),cnt=$("ofertaCnt");
   if(lbl)lbl.textContent="Oferta "+state.ofertaNombre;
-  if(cnt){const n=state.oferta?state.oferta.length:0;cnt.textContent=n+" materias cargadas";}
+  if(cnt){
+    const rows=state.oferta||[];
+    const coms=rows.reduce((a,r)=>a+(r[1]?r[1].length:0),0);
+    cnt.textContent=rows.length+" materias · "+coms+" comisiones";
+  }
+  const cfg=$("btnPdfCfg");
+  if(cfg)cfg.classList.toggle("btn-on",!!getPdfEndpoint());
 }
 async function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(file);});}
+
+// Valida la forma de una oferta antes de aceptarla:
+// [[codigo, [[comision, dias|null, horaIni, horaFin], ...]], ...]
+const DAY_CODES=["Lu","Ma","Mi","Ju","Vi","Sa"];
+function parseOferta(raw){
+  if(!Array.isArray(raw)||!raw.length)throw new Error("se esperaba un array de materias");
+  const out=[];
+  raw.forEach(row=>{
+    if(!Array.isArray(row)||row.length<2)return;
+    const codigo=+row[0];
+    if(!Number.isFinite(codigo)||!Array.isArray(row[1]))return;
+    const coms=row[1].filter(c=>Array.isArray(c)&&c.length>=4).map(c=>{
+      const ini=+c[2],fin=+c[3];
+      if(!Number.isFinite(ini)||!Number.isFinite(fin)||fin<=ini)return null;
+      let dias=null;
+      if(c[1]!=null){
+        const ds=String(c[1]).split(",").map(d=>d.trim()).filter(d=>DAY_CODES.includes(d));
+        // Un día ilegible se descarta, NO se degrada a null: null significa "a
+        // distancia", y esas comisiones saltean los filtros de turno/día y nunca
+        // dan conflicto, así que una comisión mal parseada armaría horarios inválidos.
+        if(!ds.length)return null;
+        dias=ds.join(",");
+      }
+      return [+c[0]||0, dias, ini, fin];
+    }).filter(Boolean);
+    if(coms.length)out.push([codigo,coms]);
+  });
+  if(!out.length)throw new Error("ninguna materia con comisiones válidas");
+  return out;
+}
+function applyOferta(list,nombre){
+  state.oferta=list;
+  if(nombre)state.ofertaNombre=nombre;
+  state.autoSelected.clear();
+  persistOferta();renderOfertaBar();renderSubPills();
+  $("autoResults").innerHTML="";$("combCount").textContent="";
+  toast("Oferta actualizada: "+list.length+" materias");
+}
+function exportOferta(){
+  const blob=new Blob([JSON.stringify(state.oferta,null,1)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="oferta-"+state.ofertaNombre.replace(/\s+/g,"-").toLowerCase()+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),0);
+  toast("Oferta exportada · usala como plantilla");
+}
+function importOfertaJSON(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{ applyOferta(parseOferta(JSON.parse(r.result)), file.name.replace(/\.json$/i,"").replace(/[_-]+/g," ")); }
+    catch(err){ toast("JSON inválido: "+(err.message||"no pude leerlo")); }
+  };
+  r.onerror=()=>toast("No pude leer ese archivo");
+  r.readAsText(file);
+}
+
+// Extracción del PDF de oferta.
+//
+// Esto NO puede llamar a api.anthropic.com directamente: la API no permite CORS
+// desde el browser y, sobre todo, haría falta meter una API key en un HTML estático
+// y público, donde queda a la vista de cualquiera. Así que el PDF se manda a un
+// endpoint propio que el usuario configura, y que es el que guarda la key del lado
+// del servidor. Sin endpoint configurado se explica el camino en vez de fallar
+// con un error opaco.
+const PDF_ENDPOINT_KEY=KEY+"-pdfEndpoint";
+function getPdfEndpoint(){try{return localStorage.getItem(PDF_ENDPOINT_KEY)||"";}catch(e){return "";}}
+function configurePdfEndpoint(){
+  const cur=getPdfEndpoint();
+  const v=prompt("URL del endpoint que convierte el PDF de oferta a JSON.\n\nTiene que aceptar POST con {pdf:\"<base64>\"} y devolver el array de oferta.\nLa API key va en ese servidor, nunca acá.\n\nDejalo vacío para desactivarlo.",cur);
+  if(v===null)return;
+  const url=v.trim();
+  if(!url){try{localStorage.removeItem(PDF_ENDPOINT_KEY);}catch(e){}toast("Endpoint de PDF desactivado");renderOfertaBar();return;}
+  if(!/^https:\/\//i.test(url)){toast("Tiene que ser una URL https://");return;}
+  write(PDF_ENDPOINT_KEY,url);renderOfertaBar();toast("Endpoint guardado");
+}
 async function importOfertaPDF(file){
+  const endpoint=getPdfEndpoint();
+  if(!endpoint){
+    toast("Para leer PDFs hace falta configurar un endpoint propio (botón ⚙). Mientras tanto, importá la oferta en JSON.");
+    return;
+  }
   const ov=document.createElement("div");ov.className="import-overlay";
-  ov.innerHTML='<div class="imp-spin"></div><p>Procesando PDF con IA… puede tomar hasta 60 s</p>';
+  ov.innerHTML='<div class="imp-spin"></div><p>Procesando PDF… puede tomar hasta 60 s</p>';
   document.body.appendChild(ov);
   try{
     const b64=await fileToBase64(file);
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:8000,messages:[{role:"user",content:[
-        {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
-        {type:"text",text:`This is a UNLaM university course schedule PDF. Extract every course offering as JSON.
-Return ONLY valid JSON array, no markdown:
-[[codigo_int,[[comision_int,"dias",hora_ini_int,hora_fin_int],...]],...] 
-dias codes: "Lu","Ma","Mi","Ju","Vi","Sa","Ma,Vi","Lu,Ju" or null for A distancia. Hours 24h ints.
-Example: [[901,[[1300,"Lu",8,12],[1900,"Lu",19,23]]],[3621,[[1300,"Lu",8,12]]]]`}]}]})});
+    const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pdf:b64,filename:file.name})});
+    if(!resp.ok)throw new Error("el endpoint respondió "+resp.status);
     const data=await resp.json();
-    const txt=(data.content||[]).find(b=>b.type==="text")?.text||"";
-    const clean=txt.replace(/```json?|```/g,"").trim();
-    state.oferta=JSON.parse(clean);
-    state.ofertaNombre=file.name.replace(".pdf","").replace(/_/g," ");
-    persistOferta();renderOfertaBar();renderSubPills();
-    toast("Oferta importada: "+state.oferta.length+" materias");
-  }catch(err){toast("Error al procesar: "+(err.message||"respuesta inválida"));}
-  finally{if(document.body.contains(ov))document.body.removeChild(ov);}
+    applyOferta(parseOferta(Array.isArray(data)?data:data.oferta), file.name.replace(/\.pdf$/i,"").replace(/[_-]+/g," "));
+  }catch(err){toast("Error al procesar el PDF: "+(err.message||"respuesta inválida"));}
+  finally{ov.remove();}
 }
 function renderSched(){
   const container=$("schedOptions");if(!container)return;container.innerHTML="";
   const cnt=state.schedOptions.length;$("schedMeta").textContent=cnt+(cnt===1?" opción":" opciones");
   const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  const dispS=state.subjects.filter(s=>s.condicion.trim()!=="Aprobada"&&s.disponibilidad==="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  const noDispS=state.subjects.filter(s=>s.condicion.trim()!=="Aprobada"&&s.disponibilidad!=="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  const dispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  const noDispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad!=="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
   function buildOpts(val){
+    const opt=s=>'<option value="'+esc(s.nombre)+'"'+(s.nombre===val?" selected":"")+'>'+esc(s.nombre)+'</option>';
+    // Si el valor guardado ya no coincide con ninguna materia (renombrada, o backup
+    // viejo), se agrega igual para no perderlo silenciosamente al re-renderizar.
+    const known=dispS.some(s=>s.nombre===val)||noDispS.some(s=>s.nombre===val);
     return'<option value="">— Libre —</option>'
-      +(dispS.length?'<optgroup label="✓ Disponibles para cursar">'+dispS.map(s=>'<option value="'+s.nombre.replace(/"/g,"&quot;")+'"'+(s.nombre===val?" selected":"")+'>'+s.nombre+'</option>').join('')+'</optgroup>':"")
-      +(noDispS.length?'<optgroup label="○ No disponibles aún">'+noDispS.map(s=>'<option value="'+s.nombre.replace(/"/g,"&quot;")+'"'+(s.nombre===val?" selected":"")+'>'+s.nombre+'</option>').join('')+'</optgroup>':"");
+      +(val&&!known?'<option value="'+esc(val)+'" selected>'+esc(val)+' (fuera del plan)</option>':"")
+      +(dispS.length?'<optgroup label="✓ Disponibles para cursar">'+dispS.map(opt).join('')+'</optgroup>':"")
+      +(noDispS.length?'<optgroup label="○ No disponibles aún">'+noDispS.map(opt).join('')+'</optgroup>':"");
   }
   state.schedOptions.forEach((opt,oi)=>{
     const card=document.createElement("div");card.className="card sched-opt-card";
     const head=document.createElement("div");head.className="sched-opt-head";
     head.innerHTML='<span class="sched-opt-num">Opción '+(oi+1)+'</span>'
-      +'<input class="sched-opt-name" data-oid="'+opt.id+'" value="'+opt.name.replace(/"/g,"&quot;")+'" maxlength="32" spellcheck="false" title="Clic para renombrar">'
-      +(cnt>1?'<button class="sched-del" data-oid="'+opt.id+'" title="Eliminar">×</button>':"");
+      +'<input class="sched-opt-name" data-oid="'+opt.id+'" value="'+esc(opt.name)+'" maxlength="32" spellcheck="false" title="Clic para renombrar" aria-label="Nombre de la opción '+(oi+1)+'">'
+      +(cnt>1?'<button type="button" class="sched-del" data-oid="'+opt.id+'" title="Eliminar opción" aria-label="Eliminar opción '+(oi+1)+'">×</button>':"");
     const grid=document.createElement("div");grid.className="sched";
     DAYS.forEach((d,di)=>{const val=opt.days[di]||"";const slot=document.createElement("div");
       slot.className="slot"+(val?" taken":"");
-      slot.innerHTML='<span class="day">'+d+'</span><select data-di="'+di+'" data-oid="'+opt.id+'">'+buildOpts(val)+'</select>';
+      slot.innerHTML='<span class="day" id="d'+opt.id+'-'+di+'">'+d+'</span><select data-di="'+di+'" data-oid="'+opt.id+'" aria-labelledby="d'+opt.id+'-'+di+'">'+buildOpts(val)+'</select>';
       grid.appendChild(slot);});
     const tags=document.createElement("div");tags.className="sched-opt-tags";
     const chosen=opt.days.filter(Boolean);
     if(chosen.length){
-      tags.innerHTML=chosen.map(n=>{const s=state.subjects.find(z=>z.nombre===n);
-        const ap=s?.condicion.trim()==="Aprobada",cu=s?.condicion.trim()==="Cursada",di=s?.disponibilidad==="Disponible";
+      const uniq=[...new Set(chosen)];   // una materia puede ocupar dos días
+      tags.innerHTML=uniq.map(n=>{const s=state.subjects.find(z=>z.nombre===n);
+        const ap=s?.condicion==="Aprobada",cu=s?.condicion==="Cursada",di=s?.disponibilidad==="Disponible";
         const cls=ap?"soct-y":cu?"soct-c":di?"soct-d":"soct-b";const dot=ap?"✓":cu?"→":di?"○":"–";
-        return'<span class="soct '+cls+'" title="'+n+'">'+dot+' '+n+'</span>';}).join("");
+        const hint=ap?"ya aprobada":cu?"cursando":di?"disponible":"correlativas pendientes";
+        return'<span class="soct '+cls+'" title="'+esc(n+" · "+hint)+'">'+dot+' '+esc(n)+'</span>';}).join("");
     }else{tags.innerHTML='<span style="color:var(--muted);font-size:12px;font-style:italic;">Sin materias seleccionadas</span>';}
     card.appendChild(head);card.appendChild(grid);card.appendChild(tags);container.appendChild(card);
   });
@@ -843,12 +1034,12 @@ function buildPrereqRow(s){
   const pre=PREREQS[s.codigo]||[];if(!pre.length)return'';
   const tags=pre.map(p=>{
     const ps=state.subjects.find(z=>z.codigo===p);if(!ps)return'';
-    const ap=ps.condicion.trim()==="Aprobada",cu=ps.condicion.trim()==="Cursada",di=ps.disponibilidad==="Disponible";
+    const ap=ps.condicion==="Aprobada",cu=ps.condicion==="Cursada",di=ps.disponibilidad==="Disponible";
     const cls=ap?'done':cu?'curs':di?'open':'miss';
     const icon=ap?'✓':cu?'→':di?'○':'✗';
-    return`<span class="ptag ptag-${cls}">${icon} ${ps.nombre}</span>`;
+    return`<span class="ptag ptag-${cls}">${icon} ${esc(ps.nombre)}</span>`;
   }).join('');
-  return`<tr class="xp-row"><td colspan="5"><div class="xp-inner"><span class="xp-lbl">Necesitás para cursar esta materia:</span><div class="xp-tags">${tags}</div></div></td></tr>`;
+  return`<tr class="xp-row"><td colspan="6"><div class="xp-inner"><span class="xp-lbl">Necesitás para cursar esta materia:</span><div class="xp-tags">${tags}</div></div></td></tr>`;
 }
 function renderTable(){
   const tb=$("tbody"),q=state.search.toLowerCase();
@@ -858,7 +1049,16 @@ function renderTable(){
     else if(state.filter!=="todas"&&s.condicion!==state.filter)return false;
     if(q&&!s.nombre.toLowerCase().includes(q)&&!String(s.codigo).includes(q))return false;return true;});
   const k=state.sortKey,asc=state.sortAsc;
-  rows.sort((a,b)=>{let x=a[k],y=b[k];if(typeof x==="string"){x=x.toLowerCase();y=y.toLowerCase();}return x<y?(asc?-1:1):x>y?(asc?1:-1):0;});
+  // Año y estado tienen un orden propio: alfabéticamente "Cuarto año" iría antes que
+  // "Primer año", y "Aprobada" antes que "Cursada"/"No aprobada" por casualidad.
+  const RANK={anio:s=>ZONES.indexOf(s.anio),condicion:s=>CONDS.indexOf(s.condicion),disponibilidad:s=>s.disponibilidad==="Disponible"?0:1};
+  const key=RANK[k]||(s=>{const v=s[k];return typeof v==="string"?v.toLowerCase():v;});
+  rows.sort((a,b)=>{
+    const x=key(a),y=key(b);
+    if(x<y)return asc?-1:1;
+    if(x>y)return asc?1:-1;
+    return a.codigo-b.codigo;   // desempate estable
+  });
   $("tblMeta").textContent=rows.length+" de "+state.subjects.length;
   if(!rows.length){tb.innerHTML="";$("noresult").style.display="block";return;}
   $("noresult").style.display="none";
@@ -871,8 +1071,9 @@ function renderTable(){
       :`<span class="disp-n">No disponible</span>${xpBtn}`;
     const mainRow=`<tr data-c="${s.codigo}"${isXp?' class="row-xp"':''}>`
       +`<td class="code">${String(s.codigo).padStart(4,"0")}</td>`
-      +`<td><div class="nm-cell">${s.intermedio?'<span class="idot"></span>':''}${s.nombre}</div></td>`
-      +`<td><span class="tag ${s.condicion}">${s.condicion==="No aprobada"?"Pendiente":s.condicion==="Cursada"?"Cursando":"Aprobada"}</span></td>`
+      +`<td><div class="nm-cell">${s.intermedio?'<span class="idot" title="Cuenta para el título intermedio"></span>':''}${esc(s.nombre)}</div></td>`
+      +`<td class="code">${esc(YEAR_SHORT[s.anio]||s.anio)}</td>`
+      +`<td><span class="tag ${STATE_CLASS[s.condicion]}">${STATE_LABEL[s.condicion]}</span></td>`
       +`<td>${dispCell}</td>`
       +`<td class="nota">${s.nota>0?s.nota:"—"}</td>`
       +`</tr>`;
@@ -891,32 +1092,60 @@ function renderTable(){
     renderTable();
   }));
 }
+// Resalta el término buscado. Escapa primero y recién después inserta el <mark>,
+// para que un nombre con caracteres especiales no rompa el HTML.
+function highlight(text,q){
+  const safe=esc(text);
+  if(!q)return safe;
+  const i=text.toLowerCase().indexOf(q);
+  if(i<0)return safe;
+  return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length));
+}
 function renderSidebar(){
-  const list=$("filelist"),q=($("sideSearch").value||"").toLowerCase();
+  const list=$("filelist"),q=($("sideSearch").value||"").trim().toLowerCase();
   list.innerHTML="";
+  let shown=0;
   ZONES.forEach((z,zi)=>{
-    let items=state.subjects.filter(s=>s.anio===z);
-    if(q) items=items.filter(s=>s.nombre.toLowerCase().includes(q));
+    const all=state.subjects.filter(s=>s.anio===z);
+    const items=q?all.filter(s=>s.nombre.toLowerCase().includes(q)||String(s.codigo).includes(q)):all;
     if(!items.length) return;
-    const done=state.subjects.filter(s=>s.anio===z&&s.condicion==="Aprobada").length;
-    const total=state.subjects.filter(s=>s.anio===z).length;
-    const folder=document.createElement("div");folder.className="folder"+(collapsed[zi]?" collapsed":"");
-    const head=document.createElement("div");head.className="fhead";
-    head.innerHTML='<span class="caret">▼</span>'+z+'<span class="fcount">'+done+'/'+total+'</span>';
-    head.addEventListener("click",()=>{collapsed[zi]=!collapsed[zi];folder.classList.toggle("collapsed");});
+    shown+=items.length;
+    const done=all.filter(s=>s.condicion==="Aprobada").length;
+    // Con búsqueda activa se despliegan todos los años, si no los resultados
+    // quedarían escondidos dentro de una carpeta plegada.
+    const folder=document.createElement("div");folder.className="folder"+(!q&&collapsed[zi]?" collapsed":"");
+    const head=document.createElement("button");head.className="fhead";head.type="button";
+    head.setAttribute("aria-expanded",String(!(!q&&collapsed[zi])));
+    head.innerHTML='<span class="caret">▼</span>'+esc(z)+'<span class="fcount">'+done+'/'+all.length+'</span>';
+    head.addEventListener("click",()=>{
+      collapsed[zi]=!collapsed[zi];
+      folder.classList.toggle("collapsed",collapsed[zi]);
+      head.setAttribute("aria-expanded",String(!collapsed[zi]));
+    });
     folder.appendChild(head);
     const box=document.createElement("div");box.className="fitems";
-    items.forEach(s=>{const el=document.createElement("div");el.className="note"+(state.selected===s.codigo?" active":"");
-      el.innerHTML='<span class="nd" style="background:'+stateColor(s.condicion)+'"></span><span class="nt">'+s.nombre+'</span>';
+    items.forEach(s=>{const el=document.createElement("button");el.type="button";
+      el.className="note"+(state.selected===s.codigo?" active":"");
+      el.title=s.nombre+" · "+STATE_LABEL[s.condicion];
+      el.innerHTML='<span class="nd" style="background:'+stateColor(s.condicion)+'"></span><span class="nt">'+highlight(s.nombre,q)+'</span>';
       el.addEventListener("click",()=>{select(s.codigo);openEdit(s.codigo);});
       box.appendChild(el);});
     folder.appendChild(box);list.appendChild(folder);
   });
+  if(!shown){
+    const empty=document.createElement("div");
+    empty.style.cssText="padding:18px 12px;font-size:12.5px;color:var(--muted);font-style:italic;";
+    empty.textContent=q?'Ninguna materia coincide con "'+($("sideSearch").value||"").trim()+'".':"Sin materias.";
+    list.appendChild(empty);
+  }
 }
 const collapsed=[false,false,false,false,false,false];
 
 function select(code){ state.selected=code; if(GRAPH)GRAPH.select(code); renderSidebar(); }
-function renderAll(changed){ renderStats(); renderYears(); renderTable(); renderSidebar(); if(GRAPH)GRAPH.sync(changed); }
+// recalcDerived() va acá adentro: aprobar una materia cambia la disponibilidad de
+// todas las que dependen de ella, y antes eso sólo se recalculaba al abrir Cronograma,
+// así que la tabla y el grafo quedaban mostrando datos viejos.
+function renderAll(changed){ recalcDerived(); renderStats(); renderYears(); renderTable(); renderSidebar(); if(GRAPH)GRAPH.sync(changed); }
 
 /* ===================== GRAPH ===================== */
 let GRAPH=null;
@@ -945,6 +1174,9 @@ function buildGraph(){
       const d=Math.min(deg[s.codigo]||0,10);
       const n={id:"s"+s.codigo,type:"subject",codigo:s.codigo,label:s.nombre,
         baseR:3.2+d*0.42, // nodos más conectados = más grandes
+        // yi/zi se cachean acá: step() y draw() corren 60 veces por segundo y antes
+        // resolvían el año con un find() lineal por nodo en cada frame.
+        yi, zi:ZONES.indexOf(s.anio),
         x:tX+(Math.random()-.5)*22, y:tY+(Math.random()-.5)*18, vx:0,vy:0};
       nodes.push(n);byId[n.id]=n;
     });
@@ -955,7 +1187,7 @@ function buildGraph(){
     });
     syncColors();
   }
-  function syncColors(){state.subjects.forEach(s=>{const n=byId["s"+s.codigo];if(n){n.color=stateColor(s.condicion);n.done=s.condicion==="Aprobada";n.inter=s.intermedio;}});}
+  function syncColors(){state.subjects.forEach(s=>{const n=byId["s"+s.codigo];if(n){n.color=stateColor(s.condicion);n.cond=s.condicion;n.done=s.condicion==="Aprobada";n.disp=s.disponibilidad==="Disponible";n.inter=s.intermedio;n.nota=s.nota;}});}
   function resize(){const r=canvas.getBoundingClientRect();W=r.width;H=r.height;if(W<2||H<2)return;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
   function nr(n){return n.baseR*gopts.size;}
   function step(){
@@ -971,9 +1203,7 @@ function buildGraph(){
     nodes.forEach(n=>{if(n===drag)return;
       if(n.type==="subject"){
         // estratificación fuerte por año (domina sobre resortes)
-        const sub=state.subjects.find(z=>z.codigo===n.codigo);
-        const yi=YEAR_IDX[sub?.anio]||0;
-        const tY=H*0.05+yi*(H*0.86/4.4);
+        const tY=H*0.05+n.yi*(H*0.86/4.4);
         n.vy+=(tY-n.y)*0.028*alpha;          // estratificación Y fuerte
         n.vx+=(cx-n.x)*0.0004*cenMul*alpha;  // X muy débil, la repulsión distribuye
       }else{n.vx+=(cx-n.x)*0.0014*cenMul*alpha;n.vy+=(cy-n.y)*0.0014*cenMul*alpha;}
@@ -1016,10 +1246,10 @@ function buildGraph(){
     ctx.save();ctx.translate(cam.x,cam.y);ctx.scale(cam.scale,cam.scale);
     // visibilidad por año
     const _gy=state.graphYears;
-    function nodeVis(n){ if(n.type!=="subject")return true; const sub=state.subjects.find(z=>z.codigo===n.codigo); return _gy.has(ZONES.indexOf(sub?.anio)); }
+    function nodeVis(n){ return n.type!=="subject" || _gy.has(n.zi); }
     // chain = correlativas bloqueantes cuando se hace hover sobre un nodo bloqueado
-    const _hs=hover&&hover.type==="subject"?state.subjects.find(z=>z.codigo===hover.codigo):null;
-    const _blocked=_hs&&_hs.condicion.trim()!=="Aprobada"&&_hs.disponibilidad!=="Disponible";
+    const _hs=hover&&hover.type==="subject"?hover:null;
+    const _blocked=_hs&&_hs.cond!=="Aprobada"&&!_hs.disp;
     const chain=_blocked?(()=>{const c=getBlockingChain(hover.codigo);return c.miss.size>0?c:null;})():null;
     const hi=chain?null:(hover?neighbors(hover):null);
     edges.forEach(e=>{const a=byId[e.a],b=byId[e.b];if(!a||!b||!nodeVis(a)||!nodeVis(b))return;
@@ -1038,7 +1268,7 @@ function buildGraph(){
       const nc=isMiss?"#E24D42":isDone?"#E8B23E":n.color;
       const glow=isMiss?14:isDone?8:(n.done?8:0);
       if(sel||isTarget){ctx.shadowColor=sel?"#FFE9D6":"#E24D42";ctx.shadowBlur=sel?16:18;}else if(glow&&!dim){ctx.shadowColor=nc;ctx.shadowBlur=glow;}else ctx.shadowBlur=0;
-      const pend=!n.done&&!sel&&!isMiss&&!isDone&&state.subjects.find(z=>z.codigo===n.codigo)?.condicion==="No aprobada";
+      const pend=!n.done&&!sel&&!isMiss&&!isDone&&n.cond==="No aprobada";
       ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=sel?"#FFE9D6":(dim?"rgba(90,90,110,.35)":nc);ctx.globalAlpha=dim?.4:(pend&&!isTarget?.70:1);ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0;
       
       if(n.inter&&!dim){ctx.beginPath();ctx.arc(n.x,n.y,r+2.4,0,Math.PI*2);ctx.strokeStyle="rgba(242,104,92,.75)";ctx.lineWidth=1;ctx.stroke();}
@@ -1055,6 +1285,22 @@ function buildGraph(){
   function loop(){step();draw();if(running)raf=requestAnimationFrame(loop);}
   function start(){if(REDUCED){for(let i=0;i<340;i++)step();draw();return;}if(running)return;running=true;loop();}
   function reheat(){alpha=1;if(REDUCED){for(let i=0;i<200;i++)step();draw();}else start();}
+  // Reacomodo suave: para cambios de tamaño, donde un reheat completo (alpha=1)
+  // reordena todo el grafo y desorienta.
+  function settle(){alpha=Math.max(alpha,.35);if(REDUCED){for(let i=0;i<60;i++)step();draw();}else start();}
+  // Encuadra los nodos visibles. Sin esto, alejándose con el scroll el grafo puede
+  // quedar fuera de pantalla sin manera de volver.
+  function fit(){
+    const vis=nodes.filter(n=>n.type!=="subject"||state.graphYears.has(n.zi));
+    if(!vis.length)return;
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    vis.forEach(n=>{const r=nr(n)+16;x0=Math.min(x0,n.x-r);y0=Math.min(y0,n.y-r);x1=Math.max(x1,n.x+r);y1=Math.max(y1,n.y+r);});
+    const bw=Math.max(x1-x0,1),bh=Math.max(y1-y0,1),pad=24;
+    cam.scale=Math.max(0.35,Math.min(3.5,Math.min((W-pad*2)/bw,(H-pad*2)/bh)));
+    cam.x=W/2-((x0+x1)/2)*cam.scale;
+    cam.y=H/2-((y0+y1)/2)*cam.scale;
+    draw();
+  }
   function pos(e){const r=canvas.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return {x:p.clientX-r.left,y:p.clientY-r.top};}
   function onMove(e){
     const p=pos(e);
@@ -1062,9 +1308,19 @@ function buildGraph(){
     if(panning){cam.x+=p.x-last.x;cam.y+=p.y-last.y;last=p;if(REDUCED)draw();return;}
     const n=pick(p.x,p.y);if(n!==hover){hover=n;canvas.style.cursor=n?"pointer":"grab";}
     if(hover){tip.classList.add("on");
-      const s=hover.type==="subject"?state.subjects.find(z=>z.codigo===hover.codigo):null;
-      tip.innerHTML=s?('<div class="tn">'+s.nombre+'</div><div class="tm">'+(s.condicion==="No aprobada"?"Pendiente":s.condicion)+(s.nota>0?" · "+s.nota:"")+(s.intermedio?" · intermedio":"")+'</div>'):"";if(!s)tip.classList.remove("on");
-      let tx=p.x+14,ty=p.y+14;if(tx>W-190)tx=p.x-14-tip.offsetWidth;tip.style.left=tx+"px";tip.style.top=ty+"px";
+      const ok=hover.type==="subject";
+      if(ok){
+        const meta=[STATE_LABEL[hover.cond]||hover.cond];
+        if(hover.nota>0)meta.push("nota "+hover.nota);
+        if(hover.cond!=="Aprobada")meta.push(hover.disp?"disponible":"bloqueada");
+        if(hover.inter)meta.push("intermedio");
+        tip.innerHTML='<div class="tn">'+esc(hover.label)+'</div><div class="tm">'+esc(meta.join(" · "))+'</div>';
+      }else tip.classList.remove("on");
+      // se acomoda para no salirse por derecha ni por abajo del canvas
+      let tx=p.x+14,ty=p.y+14;
+      if(tx+tip.offsetWidth>W-8)tx=Math.max(8,p.x-14-tip.offsetWidth);
+      if(ty+tip.offsetHeight>H-8)ty=Math.max(8,p.y-14-tip.offsetHeight);
+      tip.style.left=tx+"px";tip.style.top=ty+"px";
     }else tip.classList.remove("on");
     if(REDUCED&&!running)draw();
   }
@@ -1081,10 +1337,13 @@ function buildGraph(){
   canvas.addEventListener("touchstart",e=>{downXY=pos(e);onDown(e);},{passive:false});
   canvas.addEventListener("touchmove",e=>{onMove(e);if(drag||panning)e.preventDefault();},{passive:false});
   canvas.addEventListener("touchend",e=>{const changed=e.changedTouches?e.changedTouches[0]:null;onUp();if(downXY&&changed){const r=canvas.getBoundingClientRect();const px=changed.clientX-r.left,py=changed.clientY-r.top;if(Math.hypot(px-downXY.x,py-downXY.y)<6){const n=pick(px,py);if(n&&n.type==="subject"){select(n.codigo);openEdit(n.codigo);}}}});
-  window.addEventListener("resize",()=>{resize();if(REDUCED)draw();else reheat();});
+  // doble click en zona vacía = encuadrar
+  canvas.addEventListener("dblclick",e=>{const p=pos(e);if(!pick(p.x,p.y))fit();});
+  window.addEventListener("resize",()=>{resize();if(REDUCED)draw();else settle();});
   return {
     init(){resize();make();start();},
     resize(){resize();if(REDUCED)draw();},
+    fit,
     sync(code){syncColors();if(code){const n=byId["s"+code];if(n){n.vx+=(Math.random()-.5)*4;n.vy+=(Math.random()-.5)*4;}reheat();}else if(REDUCED)draw();},
     rebuild(){make();reheat();},
     reheat, redraw(){if(REDUCED||!running)draw();},
@@ -1095,69 +1354,115 @@ function buildGraph(){
 
 /* ===================== EDIT MODAL ===================== */
 function openEdit(codigo){const s=state.subjects.find(x=>x.codigo===codigo);if(!s)return;
+  lastFocus=document.activeElement;
   state.editing=codigo;state.selected=codigo;if(GRAPH)GRAPH.select(codigo);renderSidebar();
   $("mCode").textContent="Código "+String(s.codigo).padStart(4,"0");$("mTitle").textContent=s.nombre;
-  $("mYear").textContent=s.anio+(s.intermedio?" · intermedio":"");syncModal(s);$("backdrop").classList.add("open");$("mClose").focus();}
-function syncModal(s){$("segEstado").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===s.condicion));
+  $("mYear").textContent=s.anio+(s.intermedio?" · intermedio":"");syncModal(s);$("backdrop").classList.add("open");
+  // El estado es lo primero que se va a querer cambiar.
+  const cur=$("segEstado").querySelector("button.on")||$("mClose");cur.focus();}
+function syncModal(s){
+  $("segEstado").querySelectorAll("button").forEach(b=>{
+    const on=b.dataset.v===s.condicion;
+    b.classList.toggle("on",on);
+    b.setAttribute("aria-pressed",on?"true":"false");
+  });
   $("notaRange").value=s.nota;$("notaVal").textContent=s.nota>0?s.nota:"—";
-  const bd=$("swDispBadge");bd.textContent=s.disponibilidad==="Disponible"?"✓ Sí":"– No";bd.style.color=s.disponibilidad==="Disponible"?"var(--done)":"var(--muted)";
+  const disp=s.disponibilidad==="Disponible";
+  const bd=$("swDispBadge");bd.textContent=disp?"✓ Sí":"– No";bd.style.color=disp?"var(--done)":"var(--muted)";
+  const bi=$("swInterBadge");bi.textContent=s.intermedio?"✓ Sí":"– No";bi.style.color=s.intermedio?"var(--done)":"var(--muted)";
   const pre=PREREQS[s.codigo]||[],sec=$("prereqSection");
-  if(pre.length>0&&s.condicion.trim()!=="Aprobada"){sec.style.display="block";
+  if(pre.length>0&&s.condicion!=="Aprobada"){sec.style.display="block";
     $("prereqList").innerHTML=pre.map(p=>{const ps=state.subjects.find(z=>z.codigo===p);if(!ps)return"";
-      const ap=ps.condicion.trim()==="Aprobada",cu=ps.condicion.trim()==="Cursada";
+      const ap=ps.condicion==="Aprobada",cu=ps.condicion==="Cursada";
       const cls=ap?"done":cu?"curs":"miss";const dot=ap?"var(--done)":cu?"var(--curse)":"#E24D42";
       const badge=ap?"✓ Aprobada":cu?"→ Cursando":ps.disponibilidad==="Disponible"?"puede cursarse":"bloqueada";
-      return`<div class="prereq-item ${cls}"><span class="pdot" style="background:${dot}"></span><span class="pname">${ps.nombre}</span><span class="pbadge">${badge}</span></div>`;}).join("");}
-  else sec.style.display="none";$("swInter").classList.toggle("on",!!s.intermedio);}
+      return`<div class="prereq-item ${cls}"><span class="pdot" style="background:${dot}"></span><span class="pname">${esc(ps.nombre)}</span><span class="pbadge">${badge}</span></div>`;}).join("");}
+  else sec.style.display="none";
+}
 function editing(){return state.subjects.find(x=>x.codigo===state.editing);}
 function changed(){persist();renderAll(state.editing);const s=editing();if(s)syncModal(s);}
 $("segEstado").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{const s=editing();if(!s)return;s.condicion=b.dataset.v;if(s.condicion==="No aprobada")s.nota=0;if(s.condicion==="Aprobada"&&s.nota<4)s.nota=4;changed();}));
 $("notaRange").addEventListener("input",e=>{const s=editing();if(!s)return;s.nota=+e.target.value;$("notaVal").textContent=s.nota>0?s.nota:"—";if(s.nota>=4&&s.condicion==="No aprobada")s.condicion="Aprobada";if(s.nota===0&&s.condicion==="Aprobada")s.condicion="No aprobada";changed();});
 
-$("swInter").addEventListener("click",()=>{const s=editing();if(!s)return;s.intermedio=!s.intermedio;changed();});
-
-$("swInter").addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();$("swInter").click();}});
-function closeModal(){$("backdrop").classList.remove("open");state.editing=null;}
+// El foco se devuelve a donde estaba antes de abrir el modal, y se mantiene atrapado
+// adentro mientras está abierto.
+let lastFocus=null;
+function closeModal(){
+  $("backdrop").classList.remove("open");
+  state.editing=null;
+  if(lastFocus&&document.contains(lastFocus))lastFocus.focus();
+  lastFocus=null;
+}
 $("mClose").addEventListener("click",closeModal);
 $("backdrop").addEventListener("click",e=>{if(e.target===$("backdrop"))closeModal();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("backdrop").classList.contains("open"))closeModal();});
+$("backdrop").addEventListener("keydown",e=>{
+  if(e.key!=="Tab")return;
+  const f=[...$("backdrop").querySelectorAll('button,[href],input,select,[tabindex]:not([tabindex="-1"])')].filter(el=>!el.disabled&&el.offsetParent!==null);
+  if(!f.length)return;
+  const first=f[0],last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+});
 
 /* ===================== TABS / PANES ===================== */
-function countTransitiveUnlocks(codigo, apSet, targetFilter){
-  const sim=new Set([...apSet,codigo]);let cnt=0,changed=true;
-  while(changed){changed=false;state.subjects.forEach(s=>{
-    if(sim.has(s.codigo))return;if(targetFilter&&!targetFilter(s))return;
-    if((PREREQS[s.codigo]||[]).every(p=>sim.has(p))){sim.add(s.codigo);cnt++;changed=true;}
-  });}
-  return cnt;
+// Materias que pasan a estar habilitadas con un conjunto dado de aprobadas.
+function habilitadasCon(apSet){
+  return new Set(state.subjects
+    .filter(s=>!apSet.has(s.codigo)&&(PREREQS[s.codigo]||[]).every(p=>apSet.has(p)))
+    .map(s=>s.codigo));
+}
+// Cuántas materias NUEVAS se habilitan si aprobás `codigo`.
+//
+// La versión anterior calculaba la clausura transitiva de (aprobadas + codigo) sin
+// restar la línea base. Como toda materia disponible ya pertenece a esa clausura, el
+// resultado salía casi idéntico para cualquier candidata (todas daban +16 / +35) y el
+// ranking no ordenaba nada. Acá se mide el aporte marginal: el delta contra lo que ya
+// estaba habilitado sin aprobarla.
+function directUnlocks(codigo, apSet, baseline, targetFilter){
+  const conEsta=habilitadasCon(new Set([...apSet,codigo]));
+  let n=0;
+  conEsta.forEach(c=>{
+    if(baseline.has(c)||c===codigo)return;
+    const s=state.subjects.find(x=>x.codigo===c);
+    if(s&&(!targetFilter||targetFilter(s)))n++;
+  });
+  return n;
 }
 function renderPlanner(){
   const n=Math.max(1,Math.min(8,parseInt($("planN").value)||4));
-  const apSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
-  const cursando=state.subjects.filter(s=>s.condicion.trim()==="Cursada");
+  const apSet=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
+  const cursando=state.subjects.filter(s=>s.condicion==="Cursada");
   const available=state.subjects.filter(s=>s.condicion==="No aprobada"&&s.disponibilidad==="Disponible");
   // info cursando
   $("planCursando").innerHTML=cursando.length
-    ?'Ya cursando: '+cursando.map(s=>'<b>'+s.nombre.split(' ').slice(0,3).join(' ')+'</b>').join(', ')
+    ?'Ya cursando: '+cursando.map(s=>'<b>'+esc(s.nombre.split(' ').slice(0,3).join(' '))+'</b>').join(', ')
     :'<span style="color:var(--muted)">No estás cursando ninguna materia actualmente.</span>';
-  // intermedio: cuántas quedan
-  const interPend=state.subjects.filter(s=>INTERMEDIO_CODES.has(s.codigo)&&s.condicion.trim()!=="Aprobada"&&s.condicion.trim()!=="Cursada");
-  $("planInterSub").textContent='— faltan '+interPend.length+' de '+INTERMEDIO_CODES.size;
+  // intermedio: cuántas quedan. El total sale de interSubjects(), no de
+  // INTERMEDIO_CODES.size, que incluye códigos del plan que no están en los datos.
+  const interAll=interSubjects();
+  const interPend=interAll.filter(s=>s.condicion!=="Aprobada"&&s.condicion!=="Cursada");
+  $("planInterSub").textContent='— faltan '+interPend.length+' de '+interAll.length;
   $("planGradSub").textContent='— faltan '+(state.subjects.length-apSet.size-cursando.length)+' materias';
+  // Línea base: lo que ya está habilitado sin aprobar nada nuevo. Se calcula una sola
+  // vez y sirve de referencia para medir el aporte de cada candidata.
+  const baseline=habilitadasCon(apSet);
+  const isInterS=x=>INTERMEDIO_CODES.has(x.codigo);
+  // Desempate estable: a igual desbloqueo, primero la del año más bajo y luego por código.
+  const byScore=(a,b)=>b.score-a.score||ZONES.indexOf(a.s.anio)-ZONES.indexOf(b.s.anio)||a.s.codigo-b.s.codigo;
   // recomendación título intermedio
-  const interAvail=available.filter(s=>INTERMEDIO_CODES.has(s.codigo));
-  const interScored=interAvail.map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,x=>INTERMEDIO_CODES.has(x.codigo))}))
-    .sort((a,b)=>b.score-a.score).slice(0,n);
+  const interScored=available.filter(isInterS)
+    .map(s=>({s,score:directUnlocks(s.codigo,apSet,baseline,isInterS)}))
+    .sort(byScore).slice(0,n);
   // si faltan slots, completar con disponibles que desbloqueen materias del intermedio
   if(interScored.length<n){
-    const extra=available.filter(s=>!INTERMEDIO_CODES.has(s.codigo))
-      .map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,x=>INTERMEDIO_CODES.has(x.codigo))}))
-      .filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+    const extra=available.filter(s=>!isInterS(s))
+      .map(s=>({s,score:directUnlocks(s.codigo,apSet,baseline,isInterS)}))
+      .filter(x=>x.score>0).sort(byScore);
     interScored.push(...extra.slice(0,n-interScored.length));
   }
   // recomendación graduación
-  const gradScored=available.map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,null)}))
-    .sort((a,b)=>b.score-a.score).slice(0,n);
+  const gradScored=available.map(s=>({s,score:directUnlocks(s.codigo,apSet,baseline,null)}))
+    .sort(byScore).slice(0,n);
   function renderList(listId, scored, isInter){
     const el=$(listId);
     if(!scored.length){el.innerHTML='<div class="plan-empty">No hay materias disponibles para este objetivo.</div>';return;}
@@ -1166,28 +1471,47 @@ function renderPlanner(){
       const badge=isInter?(inInter?'':'<span style="font-size:10px;color:var(--muted)"> (habilita intermedio)</span>')
         :(inInter?'<span style="font-size:10px;color:var(--done)"> ✓ intermedio</span>':'');
       const unl=x.score;
-      return`<div class="prec-card" onclick="openEdit(${s.codigo})">
+      return`<button type="button" class="prec-card" data-open="${s.codigo}">
         <div class="prec-num">${i+1}</div>
         <div class="prec-body">
-          <div class="prec-name">${s.nombre}${badge}</div>
-          <div class="prec-meta">Código ${String(s.codigo).padStart(4,'0')} · ${s.anio}${unl>0?' · <b>+'+unl+' materias desbloqueadas</b>':''}</div>
+          <div class="prec-name">${esc(s.nombre)}${badge}</div>
+          <div class="prec-meta">Código ${String(s.codigo).padStart(4,'0')} · ${esc(s.anio)} · ${unl>0?'<b>habilita '+unl+' materia'+(unl===1?'':'s')+'</b>':'no habilita nuevas'}</div>
         </div>
-      </div>`;
+      </button>`;
     }).join('');
   }
   renderList("planInterList", interScored, true);
   renderList("planGradList", gradScored, false);
 }
 function go(pane){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.pane===pane));
+  if(!PANES.includes(pane))pane="graph";
+  document.querySelectorAll(".tab").forEach(t=>{
+    const on=t.dataset.pane===pane;
+    t.classList.toggle("active",on);
+    t.setAttribute("aria-selected",on?"true":"false");
+  });
   document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("active",p.dataset.pane===pane));
   $("rightPanel").style.display = pane==="graph" ? "" : "none";
+  // El canvas mide 0×0 mientras su pane está oculto, así que hay que remedir al volver.
   if(pane==="graph"&&GRAPH){GRAPH.resize();GRAPH.reheat();}
   if(pane==="avance"&&!state.avanceShown){state.avanceShown=true;revealAvance();}
-  if(pane==="planner") renderPlanner(); if(pane==="cronograma"){renderSched();renderOfertaBar();renderSubPills();}
-  document.getElementById("leftPanel").classList.remove("open");
+  if(pane==="planner") renderPlanner();
+  if(pane==="cronograma"){renderSched();renderOfertaBar();renderSubPills();}
+  $("leftPanel").classList.remove("open");
+  $("rightPanel").classList.remove("open");
+  write(KEY+"-pane",pane);
 }
-document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>go(t.dataset.pane)));
+const tabEls=[...document.querySelectorAll(".tab")];
+tabEls.forEach(t=>t.addEventListener("click",()=>go(t.dataset.pane)));
+// Flechas ←/→ para moverse entre pestañas, como espera el patrón tablist.
+$("tabbar").addEventListener("keydown",e=>{
+  if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+  const i=tabEls.indexOf(document.activeElement);
+  if(i<0)return;
+  e.preventDefault();
+  const next=tabEls[(i+(e.key==="ArrowRight"?1:tabEls.length-1))%tabEls.length];
+  next.focus();go(next.dataset.pane);
+});
 
 /* ===================== FILTERS / SORT / SEARCH ===================== */
 document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");state.filter=c.dataset.f;renderTable();}));
@@ -1220,31 +1544,102 @@ $("rpReset").addEventListener("click",()=>{
   if(GRAPH)GRAPH.reheat();toast("Controles restablecidos");
 });
 $("reheatBtn2").addEventListener("click",()=>{if(GRAPH)GRAPH.reheat();});
+$("btnReheat").addEventListener("click",()=>{if(GRAPH)GRAPH.reheat();});
+$("btnFit").addEventListener("click",()=>{if(GRAPH)GRAPH.fit();});
+
+/* ===================== ATAJOS DE TECLADO ===================== */
+document.addEventListener("keydown",e=>{
+  const open=$("backdrop").classList.contains("open");
+  if(e.key==="Escape"){ if(open)closeModal(); else if(document.activeElement===$("sideSearch")||document.activeElement===$("search")){document.activeElement.value="";document.activeElement.blur();state.search="";renderTable();renderSidebar();} return; }
+  if(open)return;
+  // No secuestrar teclas mientras se escribe en un campo.
+  const t=e.target;
+  if(t&&(t.tagName==="INPUT"||t.tagName==="SELECT"||t.tagName==="TEXTAREA"||t.isContentEditable))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key>="1"&&e.key<="5"){ e.preventDefault(); go(PANES[+e.key-1]); return; }
+  if(e.key==="/"){ e.preventDefault();
+    const activePane=document.querySelector(".pane.active")?.dataset.pane;
+    (activePane==="legajo"?$("search"):$("sideSearch")).focus(); return; }
+  if(!GRAPH)return;
+  if(e.key==="f"||e.key==="F"){ e.preventDefault(); go("graph"); GRAPH.fit(); }
+  if(e.key==="r"||e.key==="R"){ e.preventDefault(); go("graph"); GRAPH.reheat(); }
+});
 
 /* ===================== BACKUP / RESET ===================== */
-function doExport(){const blob=new Blob([JSON.stringify({subjects:state.subjects,schedOptions:state.schedOptions,ts:new Date().toISOString()},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="carrera-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href);toast("Backup descargado");}
+function doExport(){
+  // La oferta va incluida: si se importó un PDF nuevo, un backup sin ella la perdía.
+  const payload={version:2,ts:new Date().toISOString(),subjects:state.subjects,schedOptions:state.schedOptions,oferta:state.oferta,ofertaNombre:state.ofertaNombre};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="carrera-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),0);
+  toast("Backup descargado");
+}
 $("btnExport").addEventListener("click",doExport);
 $("btnImport").addEventListener("click",()=>$("fileInput").click());
-$("fileInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.subjects))state.subjects=d.subjects;else if(Array.isArray(d))state.subjects=d;if(Array.isArray(d.schedOptions))state.schedOptions=d.schedOptions;else if(Array.isArray(d.sched))state.schedOptions=[{id:1,name:"Opción 1",days:d.sched}];persist();persistSched();if(GRAPH)GRAPH.rebuild();renderAll();renderSched();toast("Datos restaurados");}catch(err){toast("No pude leer ese archivo");}};r.readAsText(f);e.target.value="";});
-$("btnReset").addEventListener("click",()=>{if(confirm("¿Volver a los datos originales de tu planilla?")){state.subjects=JSON.parse(JSON.stringify(SEED));state.schedOptions=[{id:1,name:"Opción 1",days:["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""]}];persist();persistSched();if(GRAPH)GRAPH.rebuild();renderAll();renderSched();toast("Restablecido");}});
+$("fileInput").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      const raw=Array.isArray(d)?d:d.subjects;                    // v1 = array pelado
+      const subjects=normalizeAll(raw);
+      if(!subjects.length)throw new Error("sin materias");
+      state.subjects=subjects;
+      if(Array.isArray(d.schedOptions))state.schedOptions=d.schedOptions;
+      else if(Array.isArray(d.sched))state.schedOptions=[{id:1,name:"Opción 1",days:d.sched}];
+      if(Array.isArray(d.oferta)&&d.oferta.length){state.oferta=d.oferta;state.ofertaNombre=d.ofertaNombre||state.ofertaNombre;persistOferta();}
+      // Los campos derivados del archivo pueden estar viejos: se recalculan siempre.
+      recalcDerived();
+      state.expandedRows.clear();state.autoSelected.clear();
+      persist();persistSched();
+      if(GRAPH)GRAPH.rebuild();
+      renderAll();renderSched();renderOfertaBar();
+      toast("Datos restaurados · "+subjects.length+" materias");
+    }catch(err){toast("No pude leer ese archivo: no parece un backup válido");}
+  };
+  r.onerror=()=>toast("No pude leer ese archivo");
+  r.readAsText(f);e.target.value="";
+});
+$("btnReset").addEventListener("click",()=>{
+  if(!confirm("¿Volver a los datos originales de tu planilla?\n\nSe pierden los cambios de estado y notas que hayas hecho. Conviene exportar un backup antes."))return;
+  state.subjects=normalizeAll(JSON.parse(JSON.stringify(SEED)));
+  state.schedOptions=[{id:1,name:"Opción 1",days:["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""]}];
+  recalcDerived();
+  state.expandedRows.clear();state.autoSelected.clear();
+  persist();persistSched();
+  if(GRAPH)GRAPH.rebuild();
+  renderAll();renderSched();
+  toast("Restablecido");
+});
 
 /* mobile panel toggles */
 $("tglLeft").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
 $("tglRight").addEventListener("click",()=>{go("graph");$("rightPanel").classList.toggle("open");});
 
-$("btnImportPDF").addEventListener("click",()=>$("pdfInput").click());
+$("btnImportPDF").addEventListener("click",()=>{
+  if(!getPdfEndpoint()){importOfertaPDF(null);return;}   // muestra la explicación
+  $("pdfInput").click();
+});
 $("pdfInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;importOfertaPDF(f);e.target.value="";});
+$("btnPdfCfg").addEventListener("click",configurePdfEndpoint);
+$("btnImportOferta").addEventListener("click",()=>$("ofertaInput").click());
+$("ofertaInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;importOfertaJSON(f);e.target.value="";});
+$("btnExportOferta").addEventListener("click",exportOferta);
 function renderSubPills(){
   recalcDisp();  // garantizar que disponibilidades estén al día
   const box=$("subPills");if(!box)return;box.innerHTML="";
   if(!state.autoSelected)state.autoSelected=new Set();
-  const apSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
-  const cursSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Cursada").map(s=>s.codigo));
+  const apSet=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
+  const cursSet=new Set(state.subjects.filter(s=>s.condicion==="Cursada").map(s=>s.codigo));
   const disponibles=state.subjects.filter(s=>s.disponibilidad==="Disponible"&&!apSet.has(s.codigo));
   if(!disponibles.length){box.innerHTML='<span style="color:var(--muted);font-size:12.5px;font-style:italic;">No tenés materias disponibles para cursar.</span>';updateSubCount();return;}
   disponibles.forEach(s=>{
     const ofRow=(state.oferta||[]).find(r=>r[0]===s.codigo);
-    const nComs=ofRow?ofRow[1].filter(c=>c[1]).length:0;
+    const allComs=ofRow?ofRow[1]:[];
+    const nComs=allComs.length;                       // incluye las a distancia
+    const soloVirtual=nComs>0&&allComs.every(c=>!c[1]);
     const noOf=!nComs;
     const sel=state.autoSelected.has(s.codigo);
     const yi=({Primer:"1°",Segundo:"2°",Tercer:"3°",Cuarto:"4°",Quinto:"5°",Transversales:"T"})[s.anio.split(" ")[0]]||"";
@@ -1252,14 +1647,18 @@ function renderSubPills(){
     const pill=document.createElement("button");
     pill.className="spill"+(sel?" sel":"")+(noOf?" no-oferta":"");
     pill.dataset.c=s.codigo;
-    pill.title=s.nombre+(noOf?" (sin comisiones en la oferta)":" ·  "+nComs+" comisiones")+(curs?" · Cursando actualmente":"");
-    pill.innerHTML='<span class="sp-yr">'+yi+'</span>'
-      +'<span class="sp-nm">'+(curs?"→ ":"")+s.nombre+'</span>'
-      +(nComs?'<span class="sp-coms">×'+nComs+'</span>':"");
+    pill.setAttribute("aria-pressed",sel?"true":"false");
+    if(noOf)pill.disabled=true;
+    pill.title=s.nombre+(noOf?" (sin comisiones en la oferta)":" · "+nComs+" comisión"+(nComs===1?"":"es")+(soloVirtual?" (a distancia)":""))+(curs?" · Cursando actualmente":"");
+    pill.innerHTML='<span class="sp-yr">'+esc(yi)+'</span>'
+      +'<span class="sp-nm">'+(curs?"→ ":"")+esc(s.nombre)+'</span>'
+      +(nComs?'<span class="sp-coms">'+(soloVirtual?"@":"×"+nComs)+'</span>':"");
     if(!noOf) pill.addEventListener("click",()=>{
       if(state.autoSelected.has(s.codigo))state.autoSelected.delete(s.codigo);
       else state.autoSelected.add(s.codigo);
-      pill.classList.toggle("sel");
+      const on=state.autoSelected.has(s.codigo);
+      pill.classList.toggle("sel",on);
+      pill.setAttribute("aria-pressed",on?"true":"false");
       updateSubCount();
     });
     box.appendChild(pill);
@@ -1275,6 +1674,12 @@ function updateSubCount(){
 // Listeners del cronograma via event delegation (el pane puede no estar activo al init)
 document.addEventListener("click",e=>{
   const t=e.target;
+  // Cards del planificador y botones "usar esta opción": se renderizan por innerHTML,
+  // así que se atienden por delegación en vez de con onclick inline.
+  const openBtn=t.closest("[data-open]");
+  if(openBtn){openEdit(+openBtn.dataset.open);return;}
+  const useBtn=t.closest("[data-use]");
+  if(useBtn){useAutoOption(+useBtn.dataset.use);return;}
   if(t.id==="btnAutoSched"||t.closest("#btnAutoSched")){
     if(!state.autoSelected||!state.autoSelected.size)return;
     const turno=$("autoTurno").value;
@@ -1288,8 +1693,12 @@ document.addEventListener("click",e=>{
     updateSubCount();$("autoResults").innerHTML="";$("combCount").textContent="";
   }
   if(t.classList.contains("dpk")){
-    if(document.querySelectorAll(".dpk.on").length===1&&t.classList.contains("on"))return;
+    // no dejar deseleccionar el último día: sin días no hay nada que combinar
+    if(document.querySelectorAll(".dpk.on").length===1&&t.classList.contains("on")){
+      toast("Tiene que quedar al menos un día disponible");return;
+    }
     t.classList.toggle("on");
+    t.setAttribute("aria-pressed",t.classList.contains("on")?"true":"false");
   }
 });
 $("addSchedOpt").addEventListener("click",()=>{
@@ -1317,11 +1726,13 @@ function revealAvance(){renderYears();if(REDUCED)return;const d=stats();
   fills.forEach((f,i)=>{f.style.transitionDelay=(i*0.08)+"s";f.style.width="0%";requestAnimationFrame(()=>requestAnimationFrame(()=>f.style.width=wanted[i]+"%"));});}
 
 /* ===================== INIT ===================== */
-recalcIntermedio();
-recalcDisp();
+recalcDerived();
 GRAPH=buildGraph();
-renderAll(); renderSched();
+renderAll(); renderSched(); renderOfertaBar();
 if(GRAPH) GRAPH.init();
+// Se restaura la última vista abierta. go() remide el canvas, así que corre después
+// de GRAPH.init().
+go(loadPane());
 </script>
 </body>
 </html>
