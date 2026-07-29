@@ -3,710 +3,1325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Legajo · Seguimiento de carrera</title>
+<title>Plan de estudios · Graph view</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#16233A;
-    --ink-2:#1D3050;
-    --paper:#F6F1E6;
-    --paper-2:#ECE3CE;
-    --paper-line:#D9CDAE;
-    --gold:#C79A3E;
-    --gold-soft:#E4C77C;
-    --approved:#3F6B52;
-    --approved-bg:#DCE7DE;
-    --pending:#B4772B;
-    --pending-bg:#F0DFC4;
-    --notapproved:#7A3B32;
-    --notapproved-bg:#EAD9D3;
-    --muted:#8A8272;
-    --text:#1C2230;
-    --text-soft:#5A5648;
+    --bg:#120E0E; --bg-2:#171112; --surface:#1E1719; --surface-2:#251C1E; --surface-3:#2E2325;
+    --line:#2C2122; --line-2:#3D2E30;
+    --text:#EDE4E2; --text-2:#B7A6A4; --muted:#8A7674; --faint:#5E4B4A;
+    --violet:#E24D42; --violet-2:#F2685C; --violet-glow:rgba(226,77,66,.42);
+    --red:#FFE9D6;
+    --done:#E8B23E; --curse:#D9663B; --todo:#6F6560;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:var(--ink);
-    background-image:
-      radial-gradient(circle at 15% 8%, rgba(199,154,62,0.10), transparent 40%),
-      radial-gradient(circle at 90% 90%, rgba(199,154,62,0.08), transparent 45%);
-    color:var(--text);
-    font-family:'IBM Plex Sans', sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  .display{font-family:'Fraunces', serif;}
-  a{color:inherit;}
+  html,body{height:100%;margin:0;color-scheme:dark;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;font-size:14px;}
+  button{font-family:inherit;cursor:pointer;color:inherit;background:none;border:none;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  ::-webkit-scrollbar{width:9px;height:9px;} ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:6px;} ::-webkit-scrollbar-track{background:transparent;}
 
-  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+  .app{display:flex;flex-direction:column;height:100vh;}
 
-  /* ===== HERO ===== */
-  header.hero{padding:64px 0 48px; color:var(--paper);}
-  .eyebrow{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px; letter-spacing:.22em;
-    text-transform:uppercase; color:var(--gold-soft); margin:0 0 18px;
-  }
-  .hero-grid{display:grid; grid-template-columns:auto 1fr; gap:44px; align-items:center;}
-  .hero h1{font-size:clamp(28px,4vw,44px); font-weight:500; line-height:1.15; margin:0 0 14px; color:#fff;}
-  .hero p.sub{font-size:16px; color:#B9C2D6; max-width:46ch; line-height:1.6; margin:0;}
-  .seal{width:172px; height:172px; flex:none;}
-  .seal-pct{font-family:'Fraunces', serif; font-weight:600; font-size:44px; fill:#fff;}
-  .seal-label{font-family:'IBM Plex Mono', monospace; font-size:9.2px; letter-spacing:.14em; fill:var(--gold-soft);}
+  /* ===== TAB BAR ===== */
+  .tabbar{display:flex;align-items:center;height:40px;background:var(--bg-2);border-bottom:1px solid var(--line);padding:0 6px;gap:2px;overflow-x:auto;flex:none;}
+  .tab{display:flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:7px;font-size:12.5px;color:var(--text-2);white-space:nowrap;transition:background .12s;}
+  .tab:hover{background:var(--surface);color:var(--text);}
+  .tab.active{background:var(--surface-2);color:var(--text);}
+  .tab svg{width:13px;height:13px;opacity:.8;}
+  .tab .dot{width:7px;height:7px;border-radius:50%;background:var(--violet);}
+  .tabbar .spacer{flex:1;}
+  .icon-btn{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;color:var(--text-2);}
+  .icon-btn:hover{background:var(--surface);color:var(--text);}
+  .icon-btn svg{width:16px;height:16px;}
+  .panel-toggle{display:none;}
 
-  .stat-row{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
-    margin-top:40px; background:rgba(255,255,255,0.09); border-radius:14px; overflow:hidden;
-  }
-  .stat{background:rgba(255,255,255,0.03); padding:20px 22px;}
-  .stat .n{font-family:'Fraunces', serif; font-weight:600; font-size:30px; color:#fff; display:block;}
-  .stat .l{font-size:11.5px; color:#9AA6BE; text-transform:uppercase; letter-spacing:.08em; margin-top:4px;}
+  /* ===== BODY ===== */
+  .body{flex:1;display:flex;min-height:0;}
+  aside{background:var(--bg-2);flex:none;display:flex;flex-direction:column;min-height:0;}
+  .left{width:250px;border-right:1px solid var(--line);}
+  .right{width:266px;border-left:1px solid var(--line);}
+  .center{flex:1;position:relative;min-width:0;background:var(--bg);}
 
-  /* ===== MAIN PAPER ===== */
-  main{background:var(--paper); border-radius:28px 28px 0 0; box-shadow:0 -6px 40px rgba(0,0,0,0.25);}
-  section{padding:56px 0;}
-  section + section{border-top:1px solid var(--paper-line);}
-  .section-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap;}
-  .section-head h2{font-family:'Fraunces', serif; font-weight:500; font-style:italic; font-size:26px; margin:0;}
-  .section-head .num{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--text-soft); letter-spacing:.12em;}
+  /* ---- LEFT SIDEBAR ---- */
+  .side-toolbar{display:flex;align-items:center;gap:2px;padding:8px 8px 6px;border-bottom:1px solid var(--line);}
+  .side-toolbar .grow{flex:1;}
+  .vault{padding:10px 14px 4px;}
+  .vault .vt{font-size:13px;font-weight:700;color:var(--text);}
+  .vault .vs{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);margin-top:2px;}
+  .side-search{padding:6px 10px 8px;}
+  .side-search input{width:100%;font-size:12.5px;padding:7px 10px;border-radius:7px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);}
+  .side-search input:focus{outline:1px solid var(--violet);}
+  .filelist{flex:1;overflow-y:auto;padding:2px 6px 20px;}
+  .folder>.fhead{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;}
+  .folder>.fhead:hover{background:var(--surface);color:var(--text);}
+  .fhead .caret{transition:transform .15s;font-size:9px;color:var(--muted);}
+  .folder.collapsed .caret{transform:rotate(-90deg);}
+  .folder.collapsed .fitems{display:none;}
+  .fcount{margin-left:auto;font-family:'JetBrains Mono';font-size:10px;color:var(--faint);}
+  .fitems{padding-left:6px;}
+  .note{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;border-radius:6px;font-size:12.5px;color:var(--text-2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .note:hover{background:var(--surface);color:var(--text);}
+  .note.active{background:var(--surface-3);color:var(--text);}
+  .note .nd{width:7px;height:7px;border-radius:50%;flex:none;}
+  .note .nt{overflow:hidden;text-overflow:ellipsis;}
 
-  /* ===== Year progress ===== */
-  .years{display:flex; flex-direction:column; gap:14px;}
-  .year-row{display:grid; grid-template-columns:150px 1fr 64px; align-items:center; gap:16px;}
-  .year-row .yname{font-size:14px; font-weight:600;}
-  .year-row .ymeta{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-soft); display:block; margin-top:2px;}
-  .track{height:10px; background:var(--paper-2); border:1px solid var(--paper-line); border-radius:5px; overflow:hidden;}
-  .fill{height:100%; background:linear-gradient(90deg, var(--approved), #588c6c); border-radius:5px 0 0 5px; transition:width .3s ease;}
-  .year-row .pct{font-family:'IBM Plex Mono', monospace; font-size:13px; text-align:right; font-weight:600;}
+  /* ---- CENTER PANES ---- */
+  .pane{position:absolute;inset:0;display:none;}
+  .pane.active{display:block;}
+  .pane.scroll{overflow-y:auto;padding:26px 30px 40px;}
+  #graph{display:block;width:100%;height:100%;cursor:grab;touch-action:none;}
+  #graph.grabbing{cursor:grabbing;}
+  .graph-title{position:absolute;top:12px;left:0;right:0;text-align:center;font-size:12.5px;color:var(--text-2);pointer-events:none;z-index:2;}
+  .g-tip{position:absolute;pointer-events:none;z-index:3;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font-size:12px;opacity:0;transform:translateY(4px);transition:opacity .12s;max-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.55);}
+  .g-tip.on{opacity:1;transform:none;}
+  .g-tip .tn{font-weight:600;font-size:12.5px;} .g-tip .tm{font-family:'JetBrains Mono';font-size:10.5px;color:var(--text-2);margin-top:2px;}
+  .g-hint{position:absolute;bottom:38px;left:16px;font-family:'JetBrains Mono';font-size:10.5px;color:var(--faint);z-index:2;pointer-events:none;}
+  .yr-filters{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;}
+  .yr-f{font-family:'JetBrains Mono';font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--line-2);background:rgba(18,14,14,.75);color:var(--muted);cursor:pointer;transition:all .12s;}
+  .yr-f:hover{border-color:var(--accent);color:var(--text);}
+  .yr-f.on{color:#120E0E;font-weight:600;}
+  .yr-f[data-yi="0"].on{background:#E8B23E;border-color:#E8B23E;}
+  .yr-f[data-yi="1"].on{background:#D9AC4A;border-color:#D9AC4A;}
+  .yr-f[data-yi="2"].on{background:#D47A3A;border-color:#D47A3A;}
+  .yr-f[data-yi="3"].on{background:#A05050;border-color:#A05050;color:#EDE4E2;}
+  .yr-f[data-yi="4"].on{background:#7A4A6A;border-color:#7A4A6A;color:#EDE4E2;}
+  .yr-f[data-yi="5"].on{background:var(--muted);border-color:var(--muted);color:#0C0B12;}
+  /* ── Planificador ── */
+  .plan-top{display:flex;align-items:center;gap:18px;margin-bottom:26px;flex-wrap:wrap;}
+  .plan-n-wrap{display:flex;align-items:center;gap:12px;}
+  .plan-n-wrap label{font-family:'JetBrains Mono';font-size:12px;color:var(--text-2);}
+  .plan-n{width:64px;font-size:18px;font-weight:700;text-align:center;padding:8px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);}
+  .plan-cursando{font-size:12.5px;color:var(--muted);font-style:italic;}
+  .plan-cursando b{color:var(--curse);font-style:normal;}
+  .plan-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .plan-col h3{font-size:14px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+  .plan-col h3::before{content:'';width:8px;height:8px;transform:rotate(45deg);}
+  .plan-col.inter h3::before{background:var(--done);}
+  .plan-col.grad h3::before{background:var(--accent);}
+  .plan-col h3 .plan-sub{font-size:11px;color:var(--muted);font-weight:400;font-family:'JetBrains Mono';}
+  .prec-card{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:9px;cursor:pointer;transition:border-color .12s;}
+  .prec-card:hover{border-color:var(--line-2);}
+  .prec-num{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);min-width:18px;margin-top:2px;}
+  .prec-body{flex:1;}
+  .prec-name{font-size:13px;font-weight:500;margin-bottom:4px;}
+  .prec-meta{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);}
+  .prec-meta b{color:var(--done);}
+  .plan-empty{font-size:13px;color:var(--muted);font-style:italic;padding:20px 0;}
+  @media (max-width:640px){.plan-cols{grid-template-columns:1fr;}}
 
-  /* ===== Schedule ===== */
-  .sched-wrap{overflow-x:auto;}
-  table.sched{width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px;}
-  table.sched th{
-    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--text-soft); text-align:left;
-    padding:0 10px 10px; border-bottom:2px solid var(--ink); font-weight:600;
-  }
-  table.sched td{padding:16px 10px; border-bottom:1px solid var(--paper-line); vertical-align:top;}
-  .class-chip{
-    display:inline-block; background:var(--pending-bg); color:var(--pending);
-    border:1px solid rgba(180,119,43,0.35); padding:5px 10px; border-radius:7px;
-    font-size:12.5px; font-weight:600; line-height:1.3;
-  }
-  .empty-slot{color:var(--muted); font-size:12.5px; font-style:italic;}
+  /* Avance / Cronograma / Legajo panes */
+  .pane h2{font-size:16px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:9px;}
+  .pane h2::before{content:'';width:8px;height:8px;background:var(--violet);transform:rotate(45deg);box-shadow:0 0 10px var(--violet-glow);}
+  .pane h2 .meta{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;color:var(--muted);font-weight:400;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px;}
+  .stat{padding:15px 16px;position:relative;overflow:hidden;}
+  .stat::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--violet),transparent);opacity:.5;}
+  .stat .k{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .stat .v{font-size:28px;font-weight:700;margin-top:7px;display:inline-block;transform-origin:left center;letter-spacing:-.01em;}
+  .stat .v small{font-size:14px;color:var(--faint);font-weight:500;}
+  .stat .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .stat.hl .v{color:var(--done);}
+  @keyframes statpulse{0%{transform:scale(1);}28%{transform:scale(1.13);}100%{transform:scale(1);}}
+  .stat .v.pulse{animation:statpulse .42s cubic-bezier(.3,1.3,.5,1);}
+  .years{display:flex;flex-direction:column;gap:11px;padding:20px 22px;}
+  .yr{display:grid;grid-template-columns:150px 1fr 100px;align-items:center;gap:14px;}
+  .yr .nm{font-size:13px;font-weight:600;}
+  .yr .track{height:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  .yr .fill{height:100%;background:linear-gradient(90deg,#9A6B1E,var(--done));border-radius:2px;box-shadow:0 0 10px -2px var(--done);transition:width .9s cubic-bezier(.16,.84,.28,1);}
+  .yr .r{text-align:right;font-family:'JetBrains Mono';font-size:12px;color:var(--muted);} .yr .r b{color:var(--text);}
+  .sched{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:18px 20px;}
+  .slot{display:flex;flex-direction:column;gap:6px;}
+  .slot .day{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .slot select{font-size:12px;padding:9px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg-2);color:var(--text);width:100%;color-scheme:dark;}
+  .slot select option{background:#171112;color:#EDE4E2;}
+  .slot select optgroup{background:#171112;color:#9A8A86;font-weight:600;font-style:normal;}
+  .slot select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .slot.taken select{background:rgba(226,77,66,.08);border-color:rgba(226,77,66,.3);color:var(--text);font-weight:600;}
+  /* Cronograma multi-opción */
+  .sched-opt-card{margin-bottom:16px;overflow:hidden;}
+  .sched-opt-head{display:flex;align-items:center;gap:10px;padding:14px 18px 12px;border-bottom:1px solid var(--line);}
+  .sched-opt-num{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+  .sched-opt-name{font-size:14px;font-weight:600;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--text);flex:1;padding:4px 8px;margin:-4px -8px;cursor:text;outline:none;font-family:'Inter',sans-serif;}
+  .sched-opt-name:hover,.sched-opt-name:focus{background:var(--surface-2);border-color:var(--line-2);}
+  .sched-opt-name:focus{border-color:var(--accent);}
+  .sched-del{font-size:15px;line-height:1;padding:4px 9px;border-radius:7px;border:1px solid var(--line-2);color:var(--muted);transition:all .12s;}
+  .sched-del:hover{background:rgba(226,77,66,.12);color:var(--accent);border-color:rgba(226,77,66,.3);}
+  .sched-opt-tags{display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px 14px;border-top:1px solid var(--line);min-height:44px;}
+  .soct{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:3px 10px;border-radius:6px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .soct-y{background:rgba(232,178,62,.13);color:var(--done);border:1px solid rgba(232,178,62,.22);}
+  .soct-d{background:rgba(226,77,66,.10);color:#E24D42;border:1px solid rgba(226,77,66,.22);}
+  .soct-c{background:rgba(217,102,59,.12);color:var(--curse);border:1px solid rgba(217,102,59,.22);}
+  .soct-b{background:rgba(120,110,110,.10);color:var(--text-2);border:1px solid var(--line);}
+  .sub-sel-lbl{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .ss-count{color:var(--done);font-weight:600;}
+  .ss-clear{cursor:pointer;color:var(--muted);text-decoration:underline;font-size:9px;}
+  .sub-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:30px;}
+  .spill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:12.5px;cursor:pointer;transition:all .14s;max-width:230px;text-align:left;}
+  .spill:hover{border-color:var(--accent);color:var(--text);}
+  .spill.sel{background:rgba(226,77,66,.12);border-color:rgba(226,77,66,.5);color:var(--text);}
+  .spill .sp-yr{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted);flex:none;}
+  .spill .sp-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+  .spill .sp-coms{font-family:'JetBrains Mono';font-size:9px;color:var(--faint);flex:none;}
+  .spill.sel .sp-yr{color:var(--accent);}
+  .spill.no-oferta{opacity:.4;cursor:not-allowed;border-style:dashed;}
+  .auto-filter{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding-top:12px;border-top:1px solid var(--line);}
+  .auto-gen-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+  .auto-combcount{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);}
+  .add-opt-btn{width:100%;padding:12px;border-radius:10px;border:1px dashed var(--line-2);background:none;color:var(--muted);font-size:13px;margin-top:4px;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .add-opt-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(226,77,66,.05);}
+  /* ── Oferta & Auto-armado ── */
+  .oferta-bar{display:flex;align-items:center;gap:14px;padding:12px 18px;margin-bottom:14px;flex-wrap:wrap;}
+  .oferta-info{display:flex;align-items:baseline;gap:8px;flex:1;}
+  .oferta-title{font-size:13.5px;font-weight:600;}
+  .oferta-sub{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);}
+  .auto-box{margin-bottom:14px;padding:18px 20px 14px;}
+  .auto-box-head{margin-bottom:14px;}
+  .auto-box-head .at{font-size:15px;font-weight:600;display:block;}
+  .auto-box-head .as{font-size:12px;color:var(--muted);margin-top:3px;display:block;}
+  .auto-form{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .af{display:flex;flex-direction:column;gap:5px;}
+  .af label{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+  .af select{font-size:13px;padding:9px 10px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);color-scheme:dark;}
+  .auto-n{width:64px;font-size:18px;font-weight:700;text-align:center;padding:8px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);}
+  .day-picks{display:flex;gap:5px;}
+  .dpk{font-family:'JetBrains Mono';font-size:11px;width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--muted);transition:all .12s;}
+  .dpk.on{background:rgba(226,77,66,.12);border-color:rgba(226,77,66,.4);color:var(--accent);font-weight:600;}
+  .dpk:hover{border-color:var(--accent);}
+  .auto-results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:2px;}
+  .ar-opt{background:var(--bg-2);border:1px solid var(--line-2);border-radius:10px;padding:13px;display:flex;flex-direction:column;}
+  .ar-opt-h{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+  .ar-item{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px;}
+  .ar-day{font-family:'JetBrains Mono';font-size:10px;background:rgba(226,77,66,.12);color:var(--accent);padding:2px 6px;border-radius:5px;white-space:nowrap;flex:none;margin-top:2px;}
+  .ar-info{flex:1;min-width:0;}
+  .ar-nm{font-size:12px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ar-tm{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted);}
+  .ar-use{margin-top:auto;padding-top:10px;width:100%;padding-bottom:8px;border-top:1px solid var(--line);padding:8px 0 0;font-size:12px;font-weight:600;color:var(--accent);}
+  .ar-use:hover{color:var(--text);}
+  .auto-empty{padding:16px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic;}
+  .import-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .import-overlay p{color:#fff;font-size:14px;}
+  .imp-spin{width:40px;height:40px;border:3px solid rgba(226,77,66,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .search{flex:1;min-width:180px;}
+  .search input{width:100%;font-size:13.5px;padding:9px 12px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);}
+  .search input:focus{outline:1px solid var(--violet);}
+  .chip{font-family:'JetBrains Mono';font-size:11px;padding:7px 12px;border-radius:20px;border:1px solid var(--line-2);background:var(--surface);color:var(--text-2);}
+  .chip:hover{border-color:var(--violet);color:var(--text);}
+  .chip.active{background:var(--violet);color:#120E0E;border-color:var(--violet);font-weight:600;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);padding:11px 15px;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line);}
+  thead th .ar{color:var(--violet);font-size:9px;}
+  tbody td{padding:10px 15px;border-bottom:1px solid var(--line);}
+  tbody tr{cursor:pointer;} tbody tr:hover{background:var(--surface-2);} tbody tr:last-child td{border-bottom:none;}
+  td.code{font-family:'JetBrains Mono';color:var(--faint);font-size:11.5px;}
+  td.nota{font-family:'JetBrains Mono';font-weight:600;text-align:center;}
+  .nm-cell{display:flex;align-items:center;gap:8px;}
+  .idot{width:5px;height:5px;border-radius:50%;background:var(--violet);flex:none;box-shadow:0 0 6px var(--violet-glow);}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+  .tag::before{content:'';width:6px;height:6px;border-radius:50%;}
+  .tag.Aprobada{background:rgba(232,178,62,.15);color:var(--done);} .tag.Aprobada::before{background:var(--done);box-shadow:0 0 6px var(--done);}
+  .tag.Cursada{background:rgba(217,102,59,.15);color:var(--curse);} .tag.Cursada::before{background:var(--curse);box-shadow:0 0 6px var(--curse);}
+  .tag.No\ aprobada{background:rgba(111,101,96,.18);color:var(--todo);} .tag.No\ aprobada::before{background:var(--todo);}
+  .disp-y{color:var(--done);font-weight:600;font-size:12px;} .disp-n{color:var(--faint);font-size:12px;}
+  .noresult{padding:40px;text-align:center;color:var(--muted);font-style:italic;}
+  .prq-btn{font-family:'JetBrains Mono';font-size:10px;padding:2px 7px 3px;border-radius:5px;border:1px solid rgba(226,77,66,.3);background:rgba(226,77,66,.07);color:#E86055;margin-left:7px;cursor:pointer;vertical-align:middle;transition:background .12s;line-height:1.6;}
+  .prq-btn:hover{background:rgba(226,77,66,.18);}
+  .prq-btn.open{background:rgba(226,77,66,.18);border-color:rgba(226,77,66,.5);}
+  tr.row-xp td{border-bottom:none;}
+  .xp-row td{padding:0;border-bottom:1px solid var(--line);}
+  .xp-inner{padding:12px 18px 14px 44px;background:rgba(14,10,10,.55);border-top:1px dashed rgba(226,77,66,.18);}
+  .xp-lbl{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:9px;}
+  .xp-tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .ptag{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:7px;font-size:12px;font-weight:500;white-space:nowrap;}
+  .ptag-done{background:rgba(232,178,62,.13);color:var(--done);border:1px solid rgba(232,178,62,.22);}
+  .ptag-curs{background:rgba(217,102,59,.13);color:var(--curse);border:1px solid rgba(217,102,59,.22);}
+  .ptag-open{background:rgba(150,130,128,.14);color:var(--text-2);border:1px solid rgba(150,130,128,.22);}
+  .ptag-miss{background:rgba(226,77,66,.11);color:#E24D42;border:1px solid rgba(226,77,66,.25);}
 
-  /* ===== Filters ===== */
-  .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; align-items:center;}
-  .search{flex:1; min-width:200px;}
-  .search input{
-    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:14px;
-    padding:10px 14px; border-radius:8px; border:1px solid var(--paper-line);
-    background:#fff; color:var(--text);
-  }
-  .search input:focus{outline:2px solid var(--gold); outline-offset:1px;}
-  .chip-btn{
-    font-family:'IBM Plex Mono', monospace; font-size:12px; padding:8px 14px;
-    border-radius:20px; border:1px solid var(--paper-line); background:#fff;
-    color:var(--text-soft); cursor:pointer; transition:all .15s ease;
-  }
-  .chip-btn:hover{border-color:var(--gold);}
-  .chip-btn.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
-  .chip-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  /* ---- RIGHT PANEL (graph controls) ---- */
+  .rp-head{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);}
+  .rp-head .t{font-size:12.5px;font-weight:600;} .rp-head .grow{flex:1;}
+  .rp-body{flex:1;overflow-y:auto;padding:4px 0 20px;}
+  .rsec{border-bottom:1px solid var(--line);}
+  .rsec>.rh{display:flex;align-items:center;gap:7px;padding:11px 14px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text);}
+  .rsec>.rh:hover{color:var(--violet-2);}
+  .rsec>.rh .caret{font-size:9px;color:var(--muted);transition:transform .15s;}
+  .rsec.collapsed .caret{transform:rotate(-90deg);}
+  .rsec.collapsed .rb{display:none;}
+  .rb{padding:2px 14px 14px;}
+  .ctl{margin-bottom:14px;}
+  .ctl:last-child{margin-bottom:0;}
+  .ctl label{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-2);margin-bottom:7px;}
+  .ctl label b{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);font-weight:400;}
+  input[type=range]{width:100%;accent-color:var(--violet);height:3px;}
+  .row-toggle{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--text-2);margin-bottom:14px;}
+  .switch{width:34px;height:20px;border-radius:20px;background:var(--line-2);position:relative;transition:background .15s;flex:none;cursor:pointer;}
+  .switch.on{background:var(--violet);}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;}
+  .switch.on::after{left:16px;}
+  .rbtn{width:100%;padding:10px;border-radius:8px;background:var(--violet);color:#120E0E;font-size:12.5px;font-weight:600;transition:filter .12s;}
+  .rbtn:hover{filter:brightness(1.08);}
+  .grp{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text-2);padding:5px 0;}
+  .grp .sw{width:11px;height:11px;border-radius:50%;}
 
-  /* ===== Table ===== */
-  .table-wrap{border:1px solid var(--paper-line); border-radius:12px; overflow:hidden; background:#fff;}
-  table.legajo{width:100%; border-collapse:collapse; font-size:13.8px;}
-  table.legajo thead th{
-    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px;
-    letter-spacing:.06em; text-transform:uppercase; color:var(--text-soft);
-    background:var(--paper-2); padding:12px 14px; cursor:pointer;
-    user-select:none; white-space:nowrap;
-  }
-  table.legajo thead th:hover{color:var(--text);}
-  table.legajo tbody td{padding:11px 14px; border-top:1px solid var(--paper-line); vertical-align:middle;}
-  table.legajo tbody tr.editable-row{cursor:pointer; transition:background .1s ease;}
-  table.legajo tbody tr.editable-row:hover{background:#FBF8F0;}
-  table.legajo tbody tr.editable-row.modified{border-left:3px solid var(--gold);}
-  td.code{font-family:'IBM Plex Mono', monospace; color:var(--text-soft); font-size:12.5px;}
-  td.nota{font-family:'IBM Plex Mono', monospace; font-weight:600; text-align:center;}
-  .tag{
-    display:inline-flex; align-items:center; gap:6px; font-size:12px;
-    font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;
-  }
-  .tag::before{content:''; width:6px; height:6px; border-radius:50%;}
-  .tag.aprobada{background:var(--approved-bg); color:var(--approved);}
-  .tag.aprobada::before{background:var(--approved);}
-  .tag.cursada{background:var(--pending-bg); color:var(--pending);}
-  .tag.cursada::before{background:var(--pending);}
-  .tag.no-aprobada{background:var(--notapproved-bg); color:var(--notapproved);}
-  .tag.no-aprobada::before{background:var(--notapproved);}
-  .disp{font-size:12px; color:var(--text-soft);}
-  .disp.si{color:var(--approved); font-weight:600;}
-  .mod-dot{color:var(--gold); font-size:10px; vertical-align:middle; margin-left:4px;}
-  .no-results{padding:40px; text-align:center; color:var(--text-soft); font-style:italic;}
+  /* ---- MODAL ---- */
+  .backdrop{position:fixed;inset:0;background:rgba(6,5,10,.66);backdrop-filter:blur(3px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px;}
+  .backdrop.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--line-2);border-radius:14px;max-width:430px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.6),0 0 0 1px var(--violet-glow);overflow:hidden;animation:pop .18s cubic-bezier(.2,.9,.3,1);}
+  @keyframes pop{from{transform:scale(.96) translateY(8px);opacity:0;}to{transform:none;opacity:1;}}
+  .modal-head{padding:18px 20px 13px;border-bottom:1px solid var(--line);}
+  .modal-head .mc{font-family:'JetBrains Mono';font-size:11px;color:var(--faint);}
+  .modal-head h3{font-size:19px;font-weight:600;margin:6px 0 0;line-height:1.15;}
+  .modal-head .yr-badge{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:5px;}
+  .modal-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:16px;}
+  .field label{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .seg button{padding:10px 6px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg-2);font-size:12px;font-weight:600;color:var(--text-2);}
+  .seg button[data-v="Aprobada"].on{background:rgba(232,178,62,.17);border-color:var(--done);color:var(--done);}
+  .seg button[data-v="Cursada"].on{background:rgba(217,102,59,.17);border-color:var(--curse);color:var(--curse);}
+  .seg button[data-v="No aprobada"].on{background:rgba(111,101,96,.22);border-color:var(--todo);color:var(--text);}
+  .nota-row{display:flex;align-items:center;gap:14px;} .nota-row input[type=range]{flex:1;accent-color:var(--done);}
+  .nota-val{font-size:23px;font-weight:700;min-width:36px;text-align:center;}
+  .prereq-list{display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto;}
+  .prereq-item{display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:8px;font-size:12.5px;}
+  .prereq-item.miss{background:rgba(226,77,66,.10);border:1px solid rgba(226,77,66,.22);}
+  .prereq-item.curs{background:rgba(232,162,75,.10);border:1px solid rgba(232,162,75,.22);}
+  .prereq-item.done{background:rgba(232,178,62,.10);border:1px solid rgba(232,178,62,.22);}
+  .prereq-item .pname{flex:1;}
+  .prereq-item .pbadge{font-family:'JetBrains Mono';font-size:10px;opacity:.8;white-space:nowrap;}
+  .prereq-item .pdot{width:7px;height:7px;border-radius:50%;flex:none;}
+  .toggles{display:flex;gap:10px;}
+  .tgl{flex:1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);font-size:12.5px;}
+  .modal-foot{padding:13px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:var(--surface-2);}
+  .mbtn{padding:8px 16px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:500;}
+  .mbtn:hover{border-color:var(--violet);}
 
-  /* ===== MODAL ===== */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(22,35,58,0.72);
-    display:flex; align-items:center; justify-content:center;
-    z-index:1000; padding:24px;
-    backdrop-filter:blur(4px);
-  }
-  .modal-box{
-    background:var(--paper); border-radius:20px;
-    box-shadow:0 24px 60px rgba(0,0,0,0.35);
-    padding:32px; width:100%; max-width:420px;
-  }
-  .modal-box .modal-eyebrow{
-    font-family:'IBM Plex Mono', monospace; font-size:11px;
-    letter-spacing:.14em; text-transform:uppercase;
-    color:var(--text-soft); margin:0 0 6px;
-  }
-  .modal-box h3{
-    font-family:'Fraunces', serif; font-weight:500; font-style:italic;
-    font-size:20px; margin:0 0 24px; line-height:1.3;
-    color:var(--ink);
-  }
-  .modal-field{margin-bottom:18px;}
-  .modal-field label{
-    display:block; font-size:11.5px; font-weight:600;
-    text-transform:uppercase; letter-spacing:.08em;
-    color:var(--text-soft); margin-bottom:7px;
-  }
-  .modal-field select,
-  .modal-field input{
-    width:100%; font-family:'IBM Plex Sans', sans-serif; font-size:14px;
-    padding:10px 14px; border-radius:8px; border:1.5px solid var(--paper-line);
-    background:#fff; color:var(--text); appearance:none;
-  }
-  .modal-field select:focus,
-  .modal-field input:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);}
-  .modal-field .nota-hint{font-size:11px; color:var(--text-soft); margin-top:5px;}
-  .modal-btns{
-    display:flex; gap:10px; margin-top:28px; flex-wrap:wrap;
-  }
-  .modal-btns .btn{
-    font-family:'IBM Plex Sans', sans-serif; font-size:14px; font-weight:600;
-    padding:10px 20px; border-radius:10px; border:none; cursor:pointer;
-    transition:all .15s ease; flex:1;
-  }
-  .btn-primary{background:var(--ink); color:var(--paper);}
-  .btn-primary:hover{background:var(--ink-2);}
-  .btn-secondary{background:var(--paper-2); color:var(--text); border:1px solid var(--paper-line);}
-  .btn-secondary:hover{border-color:var(--text-soft);}
-  .btn-danger{background:#EAD9D3; color:var(--notapproved); border:1px solid rgba(122,59,50,0.25); flex:none; padding:10px 16px;}
-  .btn-danger:hover{background:#DEC5BB;}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-2);border:1px solid var(--line-2);color:var(--text);font-size:13px;padding:10px 16px;border-radius:9px;opacity:0;transition:all .25s;z-index:80;pointer-events:none;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  footer{padding:32px 0 44px; text-align:center; font-size:12px; color:var(--text-soft); font-family:'IBM Plex Mono', monospace;}
-
-  @media (max-width:640px){
-    .hero-grid{grid-template-columns:1fr; text-align:center;}
-    .hero-grid .seal{margin:0 auto;}
-    .stat-row{grid-template-columns:repeat(2,1fr);}
-    .year-row{grid-template-columns:100px 1fr 44px; gap:10px;}
+  @media (max-width:900px){
+    .left,.right{position:absolute;top:40px;bottom:0;z-index:30;box-shadow:0 0 40px rgba(0,0,0,.6);transition:transform .2s;}
+    .left{left:0;transform:translateX(-100%);} .left.open{transform:none;}
+    .right{right:0;transform:translateX(100%);} .right.open{transform:none;}
+    .panel-toggle{display:grid;}
   }
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    *{transition:none !important;}
-  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important;} }
 </style>
 </head>
 <body>
-
-<header class="hero">
-  <div class="wrap">
-    <p class="eyebrow">Legajo académico &middot; actualizado con cada final</p>
-    <div class="hero-grid">
-      <svg class="seal" viewBox="0 0 200 200">
-        <defs>
-          <path id="arcTop" d="M 30,100 A 70,70 0 0 1 170,100" fill="none"/>
-          <path id="arcBottom" d="M 170,105 A 70,70 0 0 1 30,105" fill="none"/>
-        </defs>
-        <circle cx="100" cy="100" r="94" fill="none" stroke="#3A4D70" stroke-width="1.5"/>
-        <circle cx="100" cy="100" r="82" fill="none" stroke="#C79A3E" stroke-width="1.5" stroke-dasharray="3 5"/>
-        <circle cx="100" cy="100" r="70" fill="#1D3050" stroke="#C79A3E" stroke-width="2"/>
-        <text class="seal-label" text-anchor="middle">
-          <textPath href="#arcTop" startOffset="50%">AVANCE&#160;DE&#160;CARRERA</textPath>
-        </text>
-        <text class="seal-label" text-anchor="middle">
-          <textPath href="#arcBottom" startOffset="50%">ING.&#160;EN&#160;SISTEMAS&#160;DE&#160;INFORMACIÓN</textPath>
-        </text>
-        <text x="100" y="112" text-anchor="middle" class="seal-pct" id="sealPct">0%</text>
-      </svg>
-      <div>
-        <h1>Tu carrera, en un solo lugar.</h1>
-        <p class="sub">Seguimiento de materias, notas y disponibilidad — hacé clic en cualquier fila para actualizar tu estado en tiempo real.</p>
-      </div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat"><span class="n" id="stAprobadas">–</span><span class="l">Materias aprobadas</span></div>
-      <div class="stat"><span class="n" id="stCursando">–</span><span class="l">Cursando / final pendiente</span></div>
-      <div class="stat"><span class="n" id="stPromedio">–</span><span class="l">Promedio general</span></div>
-      <div class="stat"><span class="n" id="stDisponibles">–</span><span class="l">Disponibles para cursar</span></div>
-    </div>
+<div class="app">
+  <div class="tabbar" id="tabbar">
+    <button class="icon-btn panel-toggle" id="tglLeft" title="Explorador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="tab active" data-pane="graph"><span class="dot"></span>Graph view</div>
+    <div class="tab" data-pane="avance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Avance</div>
+    <div class="tab" data-pane="cronograma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Cronograma</div>
+    <div class="tab" data-pane="legajo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Legajo</div>
+    <div class="tab" data-pane="planner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4"/></svg>Planificador</div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnExport" title="Backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></button>
+    <button class="icon-btn" id="btnImport" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 012-2h12a2 2 0 012 2v2"/></svg></button>
+    <input type="file" id="fileInput" accept="application/json" hidden>
+    <button class="icon-btn" id="btnReset" title="Reset a la planilla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5"/></svg></button>
+    <button class="icon-btn panel-toggle" id="tglRight" title="Configuración del grafo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   </div>
-</header>
 
-<main>
-  <div class="wrap">
-
-    <section id="avance">
-      <div class="section-head">
-        <h2>Avance por año</h2>
-        <span class="num" id="avanceTotal">— materias en total</span>
+  <div class="body">
+    <!-- LEFT: explorador -->
+    <aside class="left" id="leftPanel">
+      <div class="side-toolbar">
+        <button class="icon-btn" id="collapseAll" title="Plegar/desplegar años"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></button>
+        <div class="grow"></div>
+        <button class="icon-btn" id="reheatBtn2" title="Reacomodar grafo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
       </div>
-      <div class="years" id="yearsList"></div>
-    </section>
+      <div class="vault"><div class="vt">Ing. en Sistemas</div><div class="vs" id="vaultSub">— materias</div></div>
+      <div class="side-search"><input type="text" id="sideSearch" placeholder="Buscar materia…"></div>
+      <div class="filelist" id="filelist"></div>
+    </aside>
 
-    <section id="cronograma">
-      <div class="section-head">
-        <h2>Cronograma vigente</h2>
-        <span class="num">1er cuatrimestre 2026</span>
-      </div>
-      <div class="sched-wrap">
-        <table class="sched" id="schedTable"></table>
-      </div>
-    </section>
-
-    <section id="legajo">
-      <div class="section-head">
-        <h2>Legajo de materias</h2>
-        <span class="num" id="legajoCount">— materias</span>
-      </div>
-
-      <div class="filters">
-        <div class="search">
-          <input type="text" id="searchInput" placeholder="Buscar materia o código…">
+    <!-- CENTER -->
+    <main class="center">
+      <section class="pane active" data-pane="graph">
+        <div class="graph-title">Graph view</div>
+        <canvas id="graph"></canvas>
+        <div class="g-tip" id="gTip"></div>
+        <div class="g-hint">Arrastrá nodos · scroll para zoom · click para editar</div>
+        <div class="yr-filters" id="yrFilters">
+          <button class="yr-f on" data-yi="0">1°</button>
+          <button class="yr-f on" data-yi="1">2°</button>
+          <button class="yr-f on" data-yi="2">3°</button>
+          <button class="yr-f on" data-yi="3">4°</button>
+          <button class="yr-f on" data-yi="4">5°</button>
+          <button class="yr-f on" data-yi="5">Trans</button>
         </div>
-        <button class="chip-btn active" data-filter="todas">Todas</button>
-        <button class="chip-btn" data-filter="Aprobada">Aprobadas</button>
-        <button class="chip-btn" data-filter="Cursada">Cursando</button>
-        <button class="chip-btn" data-filter="No aprobada">Pendientes</button>
-        <button class="chip-btn" data-filter="Disponible">Disponibles ya</button>
-      </div>
+      </section>
 
-      <div class="table-wrap">
-        <table class="legajo">
-          <thead>
-            <tr>
-              <th data-sort="codigo">Código</th>
-              <th data-sort="nombre">Materia</th>
-              <th data-sort="condicion">Estado</th>
-              <th data-sort="disponibilidad">Disponibilidad</th>
-              <th data-sort="nota">Nota</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-        <div class="no-results" id="noResults" style="display:none;">No encontramos materias con ese filtro.</div>
-      </div>
-    </section>
+      <section class="pane scroll" data-pane="planner">
+        <h2>Planificador de cuatrimestre</h2>
+        <div class="plan-top">
+          <div class="plan-n-wrap">
+            <label>Materias que querés cursar:</label>
+            <input class="plan-n" type="number" id="planN" min="1" max="8" value="4">
+          </div>
+          <div class="plan-cursando" id="planCursando"></div>
+        </div>
+        <div class="plan-cols">
+          <div class="plan-col inter">
+            <h3>Para el título intermedio <span class="plan-sub" id="planInterSub"></span></h3>
+            <div id="planInterList"></div>
+          </div>
+          <div class="plan-col grad">
+            <h3>Para recibirte <span class="plan-sub" id="planGradSub"></span></h3>
+            <div id="planGradList"></div>
+          </div>
+        </div>
+      </section>
 
-  </div>
-</main>
+      <section class="pane scroll" data-pane="avance">
+        <h2>Avance por año <span class="meta" id="yearMeta">–</span></h2>
+        <div class="stats">
+          <div class="card stat hl"><div class="k">Avance</div><div class="v" id="sPct">–</div><div class="sub" id="sPctSub">–</div></div>
+          <div class="card stat"><div class="k">Promedio</div><div class="v" id="sProm">–</div><div class="sub" id="sPromSub">–</div></div>
+          <div class="card stat"><div class="k">Aprobadas</div><div class="v" id="sAprob">–</div><div class="sub">con final</div></div>
+          <div class="card stat"><div class="k">Disponibles</div><div class="v" id="sDisp">–</div><div class="sub">sin aprobar</div></div>
+          <div class="card stat"><div class="k">Intermedio</div><div class="v" id="sInter">–</div><div class="sub" id="sInterSub">Analista</div></div>
+        </div>
+        <div class="card"><div class="years" id="years"></div></div>
+      </section>
 
-<footer>
-  <div class="wrap">Datos propios · hacé clic en cualquier fila para editar · cambios guardados en el navegador</div>
-</footer>
+      <section class="pane scroll" data-pane="cronograma">
+        <h2>Opciones de cronograma <span class="meta" id="schedMeta">—</span></h2>
+        <!-- Oferta + auto-armado -->
+        <div class="card oferta-bar">
+          <div class="oferta-info">
+            <span class="oferta-title" id="ofertaLbl">Oferta 2C 2026</span>
+            <span class="oferta-sub" id="ofertaCnt">cargada</span>
+          </div>
+          <button class="btn" id="btnImportPDF">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 7V5a2 2 0 012-2h12a2 2 0 012 2v2"/></svg>
+            Importar nuevo PDF
+          </button>
+          <input type="file" id="pdfInput" accept="application/pdf" hidden>
+        </div>
+        <div class="card auto-box">
+          <div class="auto-box-head">
+            <span class="at">Auto-armado de horario</span>
+            <span class="as">Elegí las materias que querés cursar y generamos todas las combinaciones de horario sin superposición</span>
+          </div>
+          <!-- Paso 1: elegir materias -->
+          <div class="sub-sel-lbl">
+            <span>1. Elegí las materias que querés cursar</span>
+            <span class="ss-count" id="ssCount">0 seleccionadas</span>
+            <span class="ss-clear" id="ssClear">limpiar</span>
+          </div>
+          <div class="sub-pills" id="subPills"></div>
+          <!-- Paso 2: filtros -->
+          <div class="auto-filter">
+            <div class="af"><label>Turno preferido</label><select id="autoTurno"><option value="any">Cualquiera</option><option value="manana">Mañana (8-12)</option><option value="tarde">Tarde (14-18)</option><option value="noche" selected>Noche (19-23)</option></select></div>
+            <div class="af"><label>Días disponibles</label>
+              <div class="day-picks">
+                <button class="dpk on" data-d="Lu">Lu</button><button class="dpk on" data-d="Ma">Ma</button>
+                <button class="dpk on" data-d="Mi">Mi</button><button class="dpk on" data-d="Ju">Ju</button>
+                <button class="dpk on" data-d="Vi">Vi</button><button class="dpk" data-d="Sa">Sa</button>
+              </div>
+            </div>
+          </div>
+          <!-- Paso 3: generar -->
+          <div class="auto-gen-row">
+            <button class="rbtn" id="btnAutoSched" style="flex:none;padding:10px 20px;">Generar combinaciones</button>
+            <span class="auto-combcount" id="combCount"></span>
+          </div>
+          <div id="autoResults" style="margin-top:14px;"></div>
+        </div>
+        <!-- Opciones manuales -->
+        <div id="schedOptions"></div>
+        <button class="add-opt-btn" id="addSchedOpt">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Añadir opción de horario
+        </button>
+      </section>
 
-<!-- ===== MODAL ===== -->
-<div id="editModal" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
-  <div class="modal-box">
-    <p class="modal-eyebrow" id="modalCodigo">0000</p>
-    <h3 id="modalTitle">Materia</h3>
-    <form id="editForm" novalidate>
-      <div class="modal-field">
-        <label for="inputCondicion">Estado</label>
-        <select id="inputCondicion" name="condicion">
-          <option value="Aprobada">Aprobada</option>
-          <option value="Cursada">Cursando (final pendiente)</option>
-          <option value="No aprobada">No aprobada / pendiente</option>
-        </select>
+      <section class="pane scroll" data-pane="legajo">
+        <h2>Legajo de materias <span class="meta" id="tblMeta">–</span></h2>
+        <div class="filters">
+          <div class="search"><input type="text" id="search" placeholder="Buscar por nombre o código…"></div>
+          <button class="chip active" data-f="todas">Todas</button>
+          <button class="chip" data-f="Aprobada">Aprobadas</button>
+          <button class="chip" data-f="Cursada">Cursando</button>
+          <button class="chip" data-f="No aprobada">Pendientes</button>
+          <button class="chip" data-f="disp">Disponibles</button>
+          <button class="chip" data-f="inter">Intermedio</button>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table><thead><tr>
+            <th data-s="codigo">Código <span class="ar"></span></th>
+            <th data-s="nombre">Materia <span class="ar"></span></th>
+            <th data-s="condicion">Estado <span class="ar"></span></th>
+            <th data-s="disponibilidad">Disponibilidad <span class="ar"></span></th>
+            <th data-s="nota">Nota <span class="ar"></span></th>
+          </tr></thead><tbody id="tbody"></tbody></table>
+          <div class="noresult" id="noresult" style="display:none;">Sin resultados.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- RIGHT: controles del grafo -->
+    <aside class="right" id="rightPanel">
+      <div class="rp-head"><span class="t">Configuración del grafo</span><span class="grow"></span>
+        <button class="icon-btn" id="rpReset" title="Restablecer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5"/></svg></button>
       </div>
-      <div class="modal-field">
-        <label for="inputNota">Nota</label>
-        <input type="number" id="inputNota" name="nota" min="0" max="10" step="0.5" placeholder="0 – 10">
-        <p class="nota-hint">Dejá en 0 si todavía no tenés nota.</p>
+      <div class="rp-body">
+        <div class="rsec"><div class="rh"><span class="caret">▼</span>Grupos</div>
+          <div class="rb">
+            <div class="grp"><span class="sw" style="background:var(--done)"></span>Aprobada</div>
+            <div class="grp"><span class="sw" style="background:var(--curse)"></span>Cursando</div>
+            <div class="grp"><span class="sw" style="background:var(--todo)"></span>Pendiente</div>
+            <div class="grp"><span class="sw" style="background:var(--violet)"></span>Año / raíz</div>
+          </div>
+        </div>
+        <div class="rsec"><div class="rh"><span class="caret">▼</span>Pantalla</div>
+          <div class="rb">
+            <div class="row-toggle">Flechas <span class="switch on" id="cArrows" role="switch" tabindex="0"></span></div>
+            <div class="ctl"><label>Umbral de texto <b id="vFade">0.5</b></label><input type="range" id="cFade" min="0" max="100" value="50"></div>
+            <div class="ctl"><label>Tamaño de nodo <b id="vSize">1.0</b></label><input type="range" id="cSize" min="30" max="220" value="100"></div>
+            <div class="ctl"><label>Grosor de enlace <b id="vThick">1.0</b></label><input type="range" id="cThick" min="30" max="300" value="100"></div>
+            <button class="rbtn" id="cAnimate">Animar</button>
+          </div>
+        </div>
+        <div class="rsec"><div class="rh"><span class="caret">▼</span>Fuerzas</div>
+          <div class="rb">
+            <div class="ctl"><label>Centrar <b id="vCenter">0.7</b></label><input type="range" id="fCenter" min="0" max="300" value="70"></div>
+            <div class="ctl"><label>Repulsión <b id="vRepel">1.4</b></label><input type="range" id="fRepel" min="20" max="300" value="140"></div>
+            <div class="ctl"><label>Fuerza de enlace <b id="vLink">0.9</b></label><input type="range" id="fLink" min="20" max="300" value="90"></div>
+            <div class="ctl"><label>Distancia de enlace <b id="vDist">0.8</b></label><input type="range" id="fDist" min="40" max="220" value="80"></div>
+          </div>
+        </div>
       </div>
-      <div class="modal-field" id="prereqsField" style="display:none">
-        <label>Correlativas</label>
-        <div id="prereqsList" style="display:flex;flex-direction:column;gap:6px;margin-top:2px;"></div>
-      </div>
-      <div class="modal-btns">
-        <button type="button" class="btn btn-danger" id="resetBtn" style="display:none">Resetear</button>
-        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </div>
-    </form>
+    </aside>
   </div>
 </div>
 
+<!-- MODAL -->
+<div class="backdrop" id="backdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal-head"><div class="mc" id="mCode">—</div><h3 id="mTitle">—</h3><div class="yr-badge" id="mYear">—</div></div>
+  <div class="modal-body">
+    <div class="field"><label>Estado</label><div class="seg" id="segEstado">
+      <button data-v="Aprobada">Aprobada</button><button data-v="Cursada">Cursando</button><button data-v="No aprobada">Pendiente</button>
+    </div></div>
+    <div class="field"><label>Nota final</label><div class="nota-row"><input type="range" id="notaRange" min="0" max="10" step="1" value="0"><span class="nota-val" id="notaVal">—</span></div></div>
+    <div class="field" id="prereqSection" style="display:none;">
+      <label>Correlativas necesarias</label>
+      <div class="prereq-list" id="prereqList"></div>
+    </div>
+    <div class="toggles">
+      <div class="tgl" style="opacity:.65;cursor:default;">Disponible (auto) <span id="swDispBadge" style="font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;"></span></div>
+      <div class="tgl">Intermedio <span class="switch" id="swInter" role="switch" tabindex="0"></span></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="mbtn" id="mClose">Listo</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
 <script>
-/* ======= DATA ======= */
-/* prereqs: lista de códigos de materias correlativas (todas deben ser Aprobada o Cursada) */
-const DATA = [
-  {codigo:3621, nombre:"Matemática Discreta",                          condicion:"Aprobada",    nota:9,  prereqs:[]},
-  {codigo:3622, nombre:"Análisis Matemático I",                        condicion:"Aprobada",    nota:7,  prereqs:[]},
-  {codigo:3623, nombre:"Programación Inicial",                         condicion:"Aprobada",    nota:8,  prereqs:[]},
-  {codigo:3624, nombre:"Introducción a los Sistemas de Información",   condicion:"Aprobada",    nota:7,  prereqs:[]},
-  {codigo:3625, nombre:"Sistemas de Numeración",                       condicion:"Aprobada",    nota:8,  prereqs:[]},
-  {codigo:3626, nombre:"Principios de Calidad de Software",            condicion:"Aprobada",    nota:7,  prereqs:[]},
-  {codigo:3627, nombre:"Álgebra y Geometría Analítica I",              condicion:"Aprobada",    nota:7,  prereqs:[]},
-  {codigo:3628, nombre:"Física I",                                     condicion:"Aprobada",    nota:5,  prereqs:[3622]},
-  {codigo:3629, nombre:"Programación Estructurada Básica",             condicion:"Aprobada",    nota:8,  prereqs:[3623]},
-  {codigo:3630, nombre:"Introducción a la Gestión de Requisitos",      condicion:"Aprobada",    nota:8,  prereqs:[3624]},
-  {codigo:3631, nombre:"Fundamentos de Sistemas Embebidos",            condicion:"Aprobada",    nota:8,  prereqs:[3625]},
-  {codigo:3632, nombre:"Introducción a los Proyectos Informáticos",    condicion:"Aprobada",    nota:10, prereqs:[]},
-  {codigo:3633, nombre:"Análisis Matemático II",                       condicion:"Aprobada",    nota:7,  prereqs:[3622]},
-  {codigo:3634, nombre:"Física II",                                    condicion:"No aprobada", nota:0,  prereqs:[3628]},
-  {codigo:3635, nombre:"Tópicos de Programación",                      condicion:"Cursada",     nota:4,  prereqs:[3629,3621]},
-  {codigo:3636, nombre:"Bases de Datos",                               condicion:"Aprobada",    nota:4,  prereqs:[3629,3621]},
-  {codigo:3637, nombre:"Análisis de Sistemas",                         condicion:"Aprobada",    nota:7,  prereqs:[3630]},
-  {codigo:3638, nombre:"Arquitectura de Computadoras",                 condicion:"Aprobada",    nota:4,  prereqs:[3631]},
-  {codigo:3639, nombre:"Análisis Matemático III",                      condicion:"Aprobada",    nota:8,  prereqs:[3633]},
-  {codigo:3640, nombre:"Algoritmos y Estructuras de Datos",            condicion:"No aprobada", nota:0,  prereqs:[3635]},
-  {codigo:3641, nombre:"Bases de Datos Aplicadas",                     condicion:"Aprobada",    nota:4,  prereqs:[3636,3635]},
-  {codigo:3642, nombre:"Principios de Diseño de Sistemas",             condicion:"Aprobada",    nota:9,  prereqs:[3626,3637]},
-  {codigo:3643, nombre:"Redes de Computadoras",                        condicion:"No aprobada", nota:0,  prereqs:[3638]},
-  {codigo:3644, nombre:"Gestión de las Organizaciones",                condicion:"No aprobada", nota:0,  prereqs:[3632]},
-  {codigo:3676, nombre:"Responsabilidad Social Universitaria",         condicion:"No aprobada", nota:0,  prereqs:[3626]},
-  {codigo:3645, nombre:"Álgebra y Geometría Analítica II",             condicion:"Aprobada",    nota:5,  prereqs:[3627]},
-  {codigo:3646, nombre:"Paradigmas de Programación",                   condicion:"No aprobada", nota:0,  prereqs:[3633,3640]},
-  {codigo:3647, nombre:"Requisitos Avanzados",                         condicion:"Aprobada",    nota:7,  prereqs:[3642]},
-  {codigo:3648, nombre:"Diseño de Software",                           condicion:"No aprobada", nota:0,  prereqs:[3636,3642,3635]},
-  {codigo:3649, nombre:"Sistemas Operativos",                          condicion:"No aprobada", nota:0,  prereqs:[3638,3629]},
-  {codigo:3650, nombre:"Seguridad de la Información",                  condicion:"No aprobada", nota:0,  prereqs:[3643,3635,3638]},
-  {codigo:3675, nombre:"Práctica Profesional Supervisada",             condicion:"Aprobada",    nota:7,  prereqs:[3642]},
-  {codigo:3651, nombre:"Probabilidad y Estadística",                   condicion:"No aprobada", nota:0,  prereqs:[3639,3621,3645]},
-  {codigo:3652, nombre:"Programación Avanzada",                        condicion:"No aprobada", nota:0,  prereqs:[3641,3646]},
-  {codigo:3653, nombre:"Arquitectura de Sistemas Software",            condicion:"No aprobada", nota:0,  prereqs:[3648]},
-  {codigo:3654, nombre:"Virtualización de Hardware",                   condicion:"No aprobada", nota:0,  prereqs:[3643,3649]},
-  {codigo:3655, nombre:"Auditoría y Legislación",                      condicion:"No aprobada", nota:0,  prereqs:[3650]},
-  {codigo:3656, nombre:"Estadística Aplicada",                         condicion:"No aprobada", nota:0,  prereqs:[3651]},
-  {codigo:3657, nombre:"Autómatas y Gramáticas",                       condicion:"No aprobada", nota:0,  prereqs:[3646]},
-  {codigo:3658, nombre:"Programación Concurrente",                     condicion:"No aprobada", nota:0,  prereqs:[3646,3649]},
-  {codigo:3659, nombre:"Gestión Aplicada al Desarrollo de Software I", condicion:"No aprobada", nota:0,  prereqs:[3644,3647,3648]},
-  {codigo:3660, nombre:"Sistemas Operativos Avanzados",                condicion:"No aprobada", nota:0,  prereqs:[3654,3634]},
-  {codigo:3661, nombre:"Gestión de Proyectos",                         condicion:"No aprobada", nota:0,  prereqs:[3644,3650,3651]},
-  {codigo:3662, nombre:"Matemática Aplicada",                          condicion:"No aprobada", nota:0,  prereqs:[3651]},
-  {codigo:3663, nombre:"Lenguajes y Compiladores",                     condicion:"No aprobada", nota:0,  prereqs:[3657]},
-  {codigo:3664, nombre:"Inteligencia Artificial",                      condicion:"No aprobada", nota:0,  prereqs:[3651,3646]},
-  {codigo:3665, nombre:"Gestión Aplicada al Desarrollo de Software II",condicion:"No aprobada", nota:0,  prereqs:[3653,3659]},
-  {codigo:3666, nombre:"Seguridad Aplicada y Forensia",                condicion:"No aprobada", nota:0,  prereqs:[3649,3652,3655]},
-  {codigo:3667, nombre:"Gestión de la Calidad en Procesos de Sistemas",condicion:"No aprobada", nota:0,  prereqs:[3642,3661]},
-  {codigo:3668, nombre:"Inteligencia Artificial Aplicada",             condicion:"No aprobada", nota:0,  prereqs:[3656,3664]},
-  {codigo:3669, nombre:"Innovación y Emprendedorismo",                 condicion:"No aprobada", nota:0,  prereqs:[3661]},
-  {codigo:3670, nombre:"Ciencia de Datos",                             condicion:"No aprobada", nota:0,  prereqs:[3656,3664]},
-  {codigo:3671, nombre:"Proyecto Final de Carrera",                    condicion:"No aprobada", nota:0,  prereqs:[3667,3659,3660,3656]},
-  {codigo:3677, nombre:"Lenguaje Orientado a Negocios",                condicion:"No aprobada", nota:0,  prereqs:[3663,3658,3661]},
-  {codigo:3678, nombre:"Tecnologías en Seguridad",                     condicion:"No aprobada", nota:0,  prereqs:[3666,3662]},
-  {codigo:3679, nombre:"Visión Artificial",                            condicion:"No aprobada", nota:0,  prereqs:[3665,3664]},
-  {codigo:911,  nombre:"Computación I",                                condicion:"Aprobada",    nota:8,  prereqs:[]},
-  {codigo:912,  nombre:"Computación II",                               condicion:"Aprobada",    nota:9,  prereqs:[911]},
-  {codigo:901,  nombre:"Inglés I",                                     condicion:"Aprobada",    nota:8,  prereqs:[]},
-  {codigo:902,  nombre:"Inglés II",                                    condicion:"Aprobada",    nota:7,  prereqs:[901]},
-  {codigo:903,  nombre:"Inglés III",                                   condicion:"No aprobada", nota:0,  prereqs:[902]},
-  {codigo:904,  nombre:"Inglés IV",                                    condicion:"No aprobada", nota:0,  prereqs:[903]},
-];
-
-/* ======= YEAR GROUPS (para progreso dinámico) ======= */
-const YEAR_GROUPS = [
-  {nombre:"Primer año",    codes:[3621,3622,3623,3624,3625,3626,3627,3628,3629,3630,3631,3632]},
-  {nombre:"Segundo año",   codes:[3633,3634,3635,3636,3637,3638,3639,3640,3641,3642,3643,3644,3645]},
-  {nombre:"Tercer año",    codes:[3646,3647,3648,3649,3650,3675,3651,3652,3653,3654,3655,3656]},
-  {nombre:"Cuarto año",    codes:[3657,3658,3659,3660,3661,3662,3663,3664,3665,3666,3667,3668]},
-  {nombre:"Quinto año",    codes:[3669,3670,3671,3676,3677,3678,3679]},
-  {nombre:"Transversales", codes:[911,912,901,902,903,904]},
-];
-
-const SCHEDULE = {
-  dias: ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
-  franja: "Noche",
-  clases: ["Física II","Requisitos Avanzados","Gestión de las Organizaciones", null, null, null]
+"use strict";
+const SEED = [{"codigo": 3621, "nombre": "Matemática Discreta", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 9.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3622, "nombre": "Análisis Matemático I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3623, "nombre": "Programación Inicial", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3624, "nombre": "Introducción a los Sistemas de Información", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3625, "nombre": "Sistemas de Numeración", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3626, "nombre": "Principios de Calidad de Software", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3627, "nombre": "Álgebra y Geometría Analítica I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 7.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3628, "nombre": "Física I", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 5.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3629, "nombre": "Programación Estructurada Básica", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3630, "nombre": "Introducción a la Gestión de Requisitos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3631, "nombre": "Fundamentos de Sistemas Embebidos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3632, "nombre": "Introducción a los Proyectos Informáticos", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 10.0, "anio": "Primer año", "intermedio": true}, {"codigo": 3633, "nombre": "Análisis Matemático II", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3634, "nombre": "Física II", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3635, "nombre": "Tópicos de Programación", "condicion": "Cursada", "disponibilidad": "Disponible", "nota": 4.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3636, "nombre": "Bases de Datos", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3637, "nombre": "Análisis de Sistemas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3638, "nombre": "Arquitectura de Computadoras", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3639, "nombre": "Análisis Matemático III", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 8.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3640, "nombre": "Algoritmos y Estructuras de Datos", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3641, "nombre": "Bases de Datos Aplicadas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 4.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3642, "nombre": "Principios de Diseño de Sistemas", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 9.0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3643, "nombre": "Redes de Computadoras", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3644, "nombre": "Gestión de las Organizaciones", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3676, "nombre": "Responsabilidad Social Universitaria", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Segundo año", "intermedio": true}, {"codigo": 3645, "nombre": "Álgebra y Geometría Analítica II", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 5.0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3646, "nombre": "Paradigmas de Programación", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3647, "nombre": "Requisitos Avanzados", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3648, "nombre": "Diseño de Software", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3649, "nombre": "Sistemas Operativos", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3650, "nombre": "Seguridad de la Información", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3675, "nombre": "Práctica Profesional Supervisada", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3651, "nombre": "Probabilidad y Estadística", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3652, "nombre": "Programación Avanzada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3653, "nombre": "Arquitectura de Sistemas Software", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3654, "nombre": "Virtualización de Hardware", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3655, "nombre": "Auditoría y Legislación", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Tercer año", "intermedio": true}, {"codigo": 3656, "nombre": "Estadística Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3657, "nombre": "Autómatas y Gramáticas", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3658, "nombre": "Programación Concurrente", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3659, "nombre": "Gestión Aplicada al Desarrollo de Software I", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3660, "nombre": "Sistemas Operativos Avanzados", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3661, "nombre": "Gestión de Proyectos", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3662, "nombre": "Matemática Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3663, "nombre": "Lenguajes y Compiladores", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3664, "nombre": "Inteligencia Artificial", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3665, "nombre": "Gestión Aplicada al Desarrollo de Software II", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3666, "nombre": "Seguridad Aplicada y Forensia", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3667, "nombre": "Gestión de la Calidad en Procesos de Sistemas", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Cuarto año", "intermedio": false}, {"codigo": 3668, "nombre": "Inteligencia Artificial Aplicada", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3669, "nombre": "Innovación y Emprendedorismo", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3670, "nombre": "Ciencia de Datos", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3671, "nombre": "Proyecto Final de Carrera", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3677, "nombre": "Lenguaje Orientado a Negocios", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3678, "nombre": "Tecnologías en Seguridad", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 3679, "nombre": "Visión Artificial", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Quinto año", "intermedio": false}, {"codigo": 911, "nombre": "Computación I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0, "anio": "Transversales", "intermedio": true}, {"codigo": 912, "nombre": "Computación II", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 9.0, "anio": "Transversales", "intermedio": true}, {"codigo": 901, "nombre": "Inglés I", "condicion": "Aprobada", "disponibilidad": "No Disponible", "nota": 8.0, "anio": "Transversales", "intermedio": false}, {"codigo": 902, "nombre": "Inglés II", "condicion": "Aprobada", "disponibilidad": "Disponible", "nota": 7.0, "anio": "Transversales", "intermedio": false}, {"codigo": 903, "nombre": "Inglés III", "condicion": "No aprobada", "disponibilidad": "Disponible", "nota": 0, "anio": "Transversales", "intermedio": true}, {"codigo": 904, "nombre": "Inglés IV", "condicion": "No aprobada", "disponibilidad": "No Disponible", "nota": 0, "anio": "Transversales", "intermedio": false}];
+const KEY = "carrera-tracker-v5";
+const ZONES = ["Primer año","Segundo año","Tercer año","Cuarto año","Quinto año","Transversales"];
+const YEAR_IDX = {"Primer año":0,"Segundo año":1,"Tercer año":2,"Cuarto año":3,"Quinto año":4,"Transversales":1.5};
+const PREREQS = {
+  3621:[],3622:[],3623:[],3624:[],3625:[],3626:[],
+  901:[],911:[],3627:[],
+  3628:[3622],3629:[3623],3630:[3624],3631:[3625],3632:[],
+  902:[901],912:[911],
+  3633:[3622],3634:[3628],3635:[3621,3629],3636:[3621,3629],
+  3637:[3630],3638:[3631],3676:[3626],903:[902],
+  3639:[3633],3640:[3635],3641:[3636,3635],3642:[3626,3637],
+  3643:[3638],3644:[3632],
+  3680:[3621,3623,3624,3625,3626,3630,3632,3635,3636,3638],
+  904:[903],3645:[3627],
+  3646:[3633,3640],3647:[3642],3648:[3636,3642,3635],
+  3649:[3638,3629],3650:[3635,3638,3643],3675:[3642,3636,3640],
+  3651:[3621,3639,3645],3652:[3646,3641],3653:[3648],
+  3654:[3649,3643],3655:[3650],
+  3656:[3651],3657:[3646],3658:[3646,3649],
+  3659:[3644,3647,3648],3660:[3654,3634],3661:[3644,3650,3651],
+  3662:[3651],3663:[3657],3664:[3646,3651],
+  3665:[3659,3653],3666:[3649,3652,3655],
+  3667:[3642,3661],
+  3668:[3656,3664],3669:[3661],3670:[3656,3664],
+  3672:[],3673:[],3674:[],
+  3671:[3656,3659,3660,3667]
 };
-
-/* ======= PERSISTENCE ======= */
-const STORAGE_KEY = 'carrera_overrides';
-
-function getOverrides() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-  catch { return {}; }
+// Materias que cuentan para el título intermedio (Analista) = años 1, 2 y 3 del plan oficial
+const INTERMEDIO_CODES = new Set([
+  3621,3622,3623,3624,3625,3626,901,911,3627,3628,3629,3630,3631,3632,       // Año 1
+  902,912,3633,3634,3635,3636,3637,3638,3676,903,3639,3640,3641,3642,3643,3644,3680, // Año 2
+  904,3645,3646,3647,3648,3649,3650,3675,3651,3652,3653,3654,3655            // Año 3
+]);
+function recalcIntermedio(){
+  state.subjects.forEach(s=>{ s.intermedio = INTERMEDIO_CODES.has(s.codigo); });
 }
-
-/* Calcula disponibilidad desde correlativas: disponible si todos los prereqs son Aprobada o Cursada */
-function calcDisponibilidad(codigo, condicionMap) {
-  const s = DATA.find(d => d.codigo === codigo);
-  if (!s || !s.prereqs.length) return 'Disponible';
-  return s.prereqs.every(p => {
-    const c = condicionMap[p];
-    return c === 'Aprobada' || c === 'Cursada';
-  }) ? 'Disponible' : 'No Disponible';
-}
-
-function getEffectiveData() {
-  const ov = getOverrides();
-  // Primera pasada: condiciones con overrides aplicados
-  const condicionMap = {};
-  DATA.forEach(s => {
-    const o = ov[String(s.codigo)];
-    condicionMap[s.codigo] = (o && o.condicion) ? o.condicion : s.condicion;
-  });
-  // Segunda pasada: calcular disponibilidad desde el mapa de condiciones
-  return DATA.map(s => {
-    const o = ov[String(s.codigo)];
-    const base = o ? Object.assign({}, s, o) : Object.assign({}, s);
-    base.disponibilidad = calcDisponibilidad(s.codigo, condicionMap);
-    return base;
+function recalcDisp(){
+  const ap=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
+  state.subjects.forEach(s=>{
+    if(s.condicion.trim()==="Aprobada"){s.disponibilidad="No Disponible";return;}
+    if(s.condicion.trim()==="Cursada"){s.disponibilidad="Disponible";return;}
+    const pre=PREREQS[s.codigo]||[];
+    s.disponibilidad=pre.every(p=>ap.has(p))?"Disponible":"No Disponible";
   });
 }
+const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id => document.getElementById(id);
 
-function saveOverride(codigo, changes) {
-  const ov = getOverrides();
-  const key = String(codigo);
-  const orig = DATA.find(s => s.codigo === codigo);
-  ov[key] = Object.assign({}, ov[key] || {}, changes);
-  // disponibilidad ya no se guarda — se calcula automáticamente
-  delete ov[key].disponibilidad;
-  const same = ['condicion','nota'].every(
-    k => !(k in ov[key]) || ov[key][k] === orig[k]
-  );
-  if (same) delete ov[key];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ov));
+function load(){ try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){} return JSON.parse(JSON.stringify(SEED)); }
+// Oferta 2C 2026 extraída del PDF oficial UNLaM
+// Formato: [codigo, [[comision, "dias", hIni, hFin], ...]]
+// dias: "Lu"|"Ma"|"Mi"|"Ju"|"Vi"|"Sa"|"Ma,Vi"|"Lu,Ju"|null (A distancia)
+const OFERTA_2C_2026 = [
+  [901, [[1300,"Lu",8,12],[1600,"Lu",14,18],[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[4900,"Ju",19,23],[5300,"Vi",8,12],[5600,"Vi",14,18],[5900,"Vi",19,23],[6300,"Sa",8,12],[7275,"Ma,Vi",12,14],[7664,"Sa",12,16]]],
+  [902, [[1300,"Lu",8,12],[1600,"Lu",14,18],[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[4900,"Ju",19,23],[5300,"Vi",8,12],[5600,"Vi",14,18],[5900,"Vi",19,23],[6300,"Sa",8,12],[7224,"Ma",12,16],[7444,"Ju",12,16],[7664,"Sa",12,16]]],
+  [903, [[1300,"Lu",8,12],[1700,"Lu",19,21],[2100,"Ma",8,10],[2200,"Ma",10,12],[2400,"Ma",14,16],[2500,"Ma",16,18],[2700,"Ma",19,21],[2800,"Ma",21,23],[3100,"Mi",8,10],[3200,"Mi",10,12],[3400,"Mi",14,16],[3700,"Mi",19,21],[3800,"Mi",21,23],[4100,"Ju",8,10],[4200,"Ju",10,12],[4400,"Ju",14,16],[4500,"Ju",16,18],[4700,"Ju",19,21],[4800,"Ju",21,23],[5200,"Vi",10,12],[5700,"Vi",19,21],[5800,"Vi",21,23],[6100,"Sa",8,10],[6200,"Sa",10,12],[6400,"Sa",14,16],[7300,"Mi",12,14],[7600,"Sa",12,14]]],
+  [904, [[1100,"Lu",8,10],[1400,"Lu",14,16],[1500,"Lu",16,18],[1800,"Lu",21,23],[2100,"Ma",8,10],[2200,"Ma",10,12],[2700,"Ma",19,21],[2800,"Ma",21,23],[3100,"Mi",8,10],[3200,"Mi",10,12],[3400,"Mi",14,16],[3700,"Mi",19,21],[3800,"Mi",21,23],[4100,"Ju",8,10],[4200,"Ju",10,12],[4400,"Ju",14,16],[4500,"Ju",16,18],[4700,"Ju",19,21],[4800,"Ju",21,23],[5200,"Vi",10,12],[5700,"Vi",19,21],[5800,"Vi",21,23],[6100,"Sa",8,10],[6200,"Sa",10,12],[6400,"Sa",14,16],[7300,"Mi",12,14],[7600,"Sa",12,14]]],
+  [911, [[1300,"Lu",8,12],[1600,"Lu",14,18],[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[4900,"Ju",19,23],[5600,"Vi",14,18],[5900,"Vi",19,23],[6300,"Sa",8,12]]],
+  [912, [[1300,"Lu",8,12],[1600,"Lu",14,18],[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4900,"Ju",19,23],[5600,"Vi",14,18],[5900,"Vi",19,23],[6300,"Sa",8,12]]],
+  [3621,[[1300,"Lu",8,12],[1600,"Lu",14,18],[2300,"Ma",8,12],[2900,"Ma",19,23],[3300,"Mi",8,12],[4600,"Ju",14,18],[4900,"Ju",19,23],[5300,"Vi",8,12],[5600,"Vi",14,18]]],
+  [3622,[[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[4300,"Ju",8,12],[4900,"Ju",19,23],[5600,"Vi",14,18],[5900,"Vi",19,23],[6300,"Sa",8,12]]],
+  [3623,[[1300,"Lu",8,12],[1600,"Lu",14,18],[2300,"Ma",8,12],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[6300,"Sa",8,12]]],
+  [3624,[[1900,"Lu",19,23],[2900,"Ma",19,23],[4300,"Ju",8,12],[4900,"Ju",19,23],[5300,"Vi",8,12]]],
+  [3625,[[2300,"Ma",8,12],[2600,"Ma",14,18],[2900,"Ma",19,23],[3300,"Mi",8,12],[3900,"Mi",19,23],[4300,"Ju",8,12],[5300,"Vi",8,12],[5600,"Vi",14,18],[5900,"Vi",19,23]]],
+  [3626,[[2300,"Ma",8,12],[2600,"Ma",14,18],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[5300,"Vi",8,12]]],
+  [3627,[[1300,"Lu",8,12],[1900,"Lu",19,23],[2600,"Ma",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4600,"Ju",14,18],[5300,"Vi",8,12],[5900,"Vi",19,23]]],
+  [3628,[[2300,"Ma",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12]]],
+  [3629,[[1300,"Lu",8,12],[1600,"Lu",14,18],[1900,"Lu",19,23],[2300,"Ma",8,12],[2600,"Ma",14,18],[4300,"Ju",8,12],[4600,"Ju",14,18],[5900,"Vi",19,23]]],
+  [3630,[[2300,"Ma",8,12],[2900,"Ma",19,23],[4300,"Ju",8,12],[4900,"Ju",19,23]]],
+  [3631,[[1300,"Lu",8,12],[2900,"Ma",19,23],[3300,"Mi",8,12]]],
+  [3632,[[1600,"Lu",14,18],[2300,"Ma",8,12],[2900,"Ma",19,23],[4600,"Ju",14,18],[5300,"Vi",8,12],[6300,"Sa",8,12]]],
+  [3633,[[1600,"Lu",14,18],[2300,"Ma",8,12],[3900,"Mi",19,23],[4300,"Ju",8,12],[4900,"Ju",19,23],[5900,"Vi",19,23]]],
+  [3634,[[1900,"Lu",19,23],[5300,"Vi",8,12]]],
+  [3635,[[1900,"Lu",19,23],[2600,"Ma",14,18],[2900,"Ma",19,23],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[4900,"Ju",19,23],[5900,"Vi",19,23],[6300,"Sa",8,12]]],
+  [3636,[[1900,"Lu",19,23],[2900,"Ma",19,23],[3900,"Mi",19,23],[4900,"Ju",19,23],[6300,"Sa",8,12]]],
+  [3637,[[1900,"Lu",19,23],[2300,"Ma",8,12],[4900,"Ju",19,23],[5300,"Vi",8,12]]],
+  [3638,[[1900,"Lu",19,23],[3600,"Mi",14,18],[4900,"Ju",19,23],[5900,"Vi",19,23]]],
+  [3639,[[2300,"Ma",8,12],[4300,"Ju",8,12],[5600,"Vi",14,18],[5900,"Vi",19,23]]],
+  [3640,[[1900,"Lu",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23]]],
+  [3641,[[2900,"Ma",19,23],[5600,"Vi",14,18]]],
+  [3642,[[3900,"Mi",19,23],[4300,"Ju",8,12]]],
+  [3643,[[3600,"Mi",14,18],[3900,"Mi",19,23],[5900,"Vi",19,23]]],
+  [3644,[[2900,"Ma",19,23],[3900,"Mi",19,23],[4900,"Ju",19,23]]],
+  [3645,[[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[6300,"Sa",8,12]]],
+  [3646,[[2900,"Ma",19,23],[5900,"Vi",19,23]]],
+  [3647,[[1900,"Lu",19,23],[2900,"Ma",19,23]]],
+  [3648,[[1900,"Lu",19,23],[4300,"Ju",8,12]]],
+  [3649,[[1900,"Lu",19,23],[3900,"Mi",19,23],[4900,"Ju",19,23]]],
+  [3650,[[3900,"Mi",19,23]]],
+  [3651,[[2900,"Ma",19,23],[3600,"Mi",14,18],[3900,"Mi",19,23],[4300,"Ju",8,12],[5300,"Vi",8,12]]],
+  [3652,[[4600,"Ju",14,18],[4900,"Ju",19,23]]],
+  [3653,[[1900,"Lu",19,23]]],
+  [3654,[[2900,"Ma",19,23],[4900,"Ju",19,23]]],
+  [3655,[[2900,"Ma",19,23]]],
+  [3656,[[2900,"Ma",19,23],[4900,"Ju",19,23]]],
+  [3657,[[5900,"Vi",19,23]]],
+  [3658,[[3900,"Mi",19,23]]],
+  [3659,[[4900,"Ju",19,23]]],
+  [3660,[[1900,"Lu",19,23],[2900,"Ma",19,23]]],
+  [3661,[[3900,"Mi",19,23]]],
+  [3662,[[1900,"Lu",19,23]]],
+  [3663,[[1900,"Lu",19,23],[2900,"Ma",19,23]]],
+  [3664,[[3900,"Mi",19,23]]],
+  [3665,[[2900,"Ma",19,23]]],
+  [3666,[[4900,"Ju",19,23]]],
+  [3667,[[4900,"Ju",19,23]]],
+  [3668,[[5900,"Vi",19,23]]],
+  [3669,[[2900,null,19,23]]],
+  [3670,[[4900,"Ju",19,23]]],
+  [3675,[[5600,null,14,18]]],
+  [3676,[[1900,"Lu",19,23],[2900,"Ma",19,23],[3300,"Mi",8,12],[3600,"Mi",14,18],[3900,"Mi",19,23],[5300,"Vi",8,12]]],
+  [3677,[[3900,"Mi",19,23]]],
+  [3678,[[5900,"Vi",19,23]]],
+  [3679,[[4900,"Ju",19,23]]]
+];
+function loadOferta(){try{const r=localStorage.getItem(KEY+"-of");if(r)return JSON.parse(r);}catch(e){}return OFERTA_2C_2026;}
+function loadOfertaNombre(){try{const r=localStorage.getItem(KEY+"-ofN");if(r)return r;}catch(e){}return "2C 2026";}
+function persistOferta(){try{localStorage.setItem(KEY+"-of",JSON.stringify(state.oferta));localStorage.setItem(KEY+"-ofN",state.ofertaNombre);}catch(e){}}
+function loadSchedOptions(){
+  try{const r=localStorage.getItem(KEY+"-schedOpts");if(r)return JSON.parse(r);}catch(e){}
+  let old=["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""];
+  try{const r=localStorage.getItem(KEY+"-sched");if(r)old=JSON.parse(r);}catch(e){}
+  return [{id:1,name:"Opción 1",days:old}];
 }
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state.subjects));}catch(e){}}
+function persistSched(){try{localStorage.setItem(KEY+"-schedOpts",JSON.stringify(state.schedOptions));}catch(e){}}
+const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:"todas", search:"", sortKey:"codigo", sortAsc:true, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:new Set([0,1,2,3,4,5]), autoSelected:new Set() };
 
-function resetOverride(codigo) {
-  const ov = getOverrides();
-  delete ov[String(codigo)];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ov));
+function stateColor(c){ c=c.trim(); return c==="Aprobada"?"#E8B23E":c==="Cursada"?"#D9663B":"#6F6560"; }
+function getBlockingChain(codigo){
+  // Devuelve los códigos de prereqs que faltan (miss) y los ya aprobados (done)
+  const ap=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
+  const miss=new Set(),done=new Set(),vis=new Set();
+  function walk(c){if(vis.has(c))return;vis.add(c);if(ap.has(c)){done.add(c);return;}miss.add(c);(PREREQS[c]||[]).forEach(walk);}
+  (PREREQS[codigo]||[]).forEach(walk);
+  return {miss,done,missIds:new Set([...miss].map(c=>"s"+c)),doneIds:new Set([...done].map(c=>"s"+c)),allIds:new Set([...miss,...done].map(c=>"s"+c).concat(["s"+codigo]))};
 }
-
-/* ======= SCHEDULE ======= */
-(function(){
-  const tbl = document.getElementById('schedTable');
-  let h = '<thead><tr><th>' + SCHEDULE.franja + '</th>';
-  SCHEDULE.dias.forEach(d => h += '<th>' + d + '</th>');
-  h += '</tr></thead><tbody><tr><td style="font-weight:600">Cursada</td>';
-  SCHEDULE.clases.forEach(c => {
-    h += c
-      ? '<td><span class="class-chip">' + c + '</span></td>'
-      : '<td><span class="empty-slot">Libre</span></td>';
-  });
-  h += '</tr></tbody>';
-  tbl.innerHTML = h;
-})();
-
-/* ======= STATS ======= */
-function recalcStats() {
-  const eff = getEffectiveData();
-  const total = eff.length;
-  const aprobadas = eff.filter(s => s.condicion === 'Aprobada');
-  const cursando  = eff.filter(s => s.condicion === 'Cursada');
-  const disponibles = eff.filter(s => s.condicion !== 'Aprobada' && s.disponibilidad === 'Disponible');
-  const notas = aprobadas.map(s => s.nota).filter(n => n > 0);
-  const promedio = notas.length ? notas.reduce((a,b) => a+b, 0) / notas.length : 0;
-  const pct = Math.round(aprobadas.length / total * 100);
-
-  document.getElementById('sealPct').textContent      = pct + '%';
-  document.getElementById('stAprobadas').textContent  = aprobadas.length + ' / ' + total;
-  document.getElementById('stCursando').textContent   = cursando.length;
-  document.getElementById('stPromedio').textContent   = promedio.toFixed(2);
-  document.getElementById('stDisponibles').textContent = disponibles.length;
-  document.getElementById('avanceTotal').textContent  = total + ' materias en total';
-  document.getElementById('legajoCount').textContent  = total + ' materias';
+function stats(){
+  const t=state.subjects.length, ap=state.subjects.filter(s=>s.condicion==="Aprobada");
+  const notas=state.subjects.filter(s=>s.nota>0).map(s=>s.nota);
+  const prom=notas.length?notas.reduce((a,b)=>a+b,0)/notas.length:0;
+  const disp=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible");
+  const inter=state.subjects.filter(s=>s.intermedio), interDone=inter.filter(s=>s.condicion==="Aprobada");
+  return {t,ap:ap.length,prom,disp:disp.length,inter:inter.length,interDone:interDone.length,pct:t?Math.round(ap.length/t*100):0,notasN:notas.length,restantes:t-ap.length};
 }
-
-/* ======= YEARS ======= */
-function renderYears() {
-  const eff = getEffectiveData();
-  const list = document.getElementById('yearsList');
-  list.innerHTML = '';
-  YEAR_GROUPS.forEach(yg => {
-    const subs = eff.filter(s => yg.codes.includes(s.codigo));
-    const aprobadas = subs.filter(s => s.condicion === 'Aprobada').length;
-    const total = subs.length;
-    const pct = total ? Math.round(aprobadas / total * 100) : 0;
-    const row = document.createElement('div');
-    row.className = 'year-row';
-    row.innerHTML =
-      '<div><div class="yname">' + yg.nombre + '</div><div class="ymeta">' + aprobadas + ' / ' + total + '</div></div>' +
-      '<div class="track"><div class="fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="pct">' + pct + '%</div>';
-    list.appendChild(row);
-  });
+const _last={};
+function pulse(id,key,val){const el=$(id);if(!REDUCED&&_last[key]!==undefined&&_last[key]!==val){el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");}_last[key]=val;}
+function renderStats(){
+  const d=stats();
+  $("sPct").innerHTML=d.pct+"<small>%</small>";pulse("sPct","pct",d.pct);
+  $("sPctSub").textContent=d.ap+" de "+d.t+" · faltan "+d.restantes;
+  $("sProm").textContent=d.prom.toFixed(2);pulse("sProm","prom",d.prom.toFixed(2));
+  $("sPromSub").textContent=d.notasN+" notas";
+  $("sAprob").innerHTML=d.ap+"<small> / "+d.t+"</small>";pulse("sAprob","ap",d.ap);
+  $("sDisp").textContent=d.disp;pulse("sDisp","disp",d.disp);
+  $("sInter").innerHTML=d.interDone+"<small> / "+d.inter+"</small>";pulse("sInter","inter",d.interDone);
+  $("sInterSub").textContent="Analista · "+(d.inter?Math.round(d.interDone/d.inter*100):0)+"%";
+  $("vaultSub").textContent=d.t+" materias · "+d.pct+"% hecho";
 }
-
-/* ======= TABLE ======= */
-let currentFilter = 'todas';
-let currentSearch = '';
-let sortKey = 'codigo';
-let sortAsc = true;
-
-function tagClass(c) {
-  if (c === 'Aprobada')    return 'aprobada';
-  if (c === 'Cursada')     return 'cursada';
-  return 'no-aprobada';
+function renderYears(){
+  const wrap=$("years");wrap.innerHTML="";let td=0,ta=0;
+  ZONES.forEach(z=>{const items=state.subjects.filter(s=>s.anio===z);if(!items.length)return;
+    const done=items.filter(s=>s.condicion==="Aprobada").length;td+=done;ta+=items.length;
+    const pct=Math.round(done/items.length*100);
+    const row=document.createElement("div");row.className="yr";
+    row.innerHTML='<div class="nm">'+z+'</div><div class="track"><div class="fill" style="width:'+(state.avanceShown||REDUCED?pct:0)+'%"></div></div><div class="r"><b>'+done+'</b>/'+items.length+' · '+pct+'%</div>';
+    wrap.appendChild(row);});
+  $("yearMeta").textContent=td+"/"+ta+" aprobadas";
 }
-
-function render() {
-  const eff = getEffectiveData();
-  const ov  = getOverrides();
-
-  let rows = eff.filter(s => {
-    if (currentFilter === 'Disponible') {
-      if (!(s.condicion !== 'Aprobada' && s.disponibilidad === 'Disponible')) return false;
-    } else if (currentFilter !== 'todas' && s.condicion !== currentFilter) {
-      return false;
-    }
-    if (currentSearch) {
-      const q = currentSearch.toLowerCase();
-      if (!s.nombre.toLowerCase().includes(q) && !String(s.codigo).includes(q)) return false;
-    }
+const DAY_NAMES={Lu:"Lunes",Ma:"Martes",Mi:"Miércoles",Ju:"Jueves",Vi:"Viernes",Sa:"Sábado"};
+function getSlots(com){if(!com[1])return[];return com[1].split(",").map(d=>({day:d,ini:com[2],fin:com[3]}));}
+function conflictan(c1,c2){if(!c1[1]||!c2[1])return false;const s1=getSlots(c1),s2=getSlots(c2);return s1.some(a=>s2.some(b=>a.day===b.day&&a.ini<b.fin&&b.ini<a.fin));}
+function filterComs(coms,turno,prefDias){
+  return coms.filter(c=>{
+    if(!c[1])return false;const ini=c[2];
+    if(turno==="manana"&&ini>=13)return false;
+    if(turno==="tarde"&&(ini<12||ini>=19))return false;
+    if(turno==="noche"&&ini<18)return false;
+    if(prefDias.length>0&&!c[1].split(",").every(d=>prefDias.includes(d)))return false;
     return true;
   });
-
-  rows.sort((a, b) => {
-    let va = a[sortKey], vb = b[sortKey];
-    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
-    if (va < vb) return sortAsc ? -1 :  1;
-    if (va > vb) return sortAsc ?  1 : -1;
-    return 0;
+}
+function generateCombinations(selectedCodes,turno,prefDias,maxRes){
+  maxRes=maxRes||8;
+  const subComs=selectedCodes.map(code=>{
+    const ofRow=(state.oferta||[]).find(r=>r[0]===code);
+    const sub=state.subjects.find(s=>s.codigo===code);
+    if(!ofRow||!sub)return null;
+    const coms=filterComs(ofRow[1],turno,prefDias);
+    return coms.length?{sub,coms}:null;
+  }).filter(Boolean);
+  const faltantes=selectedCodes.filter(c=>!subComs.find(s=>s.sub.codigo===c)).map(c=>{
+    const s=state.subjects.find(x=>x.codigo===c);return s?s.nombre.split(" ").slice(0,3).join(" "):"código "+c;
   });
-
-  const tbody    = document.getElementById('tbody');
-  const noResult = document.getElementById('noResults');
-
-  if (!rows.length) {
-    tbody.innerHTML = '';
-    noResult.style.display = 'block';
-    return;
+  if(faltantes.length)return{results:[],faltantes};
+  const results=[];
+  function bt(idx,chosen){
+    if(results.length>=maxRes)return;
+    if(idx===subComs.length){results.push([...chosen]);return;}
+    for(const com of subComs[idx].coms){
+      if(!chosen.some(c=>conflictan(c.com,com))){
+        chosen.push({sub:subComs[idx].sub,com});bt(idx+1,chosen);chosen.pop();
+      }
+    }
   }
-  noResult.style.display = 'none';
+  bt(0,[]);
+  return{results,faltantes:[]};
+}
+function renderAutoResults(res){
+  const box=$("autoResults");
+  const results=Array.isArray(res)?res:(res.results||[]);
+  const faltantes=(res&&res.faltantes)||[];
+  if(faltantes.length){box.innerHTML='<div class="auto-empty">Sin comisiones en ese turno/días: <b>'+faltantes.join(", ")+'</b>. Probá con "Cualquiera" o más días.</div>';return;}
+  if(!results.length){box.innerHTML='<div class="auto-empty">No se encontraron combinaciones sin superposición. Probá distintos filtros de turno o días.</div>';return;}
+  window._autoRes=results;
+  const cc=$("combCount");if(cc)cc.textContent=results.length+" combinación"+(results.length===1?"":"es")+" encontradas";
+  const grid=document.createElement("div");grid.className="auto-results-grid";
+  results.forEach((chosen,ri)=>{
+    const card=document.createElement("div");card.className="ar-opt";
+    const items=chosen.map(({sub,com})=>{
+      const dias=com[1]?com[1].split(",").map(d=>DAY_NAMES[d]||d).join(" + "):"Virtual";
+      const time=com[1]?com[2]+":00–"+com[3]+":00":"";
+      return'<div class="ar-item"><span class="ar-day">'+(com[1]||"?")+
+        '</span><div class="ar-info"><div class="ar-nm" title="'+sub.nombre+'">'+sub.nombre+'</div>'+
+        '<div class="ar-tm">'+dias+(time?" · "+time:"")+'</div></div></div>';
+    }).join("");
+    card.innerHTML='<div class="ar-opt-h">Opción '+(ri+1)+'</div>'+items+
+      '<button class="ar-use" onclick="useAutoOption('+ri+')">Usar esta opción →</button>';
+    grid.appendChild(card);
+  });
+  box.innerHTML="";box.appendChild(grid);
+}
 
-  tbody.innerHTML = rows.map(s => {
-    const modified = String(s.codigo) in ov;
-    const dot = modified ? ' <span class="mod-dot" title="Modificado localmente">●</span>' : '';
-    return '<tr class="editable-row' + (modified ? ' modified' : '') + '" data-codigo="' + s.codigo + '" title="Clic para editar">' +
-      '<td class="code">' + String(s.codigo).padStart(4, '0') + '</td>' +
-      '<td>' + s.nombre + dot + '</td>' +
-      '<td><span class="tag ' + tagClass(s.condicion) + '">' + s.condicion + '</span></td>' +
-      '<td><span class="disp' + (s.disponibilidad === 'Disponible' ? ' si' : '') + '">' + s.disponibilidad + '</span></td>' +
-      '<td class="nota">' + (s.nota > 0 ? s.nota : '—') + '</td>' +
-      '</tr>';
+function useAutoOption(ri){
+  const chosen=window._autoRes[ri];
+  const DAYS=["Lu","Ma","Mi","Ju","Vi","Sa"];
+  const days=["","","","","",""];
+  for(const{sub,com}of chosen){if(!com[1])continue;const fd=com[1].split(",")[0];const di=DAYS.indexOf(fd);if(di>=0&&!days[di])days[di]=sub.nombre;}
+  const lbl=chosen.map(c=>c.sub.nombre.split(" ").slice(0,2).join(" ")).join(" + ");
+  state.schedOptions.push({id:Date.now(),name:"Auto: "+lbl,days});
+  persistSched();renderSched();
+  toast("Opción agregada al cronograma");
+  $("schedOptions").scrollIntoView({behavior:"smooth"});
+}
+function renderOfertaBar(){
+  const lbl=$("ofertaLbl"),cnt=$("ofertaCnt");
+  if(lbl)lbl.textContent="Oferta "+state.ofertaNombre;
+  if(cnt){const n=state.oferta?state.oferta.length:0;cnt.textContent=n+" materias cargadas";}
+}
+async function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(file);});}
+async function importOfertaPDF(file){
+  const ov=document.createElement("div");ov.className="import-overlay";
+  ov.innerHTML='<div class="imp-spin"></div><p>Procesando PDF con IA… puede tomar hasta 60 s</p>';
+  document.body.appendChild(ov);
+  try{
+    const b64=await fileToBase64(file);
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:8000,messages:[{role:"user",content:[
+        {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
+        {type:"text",text:`This is a UNLaM university course schedule PDF. Extract every course offering as JSON.
+Return ONLY valid JSON array, no markdown:
+[[codigo_int,[[comision_int,"dias",hora_ini_int,hora_fin_int],...]],...] 
+dias codes: "Lu","Ma","Mi","Ju","Vi","Sa","Ma,Vi","Lu,Ju" or null for A distancia. Hours 24h ints.
+Example: [[901,[[1300,"Lu",8,12],[1900,"Lu",19,23]]],[3621,[[1300,"Lu",8,12]]]]`}]}]})});
+    const data=await resp.json();
+    const txt=(data.content||[]).find(b=>b.type==="text")?.text||"";
+    const clean=txt.replace(/```json?|```/g,"").trim();
+    state.oferta=JSON.parse(clean);
+    state.ofertaNombre=file.name.replace(".pdf","").replace(/_/g," ");
+    persistOferta();renderOfertaBar();renderSubPills();
+    toast("Oferta importada: "+state.oferta.length+" materias");
+  }catch(err){toast("Error al procesar: "+(err.message||"respuesta inválida"));}
+  finally{if(document.body.contains(ov))document.body.removeChild(ov);}
+}
+function renderSched(){
+  const container=$("schedOptions");if(!container)return;container.innerHTML="";
+  const cnt=state.schedOptions.length;$("schedMeta").textContent=cnt+(cnt===1?" opción":" opciones");
+  const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+  const dispS=state.subjects.filter(s=>s.condicion.trim()!=="Aprobada"&&s.disponibilidad==="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  const noDispS=state.subjects.filter(s=>s.condicion.trim()!=="Aprobada"&&s.disponibilidad!=="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  function buildOpts(val){
+    return'<option value="">— Libre —</option>'
+      +(dispS.length?'<optgroup label="✓ Disponibles para cursar">'+dispS.map(s=>'<option value="'+s.nombre.replace(/"/g,"&quot;")+'"'+(s.nombre===val?" selected":"")+'>'+s.nombre+'</option>').join('')+'</optgroup>':"")
+      +(noDispS.length?'<optgroup label="○ No disponibles aún">'+noDispS.map(s=>'<option value="'+s.nombre.replace(/"/g,"&quot;")+'"'+(s.nombre===val?" selected":"")+'>'+s.nombre+'</option>').join('')+'</optgroup>':"");
+  }
+  state.schedOptions.forEach((opt,oi)=>{
+    const card=document.createElement("div");card.className="card sched-opt-card";
+    const head=document.createElement("div");head.className="sched-opt-head";
+    head.innerHTML='<span class="sched-opt-num">Opción '+(oi+1)+'</span>'
+      +'<input class="sched-opt-name" data-oid="'+opt.id+'" value="'+opt.name.replace(/"/g,"&quot;")+'" maxlength="32" spellcheck="false" title="Clic para renombrar">'
+      +(cnt>1?'<button class="sched-del" data-oid="'+opt.id+'" title="Eliminar">×</button>':"");
+    const grid=document.createElement("div");grid.className="sched";
+    DAYS.forEach((d,di)=>{const val=opt.days[di]||"";const slot=document.createElement("div");
+      slot.className="slot"+(val?" taken":"");
+      slot.innerHTML='<span class="day">'+d+'</span><select data-di="'+di+'" data-oid="'+opt.id+'">'+buildOpts(val)+'</select>';
+      grid.appendChild(slot);});
+    const tags=document.createElement("div");tags.className="sched-opt-tags";
+    const chosen=opt.days.filter(Boolean);
+    if(chosen.length){
+      tags.innerHTML=chosen.map(n=>{const s=state.subjects.find(z=>z.nombre===n);
+        const ap=s?.condicion.trim()==="Aprobada",cu=s?.condicion.trim()==="Cursada",di=s?.disponibilidad==="Disponible";
+        const cls=ap?"soct-y":cu?"soct-c":di?"soct-d":"soct-b";const dot=ap?"✓":cu?"→":di?"○":"–";
+        return'<span class="soct '+cls+'" title="'+n+'">'+dot+' '+n+'</span>';}).join("");
+    }else{tags.innerHTML='<span style="color:var(--muted);font-size:12px;font-style:italic;">Sin materias seleccionadas</span>';}
+    card.appendChild(head);card.appendChild(grid);card.appendChild(tags);container.appendChild(card);
+  });
+  container.querySelectorAll(".sched-opt-name").forEach(inp=>inp.addEventListener("input",()=>{const o=state.schedOptions.find(x=>x.id===+inp.dataset.oid);if(o)o.name=inp.value;persistSched();}));
+  container.querySelectorAll(".sched-del").forEach(btn=>btn.addEventListener("click",()=>{if(!confirm("¿Eliminar esta opción?"))return;state.schedOptions=state.schedOptions.filter(o=>o.id!==+btn.dataset.oid);persistSched();renderSched();}));
+  container.querySelectorAll("select[data-di]").forEach(sel=>sel.addEventListener("change",()=>{const o=state.schedOptions.find(x=>x.id===+sel.dataset.oid);if(o)o.days[+sel.dataset.di]=sel.value;persistSched();renderSched();}));
+}
+function buildPrereqRow(s){
+  const pre=PREREQS[s.codigo]||[];if(!pre.length)return'';
+  const tags=pre.map(p=>{
+    const ps=state.subjects.find(z=>z.codigo===p);if(!ps)return'';
+    const ap=ps.condicion.trim()==="Aprobada",cu=ps.condicion.trim()==="Cursada",di=ps.disponibilidad==="Disponible";
+    const cls=ap?'done':cu?'curs':di?'open':'miss';
+    const icon=ap?'✓':cu?'→':di?'○':'✗';
+    return`<span class="ptag ptag-${cls}">${icon} ${ps.nombre}</span>`;
   }).join('');
-
-  tbody.querySelectorAll('.editable-row').forEach(row => {
-    row.addEventListener('click', () => openModal(Number(row.dataset.codigo)));
+  return`<tr class="xp-row"><td colspan="5"><div class="xp-inner"><span class="xp-lbl">Necesitás para cursar esta materia:</span><div class="xp-tags">${tags}</div></div></td></tr>`;
+}
+function renderTable(){
+  const tb=$("tbody"),q=state.search.toLowerCase();
+  let rows=state.subjects.filter(s=>{
+    if(state.filter==="disp"){if(!(s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible"))return false;}
+    else if(state.filter==="inter"){if(!s.intermedio)return false;}
+    else if(state.filter!=="todas"&&s.condicion!==state.filter)return false;
+    if(q&&!s.nombre.toLowerCase().includes(q)&&!String(s.codigo).includes(q))return false;return true;});
+  const k=state.sortKey,asc=state.sortAsc;
+  rows.sort((a,b)=>{let x=a[k],y=b[k];if(typeof x==="string"){x=x.toLowerCase();y=y.toLowerCase();}return x<y?(asc?-1:1):x>y?(asc?1:-1):0;});
+  $("tblMeta").textContent=rows.length+" de "+state.subjects.length;
+  if(!rows.length){tb.innerHTML="";$("noresult").style.display="block";return;}
+  $("noresult").style.display="none";
+  const blocked=s=>s.condicion==="No aprobada"&&(PREREQS[s.codigo]||[]).length>0;
+  tb.innerHTML=rows.map(s=>{
+    const isXp=state.expandedRows.has(s.codigo);
+    const xpBtn=blocked(s)?`<button class="prq-btn${isXp?' open':''}" data-c="${s.codigo}">${isXp?'▾':'▸'} prereqs</button>`:'';
+    const dispCell=s.disponibilidad==="Disponible"
+      ?'<span class="disp-y">Disponible</span>'
+      :`<span class="disp-n">No disponible</span>${xpBtn}`;
+    const mainRow=`<tr data-c="${s.codigo}"${isXp?' class="row-xp"':''}>`
+      +`<td class="code">${String(s.codigo).padStart(4,"0")}</td>`
+      +`<td><div class="nm-cell">${s.intermedio?'<span class="idot"></span>':''}${s.nombre}</div></td>`
+      +`<td><span class="tag ${s.condicion}">${s.condicion==="No aprobada"?"Pendiente":s.condicion==="Cursada"?"Cursando":"Aprobada"}</span></td>`
+      +`<td>${dispCell}</td>`
+      +`<td class="nota">${s.nota>0?s.nota:"—"}</td>`
+      +`</tr>`;
+    return mainRow+(isXp?buildPrereqRow(s):'');
+  }).join("");
+  // click en fila → abrir modal (salvo que sea el botón prereqs)
+  tb.querySelectorAll("tr[data-c]").forEach(tr=>tr.addEventListener("click",e=>{
+    if(e.target.closest('.prq-btn'))return;
+    openEdit(+tr.dataset.c);
+  }));
+  // click en botón prereqs → toggle expand
+  tb.querySelectorAll(".prq-btn").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const c=+btn.dataset.c;
+    if(state.expandedRows.has(c))state.expandedRows.delete(c);else state.expandedRows.add(c);
+    renderTable();
+  }));
+}
+function renderSidebar(){
+  const list=$("filelist"),q=($("sideSearch").value||"").toLowerCase();
+  list.innerHTML="";
+  ZONES.forEach((z,zi)=>{
+    let items=state.subjects.filter(s=>s.anio===z);
+    if(q) items=items.filter(s=>s.nombre.toLowerCase().includes(q));
+    if(!items.length) return;
+    const done=state.subjects.filter(s=>s.anio===z&&s.condicion==="Aprobada").length;
+    const total=state.subjects.filter(s=>s.anio===z).length;
+    const folder=document.createElement("div");folder.className="folder"+(collapsed[zi]?" collapsed":"");
+    const head=document.createElement("div");head.className="fhead";
+    head.innerHTML='<span class="caret">▼</span>'+z+'<span class="fcount">'+done+'/'+total+'</span>';
+    head.addEventListener("click",()=>{collapsed[zi]=!collapsed[zi];folder.classList.toggle("collapsed");});
+    folder.appendChild(head);
+    const box=document.createElement("div");box.className="fitems";
+    items.forEach(s=>{const el=document.createElement("div");el.className="note"+(state.selected===s.codigo?" active":"");
+      el.innerHTML='<span class="nd" style="background:'+stateColor(s.condicion)+'"></span><span class="nt">'+s.nombre+'</span>';
+      el.addEventListener("click",()=>{select(s.codigo);openEdit(s.codigo);});
+      box.appendChild(el);});
+    folder.appendChild(box);list.appendChild(folder);
   });
 }
+const collapsed=[false,false,false,false,false,false];
 
-/* ======= MODAL ======= */
-let editingCodigo = null;
+function select(code){ state.selected=code; if(GRAPH)GRAPH.select(code); renderSidebar(); }
+function renderAll(changed){ renderStats(); renderYears(); renderTable(); renderSidebar(); if(GRAPH)GRAPH.sync(changed); }
 
-function openModal(codigo) {
-  editingCodigo = codigo;
-  const eff   = getEffectiveData();
-  const s     = eff.find(d => d.codigo === codigo);
-  const orig  = DATA.find(d => d.codigo === codigo);
-  const hasOv = String(codigo) in getOverrides();
-
-  document.getElementById('modalCodigo').textContent = String(codigo).padStart(4, '0');
-  document.getElementById('modalTitle').textContent  = s.nombre;
-  document.getElementById('inputCondicion').value    = s.condicion;
-  document.getElementById('inputNota').value         = s.nota;
-  document.getElementById('resetBtn').style.display  = hasOv ? 'inline-flex' : 'none';
-
-  // Correlativas
-  const prereqsField = document.getElementById('prereqsField');
-  const prereqsList  = document.getElementById('prereqsList');
-  if (orig.prereqs.length) {
-    prereqsList.innerHTML = orig.prereqs.map(p => {
-      const ps = eff.find(d => d.codigo === p);
-      const ok = ps && (ps.condicion === 'Aprobada' || ps.condicion === 'Cursada');
-      const color = ok ? 'var(--approved)' : 'var(--notapproved)';
-      const icon  = ok ? '✓' : '✗';
-      return '<div style="font-size:13px;display:flex;align-items:center;gap:8px;">' +
-        '<span style="color:' + color + ';font-weight:700;width:14px">' + icon + '</span>' +
-        '<span>' + (ps ? ps.nombre : p) + '</span>' +
-        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text-soft);">' +
-          (ps ? ps.condicion : '?') + '</span>' +
-        '</div>';
-    }).join('');
-    prereqsField.style.display = 'block';
-  } else {
-    prereqsField.style.display = 'none';
+/* ===================== GRAPH ===================== */
+let GRAPH=null;
+const gopts={arrows:true,fade:.78,size:1,thick:1,fCenter:.7,fRepel:1.4,fLink:.85,fDist:.8,animate:false};
+function buildGraph(){
+  const canvas=$("graph");if(!canvas)return null;
+  const ctx=canvas.getContext&&canvas.getContext("2d");if(!ctx)return null;
+  let nodes=[],edges=[],byId={},W=0,H=0,DPR=Math.min(window.devicePixelRatio||1,2);
+  let alpha=1,hover=null,drag=null,panning=false,last={x:0,y:0},raf=null,running=false;
+  const cam={x:0,y:0,scale:1};
+  const tip=$("gTip");
+  function make(){
+    nodes=[];edges=[];byId={};
+    const W2=W||900,H2=H||520;
+    // grado de cada materia (prereqs entrantes + salientes)
+    const deg={};
+    state.subjects.forEach(s=>{(PREREQS[s.codigo]||[]).forEach(p=>{deg[s.codigo]=(deg[s.codigo]||0)+1;deg[p]=(deg[p]||0)+1;});});
+    // agrupar por año para distribuir X equitativamente
+    const byYear={};ZONES.forEach(z=>{byYear[z]=state.subjects.filter(s=>s.anio===z);});
+    state.subjects.forEach(s=>{
+      const yi=YEAR_IDX[s.anio]||0;
+      const tY=H2*0.05+yi*(H2*0.86/4.4);
+      const peers=byYear[s.anio]||[s];
+      const xi=peers.indexOf(s);
+      const tX=W2*0.06+(xi/Math.max(peers.length-1,1))*W2*0.88;
+      const d=Math.min(deg[s.codigo]||0,10);
+      const n={id:"s"+s.codigo,type:"subject",codigo:s.codigo,label:s.nombre,
+        baseR:3.2+d*0.42, // nodos más conectados = más grandes
+        x:tX+(Math.random()-.5)*22, y:tY+(Math.random()-.5)*18, vx:0,vy:0};
+      nodes.push(n);byId[n.id]=n;
+    });
+    state.subjects.forEach(s=>{
+      (PREREQS[s.codigo]||[]).forEach(p=>{
+        if(byId["s"+p]) edges.push({a:"s"+p,b:"s"+s.codigo,len:70,k:.030});
+      });
+    });
+    syncColors();
   }
-
-  document.getElementById('editModal').style.display = 'flex';
-  document.getElementById('inputCondicion').focus();
+  function syncColors(){state.subjects.forEach(s=>{const n=byId["s"+s.codigo];if(n){n.color=stateColor(s.condicion);n.done=s.condicion==="Aprobada";n.inter=s.intermedio;}});}
+  function resize(){const r=canvas.getBoundingClientRect();W=r.width;H=r.height;if(W<2||H<2)return;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+  function nr(n){return n.baseR*gopts.size;}
+  function step(){
+    const repMul=gopts.fRepel, linkMul=gopts.fLink, distMul=gopts.fDist, cenMul=gopts.fCenter;
+    for(let i=0;i<nodes.length;i++){const a=nodes[i];
+      for(let j=i+1;j<nodes.length;j++){const b=nodes[j];
+        let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy||0.01,d=Math.sqrt(d2);
+        const rep=(a.type==="subject"&&b.type==="subject"?1600:2400)*repMul/d2;
+        const fx=dx/d*rep,fy=dy/d*rep;a.vx+=fx*alpha;a.vy+=fy*alpha;b.vx-=fx*alpha;b.vy-=fy*alpha;}}
+    edges.forEach(e=>{const a=byId[e.a],b=byId[e.b];let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||0.01;
+      const f=(d-e.len*distMul)*e.k*linkMul;const fx=dx/d*f,fy=dy/d*f;a.vx+=fx*alpha;a.vy+=fy*alpha;b.vx-=fx*alpha;b.vy-=fy*alpha;});
+    const cx=W/2,cy=H/2;
+    nodes.forEach(n=>{if(n===drag)return;
+      if(n.type==="subject"){
+        // estratificación fuerte por año (domina sobre resortes)
+        const sub=state.subjects.find(z=>z.codigo===n.codigo);
+        const yi=YEAR_IDX[sub?.anio]||0;
+        const tY=H*0.05+yi*(H*0.86/4.4);
+        n.vy+=(tY-n.y)*0.028*alpha;          // estratificación Y fuerte
+        n.vx+=(cx-n.x)*0.0004*cenMul*alpha;  // X muy débil, la repulsión distribuye
+      }else{n.vx+=(cx-n.x)*0.0014*cenMul*alpha;n.vy+=(cy-n.y)*0.0014*cenMul*alpha;}
+      if(gopts.animate){n.vx+=(Math.random()-.5)*0.4;n.vy+=(Math.random()-.5)*0.4;}
+      n.vx*=0.84;n.vy*=0.84;n.x+=n.vx;n.y+=n.vy;});
+    alpha*=0.994;const floor=gopts.animate?0.25:0.02;if(alpha<floor)alpha=floor;
+  }
+  function neighbors(n){const s=new Set([n.id]);edges.forEach(e=>{if(e.a===n.id)s.add(e.b);if(e.b===n.id)s.add(e.a);});return s;}
+  function arrow(a,b,tr){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
+    const tx=b.x-ux*(tr+2),ty=b.y-uy*(tr+2),size=4/cam.scale+2;const ang=Math.atan2(uy,ux);
+    ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-size*Math.cos(ang-.4),ty-size*Math.sin(ang-.4));ctx.moveTo(tx,ty);ctx.lineTo(tx-size*Math.cos(ang+.4),ty-size*Math.sin(ang+.4));ctx.stroke();}
+  function draw(){
+    if(W<2||H<2)return;
+    ctx.clearRect(0,0,W,H);
+    // ── bandas de año (screen-fixed horizontal lines) ──
+    const ZONE_COLS=["rgba(232,178,62,.06)","rgba(217,102,59,.05)","rgba(226,77,66,.04)","rgba(150,130,128,.03)","rgba(130,120,110,.03)"];
+    const yearNames=["1° año","2° año","3° año","4° año","5° año"];
+    ZONES.slice(0,5).forEach((z,zi)=>{
+      const yi=YEAR_IDX[z];
+      const worldY=H*0.05+yi*(H*0.86/4.4);
+      const sy=worldY*cam.scale+cam.y;
+      const nextY=(zi<4)?(H*0.05+(yi+1)*(H*0.86/4.4))*cam.scale+cam.y:H;
+      const prevY=(zi>0)?(H*0.05+(yi-1)*(H*0.86/4.4))*cam.scale+cam.y:0;
+      const bH=Math.min(nextY-sy, sy-prevY)*0.92;
+      if(sy+bH>0&&sy-bH<H){
+        ctx.fillStyle=ZONE_COLS[zi]||"rgba(140,130,125,.03)";
+        ctx.fillRect(0,sy-bH,W,bH*2);
+        // línea separadora sutil
+        ctx.strokeStyle="rgba(180,170,160,.07)";ctx.lineWidth=1;ctx.setLineDash([4,8]);
+        ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(W,sy);ctx.stroke();ctx.setLineDash([]);
+        // etiqueta año pegada a la izquierda
+        if(sy>14&&sy<H-14){
+          ctx.fillStyle="rgba(160,150,145,.5)";
+          ctx.font="600 9px 'JetBrains Mono',monospace";
+          ctx.textAlign="left";ctx.textBaseline="middle";
+          ctx.fillText(yearNames[zi],8,sy);
+        }
+      }
+    });
+    ctx.save();ctx.translate(cam.x,cam.y);ctx.scale(cam.scale,cam.scale);
+    // visibilidad por año
+    const _gy=state.graphYears;
+    function nodeVis(n){ if(n.type!=="subject")return true; const sub=state.subjects.find(z=>z.codigo===n.codigo); return _gy.has(ZONES.indexOf(sub?.anio)); }
+    // chain = correlativas bloqueantes cuando se hace hover sobre un nodo bloqueado
+    const _hs=hover&&hover.type==="subject"?state.subjects.find(z=>z.codigo===hover.codigo):null;
+    const _blocked=_hs&&_hs.condicion.trim()!=="Aprobada"&&_hs.disponibilidad!=="Disponible";
+    const chain=_blocked?(()=>{const c=getBlockingChain(hover.codigo);return c.miss.size>0?c:null;})():null;
+    const hi=chain?null:(hover?neighbors(hover):null);
+    edges.forEach(e=>{const a=byId[e.a],b=byId[e.b];if(!a||!b||!nodeVis(a)||!nodeVis(b))return;
+      const inChain=chain&&chain.allIds.has(e.a)&&chain.allIds.has(e.b);
+      const chainMiss=inChain&&(chain.missIds.has(e.a)||chain.missIds.has(e.b)||e.b==="s"+hover.codigo);
+      const act=!chain&&hi&&(e.a===hover.id||e.b===hover.id);
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=inChain?(chainMiss?"rgba(226,77,66,.9)":"rgba(232,178,62,.75)"):act?"rgba(242,104,92,.85)":"rgba(150,130,128,.18)";
+      ctx.lineWidth=((inChain||act)?1.8:0.85)*gopts.thick;ctx.stroke();
+      if(gopts.arrows){ctx.strokeStyle=inChain?(chainMiss?"rgba(226,77,66,.95)":"rgba(232,178,62,.9)"):act?"rgba(242,104,92,.9)":"rgba(162,142,140,.32)";ctx.lineWidth=1*gopts.thick;arrow(a,b,nr(b));}});
+    const labelAlpha=Math.max(0,Math.min(1,(cam.scale-(gopts.fade*1.1))/0.3));
+    nodes.forEach(n=>{
+      if(!nodeVis(n)){return;}
+      const dim=chain?(!chain.allIds.has(n.id)&&n.id!=="s"+hover.codigo):(hi&&!hi.has(n.id)),r=nr(n),sel=n.type==="subject"&&state.selected===n.codigo;
+      const isMiss=chain&&chain.missIds.has(n.id), isDone=chain&&chain.doneIds.has(n.id), isTarget=chain&&n.id==="s"+hover.codigo;
+      const nc=isMiss?"#E24D42":isDone?"#E8B23E":n.color;
+      const glow=isMiss?14:isDone?8:(n.done?8:0);
+      if(sel||isTarget){ctx.shadowColor=sel?"#FFE9D6":"#E24D42";ctx.shadowBlur=sel?16:18;}else if(glow&&!dim){ctx.shadowColor=nc;ctx.shadowBlur=glow;}else ctx.shadowBlur=0;
+      const pend=!n.done&&!sel&&!isMiss&&!isDone&&state.subjects.find(z=>z.codigo===n.codigo)?.condicion==="No aprobada";
+      ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=sel?"#FFE9D6":(dim?"rgba(90,90,110,.35)":nc);ctx.globalAlpha=dim?.4:(pend&&!isTarget?.70:1);ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0;
+      
+      if(n.inter&&!dim){ctx.beginPath();ctx.arc(n.x,n.y,r+2.4,0,Math.PI*2);ctx.strokeStyle="rgba(242,104,92,.75)";ctx.lineWidth=1;ctx.stroke();}
+      const hovd=hover&&n===hover;let la=(hovd||sel?1:labelAlpha);
+      if(dim)la*=.4;
+      if(la>0.04){ctx.globalAlpha=la;ctx.font="500 10px 'Inter',sans-serif";
+        ctx.fillStyle="#D8C9C6";ctx.textAlign="center";ctx.textBaseline="top";
+        const lbl=n.label.length>28?n.label.slice(0,26)+"…":n.label;ctx.fillText(lbl,n.x,n.y+r+3);ctx.globalAlpha=1;}
+    });
+    ctx.restore();
+  }
+  function toWorld(sx,sy){return {x:(sx-cam.x)/cam.scale,y:(sy-cam.y)/cam.scale};}
+  function pick(sx,sy){const w=toWorld(sx,sy);let best=null,bd=1e9;nodes.forEach(n=>{const d=Math.hypot(w.x-n.x,w.y-n.y);const hitR=nr(n)+8/cam.scale;if(d<hitR&&d<bd){bd=d;best=n;}});return best;}
+  function loop(){step();draw();if(running)raf=requestAnimationFrame(loop);}
+  function start(){if(REDUCED){for(let i=0;i<340;i++)step();draw();return;}if(running)return;running=true;loop();}
+  function reheat(){alpha=1;if(REDUCED){for(let i=0;i<200;i++)step();draw();}else start();}
+  function pos(e){const r=canvas.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return {x:p.clientX-r.left,y:p.clientY-r.top};}
+  function onMove(e){
+    const p=pos(e);
+    if(drag){const w=toWorld(p.x,p.y);drag.x=w.x;drag.y=w.y;drag.vx=0;drag.vy=0;alpha=Math.max(alpha,.5);return;}
+    if(panning){cam.x+=p.x-last.x;cam.y+=p.y-last.y;last=p;if(REDUCED)draw();return;}
+    const n=pick(p.x,p.y);if(n!==hover){hover=n;canvas.style.cursor=n?"pointer":"grab";}
+    if(hover){tip.classList.add("on");
+      const s=hover.type==="subject"?state.subjects.find(z=>z.codigo===hover.codigo):null;
+      tip.innerHTML=s?('<div class="tn">'+s.nombre+'</div><div class="tm">'+(s.condicion==="No aprobada"?"Pendiente":s.condicion)+(s.nota>0?" · "+s.nota:"")+(s.intermedio?" · intermedio":"")+'</div>'):"";if(!s)tip.classList.remove("on");
+      let tx=p.x+14,ty=p.y+14;if(tx>W-190)tx=p.x-14-tip.offsetWidth;tip.style.left=tx+"px";tip.style.top=ty+"px";
+    }else tip.classList.remove("on");
+    if(REDUCED&&!running)draw();
+  }
+  function onDown(e){const p=pos(e);const n=pick(p.x,p.y);if(n){drag=n;canvas.classList.add("grabbing");}else{panning=true;last=p;canvas.classList.add("grabbing");}if(e.cancelable)e.preventDefault();}
+  function onUp(){if(drag){drag=null;reheat();}panning=false;canvas.classList.remove("grabbing");}
+  let downXY=null;
+  canvas.addEventListener("mousedown",e=>{downXY=pos(e);onDown(e);});
+  canvas.addEventListener("mousemove",onMove);
+  window.addEventListener("mouseup",onUp);
+  canvas.addEventListener("mouseleave",()=>{hover=null;tip.classList.remove("on");});
+  canvas.addEventListener("click",e=>{const p=pos(e);if(downXY&&Math.hypot(p.x-downXY.x,p.y-downXY.y)>5)return;const n=pick(p.x,p.y);if(!n)return;
+    if(n&&n.type==="subject"){select(n.codigo);openEdit(n.codigo);}});
+  canvas.addEventListener("wheel",e=>{e.preventDefault();const p=pos(e);const f=Math.exp(-e.deltaY*0.0012);const ns=Math.max(0.35,Math.min(3.5,cam.scale*f));const k=ns/cam.scale;cam.x=p.x-(p.x-cam.x)*k;cam.y=p.y-(p.y-cam.y)*k;cam.scale=ns;if(REDUCED||!running)draw();},{passive:false});
+  canvas.addEventListener("touchstart",e=>{downXY=pos(e);onDown(e);},{passive:false});
+  canvas.addEventListener("touchmove",e=>{onMove(e);if(drag||panning)e.preventDefault();},{passive:false});
+  canvas.addEventListener("touchend",e=>{const changed=e.changedTouches?e.changedTouches[0]:null;onUp();if(downXY&&changed){const r=canvas.getBoundingClientRect();const px=changed.clientX-r.left,py=changed.clientY-r.top;if(Math.hypot(px-downXY.x,py-downXY.y)<6){const n=pick(px,py);if(n&&n.type==="subject"){select(n.codigo);openEdit(n.codigo);}}}});
+  window.addEventListener("resize",()=>{resize();if(REDUCED)draw();else reheat();});
+  return {
+    init(){resize();make();start();},
+    resize(){resize();if(REDUCED)draw();},
+    sync(code){syncColors();if(code){const n=byId["s"+code];if(n){n.vx+=(Math.random()-.5)*4;n.vy+=(Math.random()-.5)*4;}reheat();}else if(REDUCED)draw();},
+    rebuild(){make();reheat();},
+    reheat, redraw(){if(REDUCED||!running)draw();},
+    select(){if(REDUCED||!running)draw();},
+    setAnimate(v){gopts.animate=v;if(v)reheat();else if(REDUCED)draw();}
+  };
 }
 
-function closeModal() {
-  document.getElementById('editModal').style.display = 'none';
-  editingCodigo = null;
+/* ===================== EDIT MODAL ===================== */
+function openEdit(codigo){const s=state.subjects.find(x=>x.codigo===codigo);if(!s)return;
+  state.editing=codigo;state.selected=codigo;if(GRAPH)GRAPH.select(codigo);renderSidebar();
+  $("mCode").textContent="Código "+String(s.codigo).padStart(4,"0");$("mTitle").textContent=s.nombre;
+  $("mYear").textContent=s.anio+(s.intermedio?" · intermedio":"");syncModal(s);$("backdrop").classList.add("open");$("mClose").focus();}
+function syncModal(s){$("segEstado").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===s.condicion));
+  $("notaRange").value=s.nota;$("notaVal").textContent=s.nota>0?s.nota:"—";
+  const bd=$("swDispBadge");bd.textContent=s.disponibilidad==="Disponible"?"✓ Sí":"– No";bd.style.color=s.disponibilidad==="Disponible"?"var(--done)":"var(--muted)";
+  const pre=PREREQS[s.codigo]||[],sec=$("prereqSection");
+  if(pre.length>0&&s.condicion.trim()!=="Aprobada"){sec.style.display="block";
+    $("prereqList").innerHTML=pre.map(p=>{const ps=state.subjects.find(z=>z.codigo===p);if(!ps)return"";
+      const ap=ps.condicion.trim()==="Aprobada",cu=ps.condicion.trim()==="Cursada";
+      const cls=ap?"done":cu?"curs":"miss";const dot=ap?"var(--done)":cu?"var(--curse)":"#E24D42";
+      const badge=ap?"✓ Aprobada":cu?"→ Cursando":ps.disponibilidad==="Disponible"?"puede cursarse":"bloqueada";
+      return`<div class="prereq-item ${cls}"><span class="pdot" style="background:${dot}"></span><span class="pname">${ps.nombre}</span><span class="pbadge">${badge}</span></div>`;}).join("");}
+  else sec.style.display="none";$("swInter").classList.toggle("on",!!s.intermedio);}
+function editing(){return state.subjects.find(x=>x.codigo===state.editing);}
+function changed(){persist();renderAll(state.editing);const s=editing();if(s)syncModal(s);}
+$("segEstado").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{const s=editing();if(!s)return;s.condicion=b.dataset.v;if(s.condicion==="No aprobada")s.nota=0;if(s.condicion==="Aprobada"&&s.nota<4)s.nota=4;changed();}));
+$("notaRange").addEventListener("input",e=>{const s=editing();if(!s)return;s.nota=+e.target.value;$("notaVal").textContent=s.nota>0?s.nota:"—";if(s.nota>=4&&s.condicion==="No aprobada")s.condicion="Aprobada";if(s.nota===0&&s.condicion==="Aprobada")s.condicion="No aprobada";changed();});
+
+$("swInter").addEventListener("click",()=>{const s=editing();if(!s)return;s.intermedio=!s.intermedio;changed();});
+
+$("swInter").addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();$("swInter").click();}});
+function closeModal(){$("backdrop").classList.remove("open");state.editing=null;}
+$("mClose").addEventListener("click",closeModal);
+$("backdrop").addEventListener("click",e=>{if(e.target===$("backdrop"))closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("backdrop").classList.contains("open"))closeModal();});
+
+/* ===================== TABS / PANES ===================== */
+function countTransitiveUnlocks(codigo, apSet, targetFilter){
+  const sim=new Set([...apSet,codigo]);let cnt=0,changed=true;
+  while(changed){changed=false;state.subjects.forEach(s=>{
+    if(sim.has(s.codigo))return;if(targetFilter&&!targetFilter(s))return;
+    if((PREREQS[s.codigo]||[]).every(p=>sim.has(p))){sim.add(s.codigo);cnt++;changed=true;}
+  });}
+  return cnt;
 }
-
-document.getElementById('editForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const nota = parseFloat(document.getElementById('inputNota').value);
-  saveOverride(editingCodigo, {
-    condicion: document.getElementById('inputCondicion').value,
-    nota:      isNaN(nota) ? 0 : Math.min(10, Math.max(0, nota)),
-  });
-  closeModal();
-  refreshAll();
-});
-
-document.getElementById('cancelBtn').addEventListener('click', closeModal);
-
-document.getElementById('resetBtn').addEventListener('click', function() {
-  resetOverride(editingCodigo);
-  closeModal();
-  refreshAll();
-});
-
-document.getElementById('editModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-});
-
-/* ======= FILTERS ======= */
-document.querySelectorAll('.chip-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    render();
-  });
-});
-
-document.getElementById('searchInput').addEventListener('input', function() {
-  currentSearch = this.value.trim();
-  render();
-});
-
-document.querySelectorAll('th[data-sort]').forEach(th => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.sort;
-    if (sortKey === key) { sortAsc = !sortAsc; } else { sortKey = key; sortAsc = true; }
-    render();
-  });
-});
-
-/* ======= INIT ======= */
-function refreshAll() {
-  recalcStats();
-  renderYears();
-  render();
+function renderPlanner(){
+  const n=Math.max(1,Math.min(8,parseInt($("planN").value)||4));
+  const apSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
+  const cursando=state.subjects.filter(s=>s.condicion.trim()==="Cursada");
+  const available=state.subjects.filter(s=>s.condicion==="No aprobada"&&s.disponibilidad==="Disponible");
+  // info cursando
+  $("planCursando").innerHTML=cursando.length
+    ?'Ya cursando: '+cursando.map(s=>'<b>'+s.nombre.split(' ').slice(0,3).join(' ')+'</b>').join(', ')
+    :'<span style="color:var(--muted)">No estás cursando ninguna materia actualmente.</span>';
+  // intermedio: cuántas quedan
+  const interPend=state.subjects.filter(s=>INTERMEDIO_CODES.has(s.codigo)&&s.condicion.trim()!=="Aprobada"&&s.condicion.trim()!=="Cursada");
+  $("planInterSub").textContent='— faltan '+interPend.length+' de '+INTERMEDIO_CODES.size;
+  $("planGradSub").textContent='— faltan '+(state.subjects.length-apSet.size-cursando.length)+' materias';
+  // recomendación título intermedio
+  const interAvail=available.filter(s=>INTERMEDIO_CODES.has(s.codigo));
+  const interScored=interAvail.map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,x=>INTERMEDIO_CODES.has(x.codigo))}))
+    .sort((a,b)=>b.score-a.score).slice(0,n);
+  // si faltan slots, completar con disponibles que desbloqueen materias del intermedio
+  if(interScored.length<n){
+    const extra=available.filter(s=>!INTERMEDIO_CODES.has(s.codigo))
+      .map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,x=>INTERMEDIO_CODES.has(x.codigo))}))
+      .filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+    interScored.push(...extra.slice(0,n-interScored.length));
+  }
+  // recomendación graduación
+  const gradScored=available.map(s=>({s,score:countTransitiveUnlocks(s.codigo,apSet,null)}))
+    .sort((a,b)=>b.score-a.score).slice(0,n);
+  function renderList(listId, scored, isInter){
+    const el=$(listId);
+    if(!scored.length){el.innerHTML='<div class="plan-empty">No hay materias disponibles para este objetivo.</div>';return;}
+    el.innerHTML=scored.map((x,i)=>{
+      const s=x.s,inInter=INTERMEDIO_CODES.has(s.codigo);
+      const badge=isInter?(inInter?'':'<span style="font-size:10px;color:var(--muted)"> (habilita intermedio)</span>')
+        :(inInter?'<span style="font-size:10px;color:var(--done)"> ✓ intermedio</span>':'');
+      const unl=x.score;
+      return`<div class="prec-card" onclick="openEdit(${s.codigo})">
+        <div class="prec-num">${i+1}</div>
+        <div class="prec-body">
+          <div class="prec-name">${s.nombre}${badge}</div>
+          <div class="prec-meta">Código ${String(s.codigo).padStart(4,'0')} · ${s.anio}${unl>0?' · <b>+'+unl+' materias desbloqueadas</b>':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  renderList("planInterList", interScored, true);
+  renderList("planGradList", gradScored, false);
 }
+function go(pane){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.pane===pane));
+  document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("active",p.dataset.pane===pane));
+  $("rightPanel").style.display = pane==="graph" ? "" : "none";
+  if(pane==="graph"&&GRAPH){GRAPH.resize();GRAPH.reheat();}
+  if(pane==="avance"&&!state.avanceShown){state.avanceShown=true;revealAvance();}
+  if(pane==="planner") renderPlanner(); if(pane==="cronograma"){renderSched();renderOfertaBar();renderSubPills();}
+  document.getElementById("leftPanel").classList.remove("open");
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>go(t.dataset.pane)));
 
-refreshAll();
+/* ===================== FILTERS / SORT / SEARCH ===================== */
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");state.filter=c.dataset.f;renderTable();}));
+$("search").addEventListener("input",e=>{state.search=e.target.value.trim();renderTable();});
+$("planN").addEventListener("input",()=>renderPlanner());
+$("sideSearch").addEventListener("input",renderSidebar);
+document.querySelectorAll("th[data-s]").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.s;if(state.sortKey===k)state.sortAsc=!state.sortAsc;else{state.sortKey=k;state.sortAsc=true;}document.querySelectorAll("th .ar").forEach(a=>a.textContent="");th.querySelector(".ar").textContent=state.sortAsc?"▲":"▼";renderTable();}));
+$("collapseAll").addEventListener("click",()=>{const anyOpen=collapsed.some(c=>!c);for(let i=0;i<collapsed.length;i++)collapsed[i]=anyOpen;renderSidebar();});
+
+/* ===================== GRAPH CONTROLS ===================== */
+function bindRange(id,valId,fn,fmt){const el=$(id);el.addEventListener("input",()=>{const v=+el.value;fn(v);if(valId)$(valId).textContent=fmt?fmt(v):v;if(GRAPH)GRAPH.redraw();});}
+bindRange("cFade","vFade",v=>gopts.fade=v/100,v=>(v/100).toFixed(2));
+bindRange("cSize","vSize",v=>gopts.size=v/100,v=>(v/100).toFixed(1));
+bindRange("cThick","vThick",v=>gopts.thick=v/100,v=>(v/100).toFixed(1));
+function reheatRange(id,valId,fn,fmt){const el=$(id);el.addEventListener("input",()=>{const v=+el.value;fn(v);if(valId)$(valId).textContent=fmt?fmt(v):v;if(GRAPH)GRAPH.reheat();});}
+reheatRange("fCenter","vCenter",v=>gopts.fCenter=v/100,v=>(v/100).toFixed(1));
+reheatRange("fRepel","vRepel",v=>gopts.fRepel=v/100,v=>(v/100).toFixed(1));
+reheatRange("fLink","vLink",v=>gopts.fLink=v/100,v=>(v/100).toFixed(1));
+reheatRange("fDist","vDist",v=>gopts.fDist=v/100,v=>(v/100).toFixed(1));
+$("cArrows").addEventListener("click",()=>{gopts.arrows=!gopts.arrows;$("cArrows").classList.toggle("on",gopts.arrows);if(GRAPH)GRAPH.redraw();});
+$("cArrows").addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();$("cArrows").click();}});
+$("cAnimate").addEventListener("click",()=>{const on=!gopts.animate;if(GRAPH)GRAPH.setAnimate(on);$("cAnimate").textContent=on?"Detener":"Animar";$("cAnimate").style.background=on?"var(--surface-3)":"";$("cAnimate").style.color=on?"var(--text)":"";});
+document.querySelectorAll(".rsec .rh").forEach(h=>h.addEventListener("click",()=>h.parentElement.classList.toggle("collapsed")));
+$("rpReset").addEventListener("click",()=>{
+  gopts.arrows=true;gopts.fade=.78;gopts.size=1;gopts.thick=1;gopts.fCenter=.7;gopts.fRepel=1.4;gopts.fLink=.85;gopts.fDist=.8;
+  $("cArrows").classList.add("on");
+  [["cFade",78],["cSize",100],["cThick",100],["fCenter",70],["fRepel",140],["fLink",90],["fDist",80]].forEach(([id,v])=>$(id).value=v);
+  ["vFade","vSize","vThick","vCenter","vRepel","vLink","vDist"].forEach((id,i)=>{const vals=[0.78,1,1,0.7,1.4,0.9,0.8];$(id).textContent=vals[i].toFixed(vals[i]%1===0?1:2);});
+  $("vFade").textContent="0.78";
+  if(GRAPH)GRAPH.reheat();toast("Controles restablecidos");
+});
+$("reheatBtn2").addEventListener("click",()=>{if(GRAPH)GRAPH.reheat();});
+
+/* ===================== BACKUP / RESET ===================== */
+function doExport(){const blob=new Blob([JSON.stringify({subjects:state.subjects,schedOptions:state.schedOptions,ts:new Date().toISOString()},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="carrera-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href);toast("Backup descargado");}
+$("btnExport").addEventListener("click",doExport);
+$("btnImport").addEventListener("click",()=>$("fileInput").click());
+$("fileInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.subjects))state.subjects=d.subjects;else if(Array.isArray(d))state.subjects=d;if(Array.isArray(d.schedOptions))state.schedOptions=d.schedOptions;else if(Array.isArray(d.sched))state.schedOptions=[{id:1,name:"Opción 1",days:d.sched}];persist();persistSched();if(GRAPH)GRAPH.rebuild();renderAll();renderSched();toast("Datos restaurados");}catch(err){toast("No pude leer ese archivo");}};r.readAsText(f);e.target.value="";});
+$("btnReset").addEventListener("click",()=>{if(confirm("¿Volver a los datos originales de tu planilla?")){state.subjects=JSON.parse(JSON.stringify(SEED));state.schedOptions=[{id:1,name:"Opción 1",days:["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""]}];persist();persistSched();if(GRAPH)GRAPH.rebuild();renderAll();renderSched();toast("Restablecido");}});
+
+/* mobile panel toggles */
+$("tglLeft").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
+$("tglRight").addEventListener("click",()=>{go("graph");$("rightPanel").classList.toggle("open");});
+
+$("btnImportPDF").addEventListener("click",()=>$("pdfInput").click());
+$("pdfInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;importOfertaPDF(f);e.target.value="";});
+function renderSubPills(){
+  recalcDisp();  // garantizar que disponibilidades estén al día
+  const box=$("subPills");if(!box)return;box.innerHTML="";
+  if(!state.autoSelected)state.autoSelected=new Set();
+  const apSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Aprobada").map(s=>s.codigo));
+  const cursSet=new Set(state.subjects.filter(s=>s.condicion.trim()==="Cursada").map(s=>s.codigo));
+  const disponibles=state.subjects.filter(s=>s.disponibilidad==="Disponible"&&!apSet.has(s.codigo));
+  if(!disponibles.length){box.innerHTML='<span style="color:var(--muted);font-size:12.5px;font-style:italic;">No tenés materias disponibles para cursar.</span>';updateSubCount();return;}
+  disponibles.forEach(s=>{
+    const ofRow=(state.oferta||[]).find(r=>r[0]===s.codigo);
+    const nComs=ofRow?ofRow[1].filter(c=>c[1]).length:0;
+    const noOf=!nComs;
+    const sel=state.autoSelected.has(s.codigo);
+    const yi=({Primer:"1°",Segundo:"2°",Tercer:"3°",Cuarto:"4°",Quinto:"5°",Transversales:"T"})[s.anio.split(" ")[0]]||"";
+    const curs=cursSet.has(s.codigo);
+    const pill=document.createElement("button");
+    pill.className="spill"+(sel?" sel":"")+(noOf?" no-oferta":"");
+    pill.dataset.c=s.codigo;
+    pill.title=s.nombre+(noOf?" (sin comisiones en la oferta)":" ·  "+nComs+" comisiones")+(curs?" · Cursando actualmente":"");
+    pill.innerHTML='<span class="sp-yr">'+yi+'</span>'
+      +'<span class="sp-nm">'+(curs?"→ ":"")+s.nombre+'</span>'
+      +(nComs?'<span class="sp-coms">×'+nComs+'</span>':"");
+    if(!noOf) pill.addEventListener("click",()=>{
+      if(state.autoSelected.has(s.codigo))state.autoSelected.delete(s.codigo);
+      else state.autoSelected.add(s.codigo);
+      pill.classList.toggle("sel");
+      updateSubCount();
+    });
+    box.appendChild(pill);
+  });
+  updateSubCount();
+}
+function updateSubCount(){
+  const n=state.autoSelected?state.autoSelected.size:0;
+  const el=$("ssCount");if(el)el.textContent=n+" seleccionada"+(n===1?"":"s");
+  const btn=$("btnAutoSched");if(btn)btn.disabled=n===0;
+  const cc=$("combCount");if(cc&&!n)cc.textContent="";
+}
+// Listeners del cronograma via event delegation (el pane puede no estar activo al init)
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.id==="btnAutoSched"||t.closest("#btnAutoSched")){
+    if(!state.autoSelected||!state.autoSelected.size)return;
+    const turno=$("autoTurno").value;
+    const prefDias=[...document.querySelectorAll(".dpk.on")].map(b=>b.dataset.d);
+    const res=generateCombinations([...state.autoSelected],turno,prefDias);
+    renderAutoResults(res);
+  }
+  if(t.id==="ssClear"){
+    state.autoSelected=new Set();
+    document.querySelectorAll(".spill.sel").forEach(p=>p.classList.remove("sel"));
+    updateSubCount();$("autoResults").innerHTML="";$("combCount").textContent="";
+  }
+  if(t.classList.contains("dpk")){
+    if(document.querySelectorAll(".dpk.on").length===1&&t.classList.contains("on"))return;
+    t.classList.toggle("on");
+  }
+});
+$("addSchedOpt").addEventListener("click",()=>{
+  state.schedOptions.push({id:Date.now(),name:"Opción "+(state.schedOptions.length+1),days:["","","","","",""]});
+  persistSched();renderSched();
+  setTimeout(()=>$("addSchedOpt").scrollIntoView({behavior:"smooth",block:"end"}),60);
+});
+// Filtros de año del grafo
+document.querySelectorAll(".yr-f").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const yi=+btn.dataset.yi;
+    if(state.graphYears.has(yi)){
+      if(state.graphYears.size>1){state.graphYears.delete(yi);btn.classList.remove("on");}
+    }else{state.graphYears.add(yi);btn.classList.add("on");}
+    if(GRAPH)GRAPH.redraw();
+  });
+});
+let toastT;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+
+/* count-up + year fill when Avance opens */
+function countUp(el,to,o){o=o||{};const dec=o.decimals||0,dur=o.dur||1000,small=o.small||"";const start=performance.now(),ease=t=>1-Math.pow(1-t,3);(function fr(now){const p=Math.min(1,(now-start)/dur),v=to*ease(p);const num=dec?v.toFixed(dec):Math.round(v);el.innerHTML=num+(small?"<small>"+small+"</small>":"");if(p<1)requestAnimationFrame(fr);})(start);}
+function revealAvance(){renderYears();if(REDUCED)return;const d=stats();
+  countUp($("sPct"),d.pct,{dur:1000,small:"%"});countUp($("sProm"),d.prom,{decimals:2,dur:1000});countUp($("sAprob"),d.ap,{dur:900,small:" / "+d.t});countUp($("sDisp"),d.disp,{dur:800});countUp($("sInter"),d.interDone,{dur:1000,small:" / "+d.inter});
+  const fills=$("years").querySelectorAll(".fill"),wanted=[];ZONES.forEach(z=>{const it=state.subjects.filter(s=>s.anio===z);if(it.length){const dn=it.filter(s=>s.condicion==="Aprobada").length;wanted.push(Math.round(dn/it.length*100));}});
+  fills.forEach((f,i)=>{f.style.transitionDelay=(i*0.08)+"s";f.style.width="0%";requestAnimationFrame(()=>requestAnimationFrame(()=>f.style.width=wanted[i]+"%"));});}
+
+/* ===================== INIT ===================== */
+recalcIntermedio();
+recalcDisp();
+GRAPH=buildGraph();
+renderAll(); renderSched();
+if(GRAPH) GRAPH.init();
 </script>
 </body>
 </html>
