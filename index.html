@@ -123,7 +123,14 @@
   .prec-name{font-size:13px;font-weight:500;margin-bottom:4px;}
   .prec-meta{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);}
   .prec-meta b{color:var(--done);}
+  .prec-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+  .pbg{font-family:'JetBrains Mono';font-size:9.5px;padding:2px 7px;border-radius:5px;border:1px solid var(--line-2);color:var(--muted);}
+  .pbg-inter{color:var(--done);border-color:rgba(232,178,62,.3);background:rgba(232,178,62,.08);}
+  .pbg-chain{color:var(--curse);border-color:rgba(217,102,59,.3);background:rgba(217,102,59,.08);}
+  .pbg-noof{color:#E24D42;border-color:rgba(226,77,66,.3);background:rgba(226,77,66,.07);}
   .plan-empty{font-size:13px;color:var(--muted);font-style:italic;padding:20px 0;}
+  .plan-proj{margin:0 0 22px;padding:13px 16px;font-size:12.5px;color:var(--text-2);line-height:1.6;}
+  .plan-proj b{color:var(--done);}
   @media (max-width:640px){.plan-cols{grid-template-columns:1fr;}}
 
   /* Avance / Cronograma / Legajo panes */
@@ -142,11 +149,30 @@
   @keyframes statpulse{0%{transform:scale(1);}28%{transform:scale(1.13);}100%{transform:scale(1);}}
   .stat .v.pulse{animation:statpulse .42s cubic-bezier(.3,1.3,.5,1);}
   .years{display:flex;flex-direction:column;gap:11px;padding:20px 22px;}
-  .yr{display:grid;grid-template-columns:150px 1fr 100px;align-items:center;gap:14px;}
+  .yr{display:grid;grid-template-columns:150px 1fr 118px;align-items:center;gap:14px;}
   .yr .nm{font-size:13px;font-weight:600;}
-  .yr .track{height:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:2px;overflow:hidden;}
-  .yr .fill{height:100%;background:linear-gradient(90deg,#9A6B1E,var(--done));border-radius:2px;box-shadow:0 0 10px -2px var(--done);transition:width .9s cubic-bezier(.16,.84,.28,1);}
+  /* Barra apilada: aprobadas + cursando + disponibles. Una sola barra de "avance"
+     escondía que buena parte de lo pendiente ya está habilitado para cursar. */
+  .yr .track{height:9px;background:var(--bg-2);border:1px solid var(--line);border-radius:3px;overflow:hidden;display:flex;}
+  .yr .fill{height:100%;transition:width .9s cubic-bezier(.16,.84,.28,1);}
+  .yr .fill.f-ap{background:linear-gradient(90deg,#9A6B1E,var(--done));box-shadow:0 0 10px -2px var(--done);}
+  .yr .fill.f-cu{background:var(--curse);}
+  .yr .fill.f-di{background:rgba(226,77,66,.30);}
   .yr .r{text-align:right;font-family:'JetBrains Mono';font-size:12px;color:var(--muted);} .yr .r b{color:var(--text);}
+  .yr-legend{display:flex;gap:16px;flex-wrap:wrap;padding:4px 22px 18px;font-size:11px;color:var(--muted);}
+  .yr-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .yr-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+  /* Histograma de notas */
+  .hist{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:18px 22px 16px;align-items:end;height:150px;}
+  .hcol{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;}
+  .hcol .hv{font-family:'JetBrains Mono';font-size:10px;color:var(--text-2);}
+  .hcol .bar{width:100%;border-radius:4px 4px 0 0;min-height:3px;background:linear-gradient(180deg,var(--done),#8A5F1B);transition:height .7s cubic-bezier(.16,.84,.28,1);}
+  .hcol.zero .bar{background:var(--line-2);}
+  .hcol .hl{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);}
+  .hist-empty{padding:26px;text-align:center;color:var(--muted);font-style:italic;font-size:12.5px;}
+  .card-h{display:flex;align-items:baseline;gap:10px;padding:14px 22px 0;}
+  .card-h .ct{font-size:13.5px;font-weight:600;}
+  .card-h .cs{font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);margin-left:auto;}
   .sched{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:18px 20px;}
   .slot{display:flex;flex-direction:column;gap:6px;}
   .slot .day{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
@@ -159,6 +185,30 @@
   .slot.taken .slot-hint{color:var(--done);}
   .slot-hint.warn{color:#E24D42;}
   .slot.warn select{border-color:rgba(226,77,66,.5);}
+  /* ── Grilla semanal ── */
+  .wkwrap{border-top:1px solid var(--line);padding:14px 18px 16px;}
+  .wk{display:grid;grid-template-columns:34px repeat(6,1fr);gap:4px;}
+  .wk-hd{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:5px;}
+  .wk-col{position:relative;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .wk-col.off{background:repeating-linear-gradient(45deg,transparent,transparent 5px,rgba(120,110,110,.05) 5px,rgba(120,110,110,.05) 10px);}
+  .wk-ax{position:relative;}
+  .wk-ax span{position:absolute;right:5px;font-family:'JetBrains Mono';font-size:9px;color:var(--faint);transform:translateY(-50%);}
+  .wk-rule{position:absolute;left:0;right:0;height:1px;background:var(--line);opacity:.6;}
+  .wk-blk{position:absolute;left:2px;right:2px;border-radius:5px;padding:3px 5px;overflow:hidden;background:rgba(226,77,66,.16);border:1px solid rgba(226,77,66,.42);}
+  .wk-blk .wb-n{font-size:10px;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .wk-blk .wb-t{font-family:'JetBrains Mono';font-size:8.5px;color:var(--text-2);}
+  .wk-blk.clash{background:rgba(226,77,66,.4);border-color:#E24D42;}
+  .wk-blk.virt{background:rgba(232,178,62,.14);border-color:rgba(232,178,62,.4);}
+  .wk-foot{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-family:'JetBrains Mono';font-size:10.5px;color:var(--muted);}
+  .wk-foot b{color:var(--text-2);font-weight:600;}
+  .wk-foot .clash-warn{color:#E24D42;}
+  /* En pantallas angostas la grilla no se comprime: scrollea dentro de su caja en vez
+     de aplastar los seis días hasta volverlos ilegibles. */
+  @media (max-width:720px){
+    .wkwrap{overflow-x:auto;}
+    .wk{min-width:520px;}
+    .sched{grid-template-columns:repeat(2,1fr);}
+  }
   .sched-filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:0 2px;}
   .sfl{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);cursor:pointer;user-select:none;}
   .sfl input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
@@ -240,12 +290,16 @@
   .chip{font-family:'JetBrains Mono';font-size:11px;padding:7px 12px;border-radius:20px;border:1px solid var(--line-2);background:var(--surface);color:var(--text-2);}
   .chip:hover{border-color:var(--violet);color:var(--text);}
   .chip.active{background:var(--violet);color:#120E0E;border-color:var(--violet);font-weight:600;}
+  .chip .cn{opacity:.65;margin-left:5px;}
+  .chip.active .cn{opacity:.75;}
   .tbl-wrap{overflow-x:auto;}
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:660px;}
   thead th{text-align:left;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);padding:11px 15px;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line);}
   thead th .ar{color:var(--violet);font-size:9px;}
   tbody td{padding:10px 15px;border-bottom:1px solid var(--line);}
-  tbody tr{cursor:pointer;} tbody tr:hover{background:var(--surface-2);} tbody tr:last-child td{border-bottom:none;}
+  tbody tr[data-c]{cursor:pointer;} tbody tr:hover{background:var(--surface-2);} tbody tr:last-child td{border-bottom:none;}
+  tbody tr[data-c]:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;background:var(--surface-2);}
+  thead th[aria-sort]{color:var(--text-2);}
   td.code{font-family:'JetBrains Mono';color:var(--faint);font-size:11.5px;}
   td.nota{font-family:'JetBrains Mono';font-weight:600;text-align:center;}
   .nm-cell{display:flex;align-items:center;gap:8px;}
@@ -258,6 +312,7 @@
   .tag.t-cu{background:rgba(217,102,59,.15);color:var(--curse);} .tag.t-cu::before{background:var(--curse);box-shadow:0 0 6px var(--curse);}
   .tag.t-no{background:rgba(111,101,96,.18);color:var(--text-2);} .tag.t-no::before{background:var(--todo);}
   .disp-y{color:var(--done);font-weight:600;font-size:12px;} .disp-n{color:var(--faint);font-size:12px;}
+  .disp-warn{color:#E24D42;cursor:help;margin-left:2px;font-weight:700;}
   .noresult{padding:40px;text-align:center;color:var(--muted);font-style:italic;}
   .prq-btn{font-family:'JetBrains Mono';font-size:10px;padding:2px 7px 3px;border-radius:5px;border:1px solid rgba(226,77,66,.3);background:rgba(226,77,66,.07);color:#E86055;margin-left:7px;cursor:pointer;vertical-align:middle;transition:background .12s;line-height:1.6;}
   .prq-btn:hover{background:rgba(226,77,66,.18);}
@@ -406,6 +461,7 @@
           </div>
           <div class="plan-cursando" id="planCursando"></div>
         </div>
+        <div class="card plan-proj" id="planProj"></div>
         <div class="plan-cols">
           <div class="plan-col inter">
             <h3>Para el título intermedio <span class="plan-sub" id="planInterSub"></span></h3>
@@ -419,15 +475,30 @@
       </section>
 
       <section class="pane scroll" data-pane="avance">
-        <h2>Avance por año <span class="meta" id="yearMeta">–</span></h2>
+        <h2>Avance de la carrera <span class="meta" id="yearMeta">–</span></h2>
         <div class="stats">
           <div class="card stat hl"><div class="k">Avance</div><div class="v" id="sPct">–</div><div class="sub" id="sPctSub">–</div></div>
           <div class="card stat"><div class="k">Promedio</div><div class="v" id="sProm">–</div><div class="sub" id="sPromSub">–</div></div>
           <div class="card stat"><div class="k">Aprobadas</div><div class="v" id="sAprob">–</div><div class="sub">con final</div></div>
           <div class="card stat"><div class="k">Disponibles</div><div class="v" id="sDisp">–</div><div class="sub">sin aprobar</div></div>
           <div class="card stat"><div class="k">Intermedio</div><div class="v" id="sInter">–</div><div class="sub" id="sInterSub">Analista</div></div>
+          <div class="card stat"><div class="k">Cursando</div><div class="v" id="sCurs">–</div><div class="sub" id="sCursSub">final pendiente</div></div>
+          <div class="card stat"><div class="k">Faltan</div><div class="v" id="sProj">–</div><div class="sub" id="sProjSub">cuatrimestres</div></div>
         </div>
-        <div class="card"><div class="years" id="years"></div></div>
+        <div class="card">
+          <div class="card-h"><span class="ct">Avance por año</span><span class="cs" id="yearsSub"></span></div>
+          <div class="years" id="years"></div>
+          <div class="yr-legend">
+            <span><i style="background:var(--done)"></i>Aprobada</span>
+            <span><i style="background:var(--curse)"></i>Cursando</span>
+            <span><i style="background:rgba(226,77,66,.30)"></i>Disponible</span>
+            <span><i style="background:var(--bg-2);border:1px solid var(--line-2)"></i>Bloqueada</span>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px;">
+          <div class="card-h"><span class="ct">Distribución de notas</span><span class="cs" id="histSub"></span></div>
+          <div id="hist"></div>
+        </div>
       </section>
 
       <section class="pane scroll" data-pane="cronograma">
@@ -508,16 +579,20 @@
           <button class="chip" data-f="No aprobada">Pendientes</button>
           <button class="chip" data-f="disp">Disponibles</button>
           <button class="chip" data-f="inter">Intermedio</button>
+          <button class="btn" id="btnCsv" title="Descargar el listado filtrado en CSV">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            CSV
+          </button>
         </div>
         <div class="card" style="overflow:hidden;">
           <div class="tbl-wrap">
           <table><thead><tr>
-            <th data-s="codigo" scope="col">Código <span class="ar"></span></th>
-            <th data-s="nombre" scope="col">Materia <span class="ar"></span></th>
-            <th data-s="anio" scope="col">Año <span class="ar"></span></th>
-            <th data-s="condicion" scope="col">Estado <span class="ar"></span></th>
-            <th data-s="disponibilidad" scope="col">Disponibilidad <span class="ar"></span></th>
-            <th data-s="nota" scope="col">Nota <span class="ar"></span></th>
+            <th data-s="codigo" scope="col" aria-sort="ascending">Código <span class="ar"></span></th>
+            <th data-s="nombre" scope="col" aria-sort="none">Materia <span class="ar"></span></th>
+            <th data-s="anio" scope="col" aria-sort="none">Año <span class="ar"></span></th>
+            <th data-s="condicion" scope="col" aria-sort="none">Estado <span class="ar"></span></th>
+            <th data-s="disponibilidad" scope="col" aria-sort="none">Disponibilidad <span class="ar"></span></th>
+            <th data-s="nota" scope="col" aria-sort="none">Nota <span class="ar"></span></th>
           </tr></thead><tbody id="tbody"></tbody></table>
           </div>
           <div class="noresult" id="noresult" style="display:none;">Sin resultados.</div>
@@ -536,12 +611,15 @@
             <div class="grp"><span class="sw" style="background:var(--done)"></span>Aprobada</div>
             <div class="grp"><span class="sw" style="background:var(--curse)"></span>Cursando</div>
             <div class="grp"><span class="sw" style="background:var(--todo)"></span>Pendiente</div>
-            <div class="grp"><span class="sw" style="background:var(--violet)"></span>Año / raíz</div>
+            <div class="grp"><span class="sw" style="background:transparent;border:1.5px solid rgba(242,104,92,.75)"></span>Anillo = cuenta para el intermedio</div>
+            <div class="grp"><span class="sw" style="background:var(--violet)"></span>Hover en bloqueada = correlativas que faltan</div>
           </div>
         </div>
         <div class="rsec"><div class="rh"><span class="caret">▼</span>Pantalla</div>
           <div class="rb">
-            <div class="row-toggle">Flechas <span class="switch on" id="cArrows" role="switch" tabindex="0"></span></div>
+            <div class="row-toggle">Flechas <span class="switch on" id="cArrows" role="switch" tabindex="0" aria-checked="true" aria-label="Mostrar flechas de correlatividad"></span></div>
+            <div class="row-toggle">Resaltar disponibles <span class="switch" id="cDisp" role="switch" tabindex="0" aria-checked="false" aria-label="Resaltar materias disponibles para cursar"></span></div>
+            <div class="row-toggle">Atenuar aprobadas <span class="switch" id="cDim" role="switch" tabindex="0" aria-checked="false" aria-label="Atenuar materias ya aprobadas"></span></div>
             <div class="ctl"><label>Umbral de texto <b id="vFade">0.5</b></label><input type="range" id="cFade" min="0" max="100" value="50"></div>
             <div class="ctl"><label>Tamaño de nodo <b id="vSize">1.0</b></label><input type="range" id="cSize" min="30" max="220" value="100"></div>
             <div class="ctl"><label>Grosor de enlace <b id="vThick">1.0</b></label><input type="range" id="cThick" min="30" max="300" value="100"></div>
@@ -579,7 +657,7 @@
       <div class="tgl derived">Disponible <span class="dbadge" id="swDispBadge"></span></div>
       <div class="tgl derived">Intermedio <span class="dbadge" id="swInterBadge"></span></div>
     </div>
-    <p class="derived-note">Disponibilidad y título intermedio se calculan solos a partir de las correlativas y del plan oficial.</p>
+    <p class="derived-note" id="derivedNote">Disponibilidad y título intermedio se calculan solos a partir de las correlativas y del plan oficial.</p>
   </div>
   <div class="modal-foot"><button class="mbtn" id="mClose">Listo</button></div>
 </div></div>
@@ -624,6 +702,12 @@ const INTERMEDIO_CODES = new Set([
 function recalcIntermedio(){
   state.subjects.forEach(s=>{ s.intermedio = INTERMEDIO_CODES.has(s.codigo); });
 }
+// PREREQS distingue dos cosas que antes se confundían: una materia con `[]` no tiene
+// correlativas, y una materia que no figura como clave tiene las correlativas SIN
+// CARGAR. Las dos daban "Disponible" con el mismo cartel, así que materias de 4°/5°
+// aparecían como cursables sin serlo. Se sigue calculando igual (no hay dato mejor),
+// pero se marca para no dar por cierto algo que no está verificado.
+function prereqsSinCargar(codigo){ return !Object.prototype.hasOwnProperty.call(PREREQS,codigo); }
 function recalcDisp(){
   const ap=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
   state.subjects.forEach(s=>{
@@ -635,13 +719,38 @@ function recalcDisp(){
 }
 // Recalcula todo lo derivado. Se llama al iniciar y después de cada import/reset,
 // porque los valores guardados de `disponibilidad`/`intermedio` pueden estar viejos.
-function recalcDerived(){ recalcIntermedio(); recalcDisp(); }
+function recalcDerived(){ recalcIntermedio(); recalcDisp(); _fwdCache=null; }
 const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = id => document.getElementById(id);
 
 // Los nombres de materia terminan interpolados en innerHTML y pueden venir de un
 // backup JSON editado a mano, así que se escapan siempre.
 const esc = v => String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+// ── Búsqueda tolerante ──────────────────────────────────────────────────────
+// Sin acentos, sin distinguir mayúsculas y por palabras sueltas en cualquier orden:
+// "mate discreta", "matematica" o "3621" encuentran "Matemática Discreta".
+// El rango se arma con new RegExp para que los combining marks queden como escapes
+// y no como bytes invisibles en el fuente.
+const DIACRITICS = new RegExp("[\\u0300-\\u036f]","g");
+const deacc = v => String(v==null?"":v).toLowerCase().normalize("NFD").replace(DIACRITICS,"");
+function searchTokens(q){ return deacc(q).split(/\s+/).filter(Boolean); }
+function matchSubject(s,tokens){
+  if(!tokens.length)return true;
+  const hay=deacc(s.nombre)+" "+s.codigo;
+  return tokens.every(t=>hay.includes(t));
+}
+// Mapa carácter a carácter entre el texto original y su versión sin acentos, para
+// poder resaltar sobre el original aunque se haya buscado sin tildes.
+function foldMap(text){
+  let folded="";const map=[];
+  for(let i=0;i<text.length;i++){
+    const f=deacc(text[i]);
+    for(let k=0;k<f.length;k++){folded+=f[k];map.push(i);}
+  }
+  map.push(text.length);
+  return {folded,map};
+}
 const CONDS = ["Aprobada","Cursada","No aprobada"];
 const STATE_CLASS = {"Aprobada":"t-ap","Cursada":"t-cu","No aprobada":"t-no"};
 const STATE_LABEL = {"Aprobada":"Aprobada","Cursada":"Cursando","No aprobada":"Pendiente"};
@@ -759,8 +868,32 @@ function loadPane(){try{const p=localStorage.getItem(KEY+"-pane");if(PANES.inclu
 // Filtro del cronograma: activado por defecto, pero se puede apagar si la oferta
 // cargada está desactualizada y hace falta elegir una materia que no figura.
 function loadSoloDelDia(){try{return localStorage.getItem(KEY+"-soloDia")!=="0";}catch(e){return true;}}
+// Preferencias de vista: orden y filtro del legajo, años visibles del grafo y cuántas
+// materias por cuatrimestre. Antes se perdían en cada recarga.
+function loadJSON(suffix,fallback){
+  try{const r=localStorage.getItem(KEY+suffix);if(r){const d=JSON.parse(r);if(d&&typeof d==="object")return d;}}catch(e){}
+  return fallback;
+}
+const VIEW_DEF={filter:"todas",sortKey:"codigo",sortAsc:true};
+function loadView(){
+  const v=loadJSON("-view",{});
+  return {
+    filter: ["todas","Aprobada","Cursada","No aprobada","disp","inter"].includes(v.filter)?v.filter:VIEW_DEF.filter,
+    sortKey: ["codigo","nombre","anio","condicion","disponibilidad","nota"].includes(v.sortKey)?v.sortKey:VIEW_DEF.sortKey,
+    sortAsc: v.sortAsc!==false
+  };
+}
+function loadGraphYears(){
+  const v=loadJSON("-gyears",null);
+  const arr=Array.isArray(v)?v.filter(x=>Number.isInteger(x)&&x>=0&&x<=5):null;
+  return new Set(arr&&arr.length?arr:[0,1,2,3,4,5]);
+}
+function loadPlanN(){try{const n=parseInt(localStorage.getItem(KEY+"-planN"),10);if(Number.isFinite(n)&&n>=1&&n<=8)return n;}catch(e){}return 4;}
 const PANES = ["graph","avance","cronograma","legajo","planner"];
-const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:"todas", search:"", sortKey:"codigo", sortAsc:true, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:new Set([0,1,2,3,4,5]), autoSelected:new Set(), schedSoloDelDia:loadSoloDelDia() };
+const _view = loadView();
+const state = { subjects: load(), schedOptions: loadSchedOptions(), oferta: loadOferta(), ofertaNombre: loadOfertaNombre(), filter:_view.filter, search:"", sortKey:_view.sortKey, sortAsc:_view.sortAsc, editing:null, selected:null, avanceShown:false, expandedRows:new Set(), graphYears:loadGraphYears(), autoSelected:new Set(), schedSoloDelDia:loadSoloDelDia(), planN:loadPlanN(), sideTokens:[] };
+function persistView(){write(KEY+"-view",{filter:state.filter,sortKey:state.sortKey,sortAsc:state.sortAsc});}
+function persistGraphYears(){write(KEY+"-gyears",[...state.graphYears]);}
 
 function stateColor(c){ return c==="Aprobada"?"#E8B23E":c==="Cursada"?"#D9663B":"#6F6560"; }
 // Cantidad real de materias que cuentan para el intermedio. INTERMEDIO_CODES tiene
@@ -775,13 +908,92 @@ function getBlockingChain(codigo){
   (PREREQS[codigo]||[]).forEach(walk);
   return {miss,done,missIds:new Set([...miss].map(c=>"s"+c)),doneIds:new Set([...done].map(c=>"s"+c)),allIds:new Set([...miss,...done].map(c=>"s"+c).concat(["s"+codigo]))};
 }
+// ── Grafo de dependencias hacia adelante ────────────────────────────────────
+// Cuántas materias dependen (directa o indirectamente) de cada una, y cuál es la
+// cadena más larga que arranca en ella. Sirve para priorizar: una materia que
+// destraba 12 materias vale más que una hoja del árbol.
+let _fwdCache=null;
+function forwardStats(){
+  if(_fwdCache)return _fwdCache;
+  const present=new Set(state.subjects.map(s=>s.codigo));
+  const hijos=new Map();
+  state.subjects.forEach(s=>(PREREQS[s.codigo]||[]).forEach(p=>{
+    if(!present.has(p))return;
+    if(!hijos.has(p))hijos.set(p,[]);
+    hijos.get(p).push(s.codigo);
+  }));
+  const desc=new Map(),depth=new Map(),estado=new Map();   // estado: 1 = en curso (corta ciclos)
+  function walk(c){
+    if(desc.has(c))return;
+    if(estado.get(c)===1){desc.set(c,new Set());depth.set(c,0);return;}   // ciclo: no debería pasar
+    estado.set(c,1);
+    const set=new Set();let d=0;
+    (hijos.get(c)||[]).forEach(h=>{
+      walk(h);
+      set.add(h);(desc.get(h)||new Set()).forEach(x=>set.add(x));
+      d=Math.max(d,1+(depth.get(h)||0));
+    });
+    desc.set(c,set);depth.set(c,d);estado.set(c,2);
+  }
+  state.subjects.forEach(s=>walk(s.codigo));
+  _fwdCache={desc,depth,count:new Map([...desc].map(([c,s])=>[c,s.size]))};
+  return _fwdCache;
+}
+// Clausura de correlativas hacia atrás: todo lo que hace falta aprobar para llegar
+// a un conjunto de materias objetivo.
+function closurePrereqs(codes){
+  const out=new Set(),stack=[...codes];
+  while(stack.length){
+    const c=stack.pop();
+    if(out.has(c))continue;
+    out.add(c);
+    (PREREQS[c]||[]).forEach(p=>stack.push(p));
+  }
+  return out;
+}
+// Estimación de cuántos cuatrimestres faltan tomando hasta `n` materias habilitadas
+// por vez, priorizando las que más destraban. Es una simulación, no un plan oficial:
+// no mira la oferta ni los choques de horario.
+function proyeccion(n,targetCodes){
+  n=Math.max(1,Math.min(8,parseInt(n,10)||4));
+  const ap=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
+  const objetivo=targetCodes?closurePrereqs(targetCodes):null;
+  const restantes=new Map(state.subjects
+    .filter(s=>!ap.has(s.codigo)&&(!objetivo||objetivo.has(s.codigo)))
+    .map(s=>[s.codigo,s]));
+  const {count}=forwardStats();
+  let cuatri=0;
+  while(restantes.size){
+    if(cuatri>=40)return {cuatris:null,bloqueadas:restantes.size};
+    const habil=[...restantes.values()].filter(s=>(PREREQS[s.codigo]||[]).every(p=>ap.has(p)));
+    // Sin materias habilitadas el plan quedó inconsistente (falta una correlativa que
+    // no está en los datos): se avisa en vez de colgarse en el while.
+    if(!habil.length)return {cuatris:cuatri,bloqueadas:restantes.size};
+    habil.sort((a,b)=>
+      (cuatri===0?((b.condicion==="Cursada")-(a.condicion==="Cursada")):0)
+      ||(count.get(b.codigo)||0)-(count.get(a.codigo)||0)
+      ||ZONES.indexOf(a.anio)-ZONES.indexOf(b.anio)
+      ||a.codigo-b.codigo);
+    habil.slice(0,n).forEach(s=>{ap.add(s.codigo);restantes.delete(s.codigo);});
+    cuatri++;
+  }
+  return {cuatris:cuatri,bloqueadas:0};
+}
 function stats(){
   const t=state.subjects.length, ap=state.subjects.filter(s=>s.condicion==="Aprobada");
-  const notas=state.subjects.filter(s=>s.nota>0).map(s=>s.nota);
-  const prom=notas.length?notas.reduce((a,b)=>a+b,0)/notas.length:0;
+  const cu=state.subjects.filter(s=>s.condicion==="Cursada");
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+  // El promedio de la carrera se calcula sobre finales rendidos. La nota de una
+  // materia sólo cursada es la de la cursada, no la del final, así que mezclarlas
+  // daba un promedio que no coincide con el del certificado analítico. Se muestra
+  // aparte para no perder el dato.
+  const notasAp=ap.filter(s=>s.nota>0).map(s=>s.nota);
+  const notasTodas=state.subjects.filter(s=>s.nota>0).map(s=>s.nota);
   const disp=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible");
   const inter=state.subjects.filter(s=>s.intermedio), interDone=inter.filter(s=>s.condicion==="Aprobada");
-  return {t,ap:ap.length,prom,disp:disp.length,inter:inter.length,interDone:interDone.length,pct:t?Math.round(ap.length/t*100):0,notasN:notas.length,restantes:t-ap.length};
+  return {t,ap:ap.length,cu:cu.length,prom:avg(notasAp),promTodas:avg(notasTodas),
+    disp:disp.length,inter:inter.length,interDone:interDone.length,
+    pct:t?Math.round(ap.length/t*100):0,notasN:notasAp.length,notasTodasN:notasTodas.length,restantes:t-ap.length};
 }
 const _last={};
 function pulse(id,key,val){const el=$(id);if(!REDUCED&&_last[key]!==undefined&&_last[key]!==val){el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");}_last[key]=val;}
@@ -790,22 +1002,69 @@ function renderStats(){
   $("sPct").innerHTML=d.pct+"<small>%</small>";pulse("sPct","pct",d.pct);
   $("sPctSub").textContent=d.ap+" de "+d.t+" · faltan "+d.restantes;
   $("sProm").textContent=d.prom.toFixed(2);pulse("sProm","prom",d.prom.toFixed(2));
-  $("sPromSub").textContent=d.notasN+" notas";
+  $("sPromSub").textContent=d.notasN+" final"+(d.notasN===1?"":"es")
+    +(d.notasTodasN>d.notasN?" · con cursadas "+d.promTodas.toFixed(2):"");
   $("sAprob").innerHTML=d.ap+"<small> / "+d.t+"</small>";pulse("sAprob","ap",d.ap);
   $("sDisp").textContent=d.disp;pulse("sDisp","disp",d.disp);
   $("sInter").innerHTML=d.interDone+"<small> / "+d.inter+"</small>";pulse("sInter","inter",d.interDone);
   $("sInterSub").textContent="Analista · "+(d.inter?Math.round(d.interDone/d.inter*100):0)+"%";
+  $("sCurs").textContent=d.cu;pulse("sCurs","cu",d.cu);
+  $("sCursSub").textContent=d.cu?"final pendiente":"nada en curso";
+  const pr=proyeccion(state.planN);
+  $("sProj").innerHTML=pr.cuatris==null?"?":"~"+pr.cuatris;pulse("sProj","proj",pr.cuatris);
+  $("sProjSub").textContent=pr.cuatris==null
+    ?"no se pudo estimar"
+    :"cuatrimestres a "+state.planN+" por vez";
   $("vaultSub").textContent=d.t+" materias · "+d.pct+"% hecho";
 }
 function renderYears(){
   const wrap=$("years");wrap.innerHTML="";let td=0,ta=0;
+  const show=state.avanceShown||REDUCED;
   ZONES.forEach(z=>{const items=state.subjects.filter(s=>s.anio===z);if(!items.length)return;
-    const done=items.filter(s=>s.condicion==="Aprobada").length;td+=done;ta+=items.length;
-    const pct=Math.round(done/items.length*100);
+    const done=items.filter(s=>s.condicion==="Aprobada").length;
+    const curs=items.filter(s=>s.condicion==="Cursada").length;
+    const disp=items.filter(s=>s.condicion==="No aprobada"&&s.disponibilidad==="Disponible").length;
+    td+=done;ta+=items.length;
+    const p=v=>Math.round(v/items.length*100);
+    const pct=p(done);
     const row=document.createElement("div");row.className="yr";
-    row.innerHTML='<div class="nm">'+z+'</div><div class="track"><div class="fill" style="width:'+(state.avanceShown||REDUCED?pct:0)+'%"></div></div><div class="r"><b>'+done+'</b>/'+items.length+' · '+pct+'%</div>';
+    row.innerHTML='<div class="nm">'+esc(z)+'</div>'
+      +'<div class="track" role="img" aria-label="'+esc(z+": "+done+" aprobadas, "+curs+" cursando, "+disp+" disponibles, de "+items.length)+'">'
+      +'<div class="fill f-ap" style="width:'+(show?p(done):0)+'%"></div>'
+      +'<div class="fill f-cu" style="width:'+(show?p(curs):0)+'%"></div>'
+      +'<div class="fill f-di" style="width:'+(show?p(disp):0)+'%"></div>'
+      +'</div>'
+      +'<div class="r"><b>'+done+'</b>/'+items.length+' · '+pct+'%</div>';
     wrap.appendChild(row);});
   $("yearMeta").textContent=td+"/"+ta+" aprobadas";
+  const ys=$("yearsSub");if(ys)ys.textContent=td+" de "+ta+" con final rendido";
+}
+// Histograma de notas de final. Sólo mira materias aprobadas: la nota de una cursada
+// no es comparable con la de un final.
+function renderHist(){
+  const box=$("hist"),sub=$("histSub");if(!box)return;
+  const notas=state.subjects.filter(s=>s.condicion==="Aprobada"&&s.nota>0).map(s=>s.nota);
+  if(!notas.length){
+    box.className="";box.innerHTML='<div class="hist-empty">Todavía no hay notas de final cargadas.</div>';
+    if(sub)sub.textContent="";return;
+  }
+  const buckets=[4,5,6,7,8,9,10];
+  const bucketOf=n=>Math.min(10,Math.max(4,Math.round(n)));
+  const counts=buckets.map(b=>notas.filter(n=>bucketOf(n)===b).length);
+  const max=Math.max(...counts,1);
+  if(sub){
+    const moda=buckets[counts.indexOf(max)];
+    sub.textContent=notas.length+" final"+(notas.length===1?"":"es")+" · más frecuente: "+moda;
+  }
+  box.className="hist";
+  box.innerHTML=buckets.map((b,i)=>{
+    const c=counts[i];
+    const h=c?Math.max(8,Math.round(c/max*78)):3;
+    return'<div class="hcol'+(c?"":" zero")+'" title="'+c+' materia'+(c===1?"":"s")+' con '+b+'">'
+      +'<span class="hv">'+(c||"")+'</span>'
+      +'<div class="bar" style="height:'+h+'%"></div>'
+      +'<span class="hl">'+b+'</span></div>';
+  }).join("");
 }
 const DAY_NAMES={Lu:"Lunes",Ma:"Martes",Mi:"Miércoles",Ju:"Jueves",Vi:"Viernes",Sa:"Sábado"};
 const DAY_ORDER=["Lu","Ma","Mi","Ju","Vi","Sa"];   // índice = columna del cronograma
@@ -835,6 +1094,27 @@ function filterComs(coms,turno,prefDias){
   });
 }
 const MAX_COMBS=24;
+const MAX_EXPLORE=6000;   // techo de combinaciones exploradas antes de cortar
+// Calidad de una combinación: menos días en la facultad, menos horas muertas entre
+// materias y terminar más temprano. Sin esto el corte por cantidad devolvía
+// simplemente las primeras del listado, que suelen ser las peores (una materia por
+// día de lunes a viernes).
+function scoreComb(chosen){
+  const porDia={};
+  let virt=0;
+  chosen.forEach(({com})=>{
+    if(!com[1]){virt++;return;}
+    com[1].split(",").forEach(d=>{(porDia[d]=porDia[d]||[]).push([com[2],com[3]]);});
+  });
+  const dias=Object.keys(porDia).length;
+  let horas=0,huecos=0,fin=0;
+  Object.values(porDia).forEach(list=>{
+    list.sort((a,b)=>a[0]-b[0]);
+    list.forEach(([i,f])=>{horas+=f-i;fin=Math.max(fin,f);});
+    for(let i=1;i<list.length;i++)huecos+=Math.max(0,list[i][0]-list[i-1][1]);
+  });
+  return {dias,horas,huecos,fin,virt,rank:dias*10+huecos*3+fin*0.1};
+}
 function generateCombinations(selectedCodes,turno,prefDias,maxRes){
   maxRes=maxRes||MAX_COMBS;
   const subComs=selectedCodes.map(code=>{
@@ -848,33 +1128,40 @@ function generateCombinations(selectedCodes,turno,prefDias,maxRes){
     const s=state.subjects.find(x=>x.codigo===c);return s?s.nombre.split(" ").slice(0,3).join(" "):"código "+c;
   });
   if(faltantes.length)return{results:[],faltantes};
-  const results=[];
+  // Las materias con menos comisiones primero: podan antes el árbol de búsqueda.
+  subComs.sort((a,b)=>a.coms.length-b.coms.length);
+  const todas=[];let truncated=false;
   function bt(idx,chosen){
-    if(results.length>=maxRes)return;
-    if(idx===subComs.length){results.push([...chosen]);return;}
+    if(truncated)return;
+    if(idx===subComs.length){
+      todas.push(chosen.slice());
+      if(todas.length>=MAX_EXPLORE)truncated=true;
+      return;
+    }
     for(const com of subComs[idx].coms){
+      if(truncated)return;
       if(!chosen.some(c=>conflictan(c.com,com))){
         chosen.push({sub:subComs[idx].sub,com});bt(idx+1,chosen);chosen.pop();
       }
     }
   }
   bt(0,[]);
-  // El backtracking corta al llegar al máximo, así que puede haber más combinaciones
-  // de las que se muestran: se avisa en vez de dar el corte por total.
-  return{results,faltantes:[],truncated:results.length>=maxRes};
+  todas.forEach(c=>{c.score=scoreComb(c);});
+  todas.sort((a,b)=>a.score.rank-b.score.rank);
+  return{results:todas.slice(0,maxRes),total:todas.length,faltantes:[],truncated};
 }
 function renderAutoResults(res){
   const box=$("autoResults");
   const results=Array.isArray(res)?res:(res.results||[]);
   const faltantes=(res&&res.faltantes)||[];
-  if(faltantes.length){box.innerHTML='<div class="auto-empty">Sin comisiones en ese turno/días: <b>'+faltantes.join(", ")+'</b>. Probá con "Cualquiera" o más días.</div>';return;}
+  if(faltantes.length){box.innerHTML='<div class="auto-empty">Sin comisiones en ese turno/días: <b>'+esc(faltantes.join(", "))+'</b>. Probá con "Cualquiera" o más días.</div>';return;}
   if(!results.length){box.innerHTML='<div class="auto-empty">No se encontraron combinaciones sin superposición. Probá distintos filtros de turno o días.</div>';return;}
   state.autoRes=results;
   // "combinación" pierde el acento en plural: concatenar "es" daba "combinaciónes".
   const cc=$("combCount");
-  if(cc)cc.textContent=res.truncated
-    ?"más de "+results.length+" combinaciones · mostrando las primeras "+results.length
-    :(results.length===1?"1 combinación encontrada":results.length+" combinaciones encontradas");
+  const total=res.total||results.length;
+  if(cc)cc.textContent=(res.truncated?"más de "+total:total===1?"1 combinación":total+" combinaciones")
+    +(total>results.length?" · mostrando las "+results.length+" mejores":" encontrada"+(total===1?"":"s"));
   const grid=document.createElement("div");grid.className="auto-results-grid";
   results.forEach((chosen,ri)=>{
     const card=document.createElement("div");card.className="ar-opt";
@@ -885,7 +1172,11 @@ function renderAutoResults(res){
         '</span><div class="ar-info"><div class="ar-nm" title="'+esc(sub.nombre)+'">'+esc(sub.nombre)+'</div>'+
         '<div class="ar-tm">'+esc(dias+(time?" · "+time:""))+' · com. '+esc(com[0])+'</div></div></div>';
     }).join("");
-    card.innerHTML='<div class="ar-opt-h">Opción '+(ri+1)+'</div>'+items+
+    const sc=chosen.score||scoreComb(chosen);
+    const resumen=[sc.dias+(sc.dias===1?" día":" días"),sc.horas+" h",
+      sc.huecos?sc.huecos+" h de huecos":"sin huecos",
+      sc.virt?sc.virt+" a distancia":""].filter(Boolean).join(" · ");
+    card.innerHTML='<div class="ar-opt-h">Opción '+(ri+1)+' · '+esc(resumen)+'</div>'+items+
       '<button type="button" class="ar-use" data-use="'+ri+'">Usar esta opción →</button>';
     grid.appendChild(card);
   });
@@ -895,16 +1186,22 @@ function renderAutoResults(res){
 function useAutoOption(ri){
   const chosen=(state.autoRes||[])[ri];
   if(!chosen)return;
-  const DAYS=["Lu","Ma","Mi","Ju","Vi","Sa"];
-  const days=["","","","","",""];
+  const days=[[],[],[],[],[],[]];
   let virtuales=0;
   for(const{sub,com}of chosen){
-    if(!com[1]){virtuales++;continue;}   // a distancia: no ocupa día de la semana
-    const fd=com[1].split(",")[0];const di=DAYS.indexOf(fd);
-    if(di>=0&&!days[di])days[di]=sub.nombre;
+    const val=sub.codigo+"#"+com[0];
+    // A distancia: no ocupa día de la semana, pero se anota igual en el primer día
+    // libre para no perderla del cronograma.
+    if(!com[1]){virtuales++;days[0].push(val);continue;}
+    // Una comisión de "Ma,Vi" ocupa los DOS días. Antes sólo se anotaba el primero,
+    // así que el cronograma mostraba media cursada.
+    com[1].split(",").forEach(d=>{
+      const di=DAY_ORDER.indexOf(d);
+      if(di>=0&&!days[di].includes(val))days[di].push(val);
+    });
   }
   const lbl=chosen.map(c=>c.sub.nombre.split(" ").slice(0,2).join(" ")).join(" + ");
-  state.schedOptions.push({id:Date.now(),name:("Auto: "+lbl).slice(0,32),days});
+  state.schedOptions.push({id:nextOptId(),name:("Auto: "+lbl).slice(0,32),days});
   persistSched();renderSched();
   toast(virtuales?"Opción agregada · "+virtuales+" a distancia sin día fijo":"Opción agregada al cronograma");
   $("schedOptions").scrollIntoView({behavior:"smooth",block:"start"});
@@ -1013,94 +1310,265 @@ async function importOfertaPDF(file){
   }catch(err){toast("Error al procesar el PDF: "+(err.message||"respuesta inválida"));}
   finally{ov.remove();}
 }
+/* ===================== MODELO DEL CRONOGRAMA =====================
+   opt.days es un array de 6 días (Lu..Sa) y cada día es una LISTA de slots.
+   Un slot es "codigo" o "codigo#comision".
+
+   Antes cada día guardaba el NOMBRE de una única materia. Eso traía tres
+   problemas: se rompía al renombrar una materia, no registraba qué comisión se
+   había elegido (y sin comisión no se puede dibujar la semana), y no permitía
+   anotar dos materias el mismo día en horarios distintos — algo que el propio
+   auto-armado genera (p. ej. 8–12 y 19–23 el mismo lunes). Los formatos viejos
+   se migran al cargar, así que un backup anterior sigue funcionando. */
+function parseSlot(v){
+  if(v==null||v==="")return null;
+  const str=String(v);
+  const m=/^(\d+)(?:#(\d+))?$/.exec(str);
+  if(m){
+    const codigo=+m[1];
+    if(state.subjects.some(s=>s.codigo===codigo))return {codigo,com:m[2]?+m[2]:null,raw:str};
+    return {codigo:null,com:null,raw:str,label:"código "+codigo};
+  }
+  const byName=state.subjects.find(s=>s.nombre===str);       // formato viejo: nombre
+  if(byName)return {codigo:byName.codigo,com:null,raw:String(byName.codigo)};
+  return {codigo:null,com:null,raw:str,label:str};           // se conserva, no se pierde
+}
+function slotSubject(sl){return sl&&sl.codigo!=null?state.subjects.find(s=>s.codigo===sl.codigo):null;}
+function migrateSchedOptions(){
+  const src=Array.isArray(state.schedOptions)?state.schedOptions:[];
+  state.schedOptions=src.filter(o=>o&&typeof o==="object").map((o,i)=>{
+    const cells=Array.isArray(o.days)?o.days:[];
+    const days=[];
+    for(let d=0;d<6;d++){
+      const cell=cells[d];
+      const list=Array.isArray(cell)?cell:(cell?[cell]:[]);
+      const out=[],seen=new Set();
+      list.forEach(v=>{const sl=parseSlot(v);if(!sl||seen.has(sl.raw))return;seen.add(sl.raw);out.push(sl.raw);});
+      days.push(out);
+    }
+    return {id:Number.isFinite(+o.id)?+o.id:i+1,name:String(o.name||("Opción "+(i+1))).slice(0,32),days};
+  });
+  if(!state.schedOptions.length)state.schedOptions=[{id:1,name:"Opción 1",days:[[],[],[],[],[],[]]}];
+}
+// Explica por qué un slot guardado no figura en las listas del desplegable.
+function slotLabel(v,dayCode){
+  const sl=parseSlot(v);
+  if(!sl)return "—";
+  if(sl.codigo==null)return (sl.label||String(v))+" (fuera del plan)";
+  const s=slotSubject(sl);
+  if(!s)return "código "+sl.codigo+" (fuera del plan)";
+  let motivo="";
+  if(sl.com!=null&&!ofertaDe(s.codigo).some(c=>c[0]===sl.com))motivo="com. "+sl.com+" ya no está en la oferta";
+  else if(s.condicion==="Aprobada")motivo="ya aprobada";
+  else if(comisionesEnDia(s.codigo,dayCode).length)motivo="";
+  else if(comisionesADistancia(s.codigo).length)motivo="a distancia";
+  else motivo="no se da este día";
+  return s.nombre+(motivo?" ("+motivo+")":"");
+}
+// Bloques reales de la semana para una opción. Una comisión de "Ma,Vi" ocupa los dos
+// días aunque se haya elegido en una sola columna, así que la grilla se arma desde la
+// comisión y no desde la columna del select.
+function semanaDe(opt){
+  const bloques=[],virtuales=[],sinHorario=[],vistos=new Set();
+  opt.days.forEach((cell,di)=>{
+    (cell||[]).forEach(v=>{
+      const sl=parseSlot(v);if(!sl)return;
+      const s=slotSubject(sl);
+      if(!s){sinHorario.push({nombre:sl.label||String(v)});return;}
+      const clave=sl.codigo+"#"+(sl.com==null?"":sl.com);
+      if(vistos.has(clave))return;
+      vistos.add(clave);
+      const coms=ofertaDe(s.codigo);
+      const com=sl.com!=null?coms.find(c=>c[0]===sl.com):(comisionesEnDia(s.codigo,DAY_ORDER[di])[0]||null);
+      if(!com){sinHorario.push({nombre:s.nombre});return;}
+      if(!com[1]){virtuales.push({sub:s,com});return;}
+      com[1].split(",").forEach(d=>{
+        const idx=DAY_ORDER.indexOf(d);
+        if(idx>=0)bloques.push({dia:idx,ini:com[2],fin:com[3],sub:s,com,clash:false});
+      });
+    });
+  });
+  for(let i=0;i<bloques.length;i++)for(let j=i+1;j<bloques.length;j++){
+    const a=bloques[i],b=bloques[j];
+    if(a.dia===b.dia&&a.ini<b.fin&&b.ini<a.fin){a.clash=true;b.clash=true;}
+  }
+  return {bloques,virtuales,sinHorario};
+}
+const WK_PX_HORA=19;
+function renderWeekHTML(opt){
+  const {bloques,virtuales,sinHorario}=semanaDe(opt);
+  if(!bloques.length&&!virtuales.length&&!sinHorario.length)return "";
+  const h0=bloques.length?Math.max(6,Math.min(...bloques.map(b=>b.ini))-1):8;
+  const h1=bloques.length?Math.min(24,Math.max(...bloques.map(b=>b.fin))+1):20;
+  const span=Math.max(1,h1-h0),alto=Math.max(110,span*WK_PX_HORA);
+  const pct=h=>(h-h0)/span*100;
+  const cabecera='<div class="wk-hd"></div>'+DAY_ORDER.map(d=>'<div class="wk-hd">'+d+'</div>').join("");
+  // Las etiquetas de los extremos se apoyan contra el borde en vez de centrarse en la
+  // línea, si no la primera y la última quedan cortadas a la mitad.
+  let ejes="";
+  for(let h=h0;h<=h1;h+=2){
+    const t=pct(h);
+    const shift=t<3?"none":t>97?"translateY(-100%)":"translateY(-50%)";
+    ejes+='<span style="top:'+t+'%;transform:'+shift+'">'+h+'</span>';
+  }
+  let cuerpo='<div class="wk-ax" style="height:'+alto+'px">'+ejes+'</div>';
+  DAY_ORDER.forEach((dc,di)=>{
+    const bs=bloques.filter(b=>b.dia===di);
+    let reglas="";
+    for(let h=h0+2;h<h1;h+=2)reglas+='<div class="wk-rule" style="top:'+pct(h)+'%"></div>';
+    const blks=bs.map(b=>
+      '<div class="wk-blk'+(b.clash?" clash":"")+'" style="top:'+pct(b.ini)+'%;height:'+Math.max(pct(b.fin)-pct(b.ini),7)+'%" '
+      +'title="'+esc(b.sub.nombre+" · "+b.ini+"–"+b.fin+" · com. "+b.com[0]+(b.clash?" · SE SUPERPONE":""))+'">'
+      +'<div class="wb-n">'+esc(b.sub.nombre)+'</div><div class="wb-t">'+b.ini+'–'+b.fin+'</div></div>').join("");
+    cuerpo+='<div class="wk-col'+(bs.length?"":" off")+'" style="height:'+alto+'px">'+reglas+blks+'</div>';
+  });
+  const dias=new Set(bloques.map(b=>b.dia)).size;
+  const horas=bloques.reduce((a,b)=>a+(b.fin-b.ini),0);
+  const choques=bloques.filter(b=>b.clash).length;
+  const pie=[
+    '<span><b>'+dias+'</b> día'+(dias===1?"":"s")+' en la facultad</span>',
+    '<span><b>'+horas+'</b> h semanales</span>',
+    virtuales.length?'<span><b>'+virtuales.length+'</b> a distancia</span>':"",
+    sinHorario.length?'<span>'+sinHorario.length+' sin horario en la oferta</span>':"",
+    choques?'<span class="clash-warn">⚠ '+choques+' bloques superpuestos</span>':""
+  ].filter(Boolean).join("");
+  return'<div class="wkwrap"><div class="wk">'+cabecera+cuerpo+'</div><div class="wk-foot">'+pie+'</div></div>';
+}
 function renderSched(){
   const container=$("schedOptions");if(!container)return;container.innerHTML="";
   const cnt=state.schedOptions.length;$("schedMeta").textContent=cnt+(cnt===1?" opción":" opciones");
   const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
   const dispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
   const noDispS=state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad!=="Disponible").sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  // El desplegable de cada día lista solo las materias que realmente se cursan ese
-  // día según la oferta, con su franja horaria al lado, para no tener que ir a
-  // chequear la oferta aparte. El `value` sigue siendo el nombre pelado: es la clave
-  // con la que se guarda en opt.days y con la que después se buscan los tags.
-  function buildOpts(val,dayCode){
+  // Una opción del desplegable POR COMISIÓN, no por materia: elegir "Bases de Datos"
+  // no alcanzaba para saber a qué hora ibas, y sin eso no hay grilla ni chequeo de
+  // superposiciones.
+  function opcionesDe(s,dayCode){
+    const coms=comisionesEnDia(s.codigo,dayCode);
+    if(coms.length)return coms.map(c=>{
+      const otros=c[1].split(",").filter(d=>d!==dayCode);
+      return {v:s.codigo+"#"+c[0],
+        label:s.nombre+"  ·  "+c[2]+"–"+c[3]+"  ·  com. "+c[0]+(otros.length?"  ·  también "+otros.join("/"):"")};
+    });
+    const virt=comisionesADistancia(s.codigo);
+    if(virt.length)return virt.map(c=>({v:s.codigo+"#"+c[0],label:s.nombre+"  ·  a distancia  ·  com. "+c[0]}));
+    return [{v:String(s.codigo),label:s.nombre+"  ·  sin comisión ese día"}];
+  }
+  function buildOpts(curVal,dayCode,excluir){
     const soloDelDia=state.schedSoloDelDia;
-    const opt=s=>{
-      const coms=comisionesEnDia(s.codigo,dayCode);
-      const horas=coms.length?"  ·  "+fmtHoras(coms):(comisionesADistancia(s.codigo).length?"  ·  a distancia":"");
-      return'<option value="'+esc(s.nombre)+'"'+(s.nombre===val?" selected":"")+'>'+esc(s.nombre+horas)+'</option>';
-    };
-    const seDaEseDia=s=>comisionesEnDia(s.codigo,dayCode).length>0;
-    const esADistancia=s=>!seDaEseDia(s)&&comisionesADistancia(s.codigo).length>0;
-    const disp   = soloDelDia?dispS.filter(seDaEseDia):dispS;
-    const noDisp = soloDelDia?noDispS.filter(seDaEseDia):noDispS;
+    const seDa=s=>comisionesEnDia(s.codigo,dayCode).length>0;
+    const esVirt=s=>!seDa(s)&&comisionesADistancia(s.codigo).length>0;
+    const usable=list=>list.filter(s=>!excluir.has(s.codigo));
+    const disp   = usable(soloDelDia?dispS.filter(seDa):dispS);
+    const noDisp = usable(soloDelDia?noDispS.filter(seDa):noDispS);
     // Las virtuales no tienen día, pero se ofrecen igual para poder anotarlas.
-    const virt   = soloDelDia?[...dispS,...noDispS].filter(esADistancia):[];
-    // Si el valor guardado no está en ninguna lista se agrega igual para no perderlo en
-    // silencio, aclarando POR QUÉ no figura. Son motivos distintos: una materia ya
-    // aprobada se excluye de las listas aunque sí se curse ese día, así que rotularla
-    // como "no se da este día" sería falso.
-    const listado=[...disp,...noDisp,...virt].some(s=>s.nombre===val);
-    let motivo="";
-    if(val&&!listado){
-      const sv=state.subjects.find(z=>z.nombre===val);
-      if(!sv)                                       motivo="fuera del plan";
-      else if(sv.condicion==="Aprobada")            motivo="ya aprobada";
-      else if(comisionesEnDia(sv.codigo,dayCode).length) motivo="";      // sí se da: no aclarar nada
-      else if(comisionesADistancia(sv.codigo).length)    motivo="a distancia";
-      else                                          motivo="no se da este día";
-    }
-    return'<option value="">— Libre —</option>'
-      +(val&&!listado?'<option value="'+esc(val)+'" selected>'+esc(val+(motivo?" ("+motivo+")":""))+'</option>':"")
-      +(disp.length?'<optgroup label="✓ Disponibles para cursar">'+disp.map(opt).join('')+'</optgroup>':"")
-      +(noDisp.length?'<optgroup label="○ Correlativas pendientes">'+noDisp.map(opt).join('')+'</optgroup>':"")
-      +(virt.length?'<optgroup label="@ A distancia (sin día fijo)">'+virt.map(opt).join('')+'</optgroup>':"");
+    const virt   = usable(soloDelDia?[...dispS,...noDispS].filter(esVirt):[]);
+    const vistos=[];
+    const grupo=(label,list)=>{
+      if(!list.length)return "";
+      const inner=list.map(s=>opcionesDe(s,dayCode).map(o=>{
+        vistos.push(o.v);
+        return'<option value="'+esc(o.v)+'"'+(o.v===curVal?" selected":"")+'>'+esc(o.label)+'</option>';
+      }).join("")).join("");
+      return'<optgroup label="'+esc(label)+'">'+inner+'</optgroup>';
+    };
+    const g1=grupo("✓ Disponibles para cursar",disp);
+    const g2=grupo("○ Correlativas pendientes",noDisp);
+    const g3=grupo("@ A distancia (sin día fijo)",virt);
+    // Lo guardado que no figure en ninguna lista se conserva igual, aclarando por qué.
+    const extra=(curVal&&!vistos.includes(curVal))
+      ?'<option value="'+esc(curVal)+'" selected>'+esc(slotLabel(curVal,dayCode))+'</option>':"";
+    return'<option value="">— Libre —</option>'+extra+g1+g2+g3;
   }
   state.schedOptions.forEach((opt,oi)=>{
     const card=document.createElement("div");card.className="card sched-opt-card";
     const head=document.createElement("div");head.className="sched-opt-head";
     head.innerHTML='<span class="sched-opt-num">Opción '+(oi+1)+'</span>'
       +'<input class="sched-opt-name" data-oid="'+opt.id+'" value="'+esc(opt.name)+'" maxlength="32" spellcheck="false" title="Clic para renombrar" aria-label="Nombre de la opción '+(oi+1)+'">'
+      +'<button type="button" class="sched-del sched-dup" data-oid="'+opt.id+'" title="Duplicar opción" aria-label="Duplicar opción '+(oi+1)+'">⧉</button>'
       +(cnt>1?'<button type="button" class="sched-del" data-oid="'+opt.id+'" title="Eliminar opción" aria-label="Eliminar opción '+(oi+1)+'">×</button>':"");
     const grid=document.createElement("div");grid.className="sched";
+    // Materias ya anotadas en CUALQUIER día de esta opción: no se vuelven a ofrecer,
+    // porque elegir dos comisiones distintas de la misma materia no es una cursada
+    // válida. La que ya está seleccionada en el propio select sí se sigue mostrando.
+    const usados=new Set();
+    opt.days.forEach(cell=>(cell||[]).forEach(v=>{const sl=parseSlot(v);if(sl&&sl.codigo!=null)usados.add(sl.codigo);}));
     DAYS.forEach((d,di)=>{
-      const val=opt.days[di]||"";
+      const cell=opt.days[di]||[];
       const dayCode=DAY_ORDER[di];
       const slot=document.createElement("div");
+      // Un select por materia anotada + uno vacío al final: así se puede poner más de
+      // una materia el mismo día (mañana y noche) sin cambiar de vista.
+      const selects=[...cell,""].map((val,si)=>{
+        const excl=new Set(usados);
+        const sl=parseSlot(val);
+        if(sl&&sl.codigo!=null)excl.delete(sl.codigo);
+        return'<select data-di="'+di+'" data-si="'+si+'" data-oid="'+opt.id+'" aria-labelledby="d'+opt.id+'-'+di+'">'
+          +buildOpts(val?String(val):"",dayCode,excl)+'</select>';
+      }).join("");
       // El horario de lo elegido se muestra abajo del select, así no hay que
       // cruzarlo con la oferta a mano.
       let hint="",warn=false;
-      if(val){
-        const sv=state.subjects.find(z=>z.nombre===val);
-        const coms=sv?comisionesEnDia(sv.codigo,dayCode):[];
-        const virt=sv&&!coms.length?comisionesADistancia(sv.codigo):[];
-        if(coms.length)      hint=fmtHoras(coms)+(coms.length>1?" · "+coms.length+" com.":" · com. "+coms[0][0]);
-        else if(virt.length) hint="a distancia";
-        else {hint=sv?"no se da este día":"fuera del plan";warn=true;}
+      if(cell.length){
+        const partes=cell.map(v=>{
+          const sl=parseSlot(v),sv=slotSubject(sl);
+          if(!sv)return {txt:"fuera del plan",warn:true};
+          const com=sl.com!=null?ofertaDe(sv.codigo).find(c=>c[0]===sl.com):null;
+          if(com)return {txt:com[1]?com[2]+"–"+com[3]:"a distancia",warn:false};
+          const coms=comisionesEnDia(sv.codigo,dayCode);
+          if(coms.length)return {txt:fmtHoras(coms),warn:false};
+          if(comisionesADistancia(sv.codigo).length)return {txt:"a distancia",warn:false};
+          return {txt:"no se da este día",warn:true};
+        });
+        warn=partes.some(p=>p.warn);
+        hint=partes.map(p=>p.txt).join(" · ");
       }else{
         const n=(state.schedSoloDelDia?dispS.filter(s=>comisionesEnDia(s.codigo,dayCode).length):dispS).length;
         hint=n?n+" disponible"+(n===1?"":"s"):"sin materias este día";
       }
-      slot.className="slot"+(val?" taken":"")+(warn?" warn":"");
-      slot.innerHTML='<span class="day" id="d'+opt.id+'-'+di+'">'+d+'</span>'
-        +'<select data-di="'+di+'" data-oid="'+opt.id+'" aria-labelledby="d'+opt.id+'-'+di+'">'+buildOpts(val,dayCode)+'</select>'
+      slot.className="slot"+(cell.length?" taken":"")+(warn?" warn":"");
+      slot.innerHTML='<span class="day" id="d'+opt.id+'-'+di+'">'+d+'</span>'+selects
         +'<span class="slot-hint'+(warn?" warn":"")+'">'+esc(hint)+'</span>';
       grid.appendChild(slot);});
     const tags=document.createElement("div");tags.className="sched-opt-tags";
-    const chosen=opt.days.filter(Boolean);
-    if(chosen.length){
-      const uniq=[...new Set(chosen)];   // una materia puede ocupar dos días
-      tags.innerHTML=uniq.map(n=>{const s=state.subjects.find(z=>z.nombre===n);
-        const ap=s?.condicion==="Aprobada",cu=s?.condicion==="Cursada",di=s?.disponibilidad==="Disponible";
+    // Una materia puede ocupar dos días: se listan una sola vez.
+    const codigos=[];
+    opt.days.forEach(cell=>(cell||[]).forEach(v=>{
+      const sl=parseSlot(v);if(!sl)return;
+      const key=sl.codigo!=null?sl.codigo:sl.raw;
+      if(!codigos.includes(key))codigos.push(key);
+    }));
+    if(codigos.length){
+      tags.innerHTML=codigos.map(k=>{
+        const s=typeof k==="number"?state.subjects.find(z=>z.codigo===k):null;
+        if(!s)return'<span class="soct soct-b" title="fuera del plan">– '+esc(String(k))+'</span>';
+        const ap=s.condicion==="Aprobada",cu=s.condicion==="Cursada",di=s.disponibilidad==="Disponible";
         const cls=ap?"soct-y":cu?"soct-c":di?"soct-d":"soct-b";const dot=ap?"✓":cu?"→":di?"○":"–";
         const hint=ap?"ya aprobada":cu?"cursando":di?"disponible":"correlativas pendientes";
-        return'<span class="soct '+cls+'" title="'+esc(n+" · "+hint)+'">'+dot+' '+esc(n)+'</span>';}).join("");
+        return'<span class="soct '+cls+'" title="'+esc(s.nombre+" · "+hint)+'">'+dot+' '+esc(s.nombre)+'</span>';
+      }).join("");
     }else{tags.innerHTML='<span style="color:var(--muted);font-size:12px;font-style:italic;">Sin materias seleccionadas</span>';}
-    card.appendChild(head);card.appendChild(grid);card.appendChild(tags);container.appendChild(card);
+    card.appendChild(head);card.appendChild(grid);
+    const wk=renderWeekHTML(opt);
+    if(wk){const box=document.createElement("div");box.innerHTML=wk;card.appendChild(box.firstElementChild);}
+    card.appendChild(tags);container.appendChild(card);
   });
   container.querySelectorAll(".sched-opt-name").forEach(inp=>inp.addEventListener("input",()=>{const o=state.schedOptions.find(x=>x.id===+inp.dataset.oid);if(o)o.name=inp.value;persistSched();}));
-  container.querySelectorAll(".sched-del").forEach(btn=>btn.addEventListener("click",()=>{if(!confirm("¿Eliminar esta opción?"))return;state.schedOptions=state.schedOptions.filter(o=>o.id!==+btn.dataset.oid);persistSched();renderSched();}));
-  container.querySelectorAll("select[data-di]").forEach(sel=>sel.addEventListener("change",()=>{const o=state.schedOptions.find(x=>x.id===+sel.dataset.oid);if(o)o.days[+sel.dataset.di]=sel.value;persistSched();renderSched();}));
+  container.querySelectorAll(".sched-dup").forEach(btn=>btn.addEventListener("click",()=>{
+    const o=state.schedOptions.find(x=>x.id===+btn.dataset.oid);if(!o)return;
+    state.schedOptions.push({id:nextOptId(),name:(o.name+" (copia)").slice(0,32),days:o.days.map(c=>[...c])});
+    persistSched();renderSched();toast("Opción duplicada");
+  }));
+  container.querySelectorAll(".sched-del:not(.sched-dup)").forEach(btn=>btn.addEventListener("click",()=>{if(!confirm("¿Eliminar esta opción?"))return;state.schedOptions=state.schedOptions.filter(o=>o.id!==+btn.dataset.oid);persistSched();renderSched();}));
+  container.querySelectorAll("select[data-di]").forEach(sel=>sel.addEventListener("change",()=>{
+    const o=state.schedOptions.find(x=>x.id===+sel.dataset.oid);if(!o)return;
+    const di=+sel.dataset.di,si=+sel.dataset.si;
+    const cell=(o.days[di]||[]).slice();
+    if(sel.value){ if(!cell.includes(sel.value))cell[si]=sel.value; }
+    else cell.splice(si,1);
+    o.days[di]=cell.filter(Boolean);
+    persistSched();renderSched();
+  }));
   // Resumen de cuántas materias quedan visibles por día con el filtro puesto.
   const hint=$("sflHint");
   if(hint){
@@ -1110,6 +1578,9 @@ function renderSched(){
     }else hint.textContent="mostrando todas las materias del plan";
   }
 }
+// Date.now() puede repetirse si se agregan dos opciones en el mismo milisegundo, y el
+// id es la clave con la que se buscan los selects.
+function nextOptId(){return state.schedOptions.reduce((m,o)=>Math.max(m,+o.id||0),0)+1;}
 function buildPrereqRow(s){
   const pre=PREREQS[s.codigo]||[];if(!pre.length)return'';
   const tags=pre.map(p=>{
@@ -1121,37 +1592,62 @@ function buildPrereqRow(s){
   }).join('');
   return`<tr class="xp-row"><td colspan="6"><div class="xp-inner"><span class="xp-lbl">Necesitás para cursar esta materia:</span><div class="xp-tags">${tags}</div></div></td></tr>`;
 }
-function renderTable(){
-  const tb=$("tbody"),q=state.search.toLowerCase();
-  let rows=state.subjects.filter(s=>{
+// Filtro + orden del legajo, en un solo lugar: lo usan la tabla y el export a CSV,
+// así el CSV siempre baja exactamente lo que se está viendo.
+function filteredRows(){
+  const tokens=searchTokens(state.search);
+  const rows=state.subjects.filter(s=>{
     if(state.filter==="disp"){if(!(s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible"))return false;}
     else if(state.filter==="inter"){if(!s.intermedio)return false;}
     else if(state.filter!=="todas"&&s.condicion!==state.filter)return false;
-    if(q&&!s.nombre.toLowerCase().includes(q)&&!String(s.codigo).includes(q))return false;return true;});
+    return matchSubject(s,tokens);
+  });
   const k=state.sortKey,asc=state.sortAsc;
   // Año y estado tienen un orden propio: alfabéticamente "Cuarto año" iría antes que
   // "Primer año", y "Aprobada" antes que "Cursada"/"No aprobada" por casualidad.
   const RANK={anio:s=>ZONES.indexOf(s.anio),condicion:s=>CONDS.indexOf(s.condicion),disponibilidad:s=>s.disponibilidad==="Disponible"?0:1};
-  const key=RANK[k]||(s=>{const v=s[k];return typeof v==="string"?v.toLowerCase():v;});
+  const key=RANK[k]||(s=>{const v=s[k];return typeof v==="string"?deacc(v):v;});
   rows.sort((a,b)=>{
     const x=key(a),y=key(b);
     if(x<y)return asc?-1:1;
     if(x>y)return asc?1:-1;
     return a.codigo-b.codigo;   // desempate estable
   });
+  return rows;
+}
+function chipCount(f){
+  if(f==="todas")return state.subjects.length;
+  if(f==="disp")return state.subjects.filter(s=>s.condicion!=="Aprobada"&&s.disponibilidad==="Disponible").length;
+  if(f==="inter")return interSubjects().length;
+  return state.subjects.filter(s=>s.condicion===f).length;
+}
+function renderChips(){
+  document.querySelectorAll(".chip[data-f]").forEach(c=>{
+    let n=c.querySelector(".cn");
+    if(!n){n=document.createElement("span");n.className="cn";c.appendChild(n);}
+    n.textContent=chipCount(c.dataset.f);
+  });
+}
+function renderTable(){
+  const tb=$("tbody"),tokens=searchTokens(state.search);
+  const rows=filteredRows();
+  renderChips();
   $("tblMeta").textContent=rows.length+" de "+state.subjects.length;
   if(!rows.length){tb.innerHTML="";$("noresult").style.display="block";return;}
   $("noresult").style.display="none";
   const blocked=s=>s.condicion==="No aprobada"&&(PREREQS[s.codigo]||[]).length>0;
   tb.innerHTML=rows.map(s=>{
     const isXp=state.expandedRows.has(s.codigo);
-    const xpBtn=blocked(s)?`<button class="prq-btn${isXp?' open':''}" data-c="${s.codigo}">${isXp?'▾':'▸'} prereqs</button>`:'';
+    const xpBtn=blocked(s)?`<button class="prq-btn${isXp?' open':''}" data-c="${s.codigo}" aria-expanded="${isXp}">${isXp?'▾':'▸'} prereqs</button>`:'';
+    const dudosa=s.disponibilidad==="Disponible"&&s.condicion!=="Cursada"&&prereqsSinCargar(s.codigo);
     const dispCell=s.disponibilidad==="Disponible"
-      ?'<span class="disp-y">Disponible</span>'
+      ?`<span class="disp-y">Disponible${dudosa?'<span class="disp-warn" title="Esta materia no tiene correlativas cargadas en el plan: verificá en el sistema de la facultad antes de anotarte.">*</span>':''}</span>`
       :`<span class="disp-n">No disponible</span>${xpBtn}`;
-    const mainRow=`<tr data-c="${s.codigo}"${isXp?' class="row-xp"':''}>`
+    // Las filas son interactivas (abren el modal), así que tienen que ser
+    // alcanzables con Tab y activarse con Enter/Espacio, no sólo con el mouse.
+    const mainRow=`<tr data-c="${s.codigo}" tabindex="0" role="button" aria-label="${esc("Editar "+s.nombre)}"${isXp?' class="row-xp"':''}>`
       +`<td class="code">${String(s.codigo).padStart(4,"0")}</td>`
-      +`<td><div class="nm-cell">${s.intermedio?'<span class="idot" title="Cuenta para el título intermedio"></span>':''}${esc(s.nombre)}</div></td>`
+      +`<td><div class="nm-cell">${s.intermedio?'<span class="idot" title="Cuenta para el título intermedio"></span>':''}${highlight(s.nombre,tokens)}</div></td>`
       +`<td class="code">${esc(YEAR_SHORT[s.anio]||s.anio)}</td>`
       +`<td><span class="tag ${STATE_CLASS[s.condicion]}">${STATE_LABEL[s.condicion]}</span></td>`
       +`<td>${dispCell}</td>`
@@ -1159,11 +1655,18 @@ function renderTable(){
       +`</tr>`;
     return mainRow+(isXp?buildPrereqRow(s):'');
   }).join("");
-  // click en fila → abrir modal (salvo que sea el botón prereqs)
-  tb.querySelectorAll("tr[data-c]").forEach(tr=>tr.addEventListener("click",e=>{
-    if(e.target.closest('.prq-btn'))return;
-    openEdit(+tr.dataset.c);
-  }));
+  // click / Enter en fila → abrir modal (salvo que sea el botón prereqs)
+  tb.querySelectorAll("tr[data-c]").forEach(tr=>{
+    tr.addEventListener("click",e=>{
+      if(e.target.closest('.prq-btn'))return;
+      openEdit(+tr.dataset.c);
+    });
+    tr.addEventListener("keydown",e=>{
+      if(e.key!=="Enter"&&e.key!==" ")return;
+      if(e.target.closest('.prq-btn'))return;
+      e.preventDefault();openEdit(+tr.dataset.c);
+    });
+  });
   // click en botón prereqs → toggle expand
   tb.querySelectorAll(".prq-btn").forEach(btn=>btn.addEventListener("click",e=>{
     e.stopPropagation();
@@ -1172,22 +1675,62 @@ function renderTable(){
     renderTable();
   }));
 }
-// Resalta el término buscado. Escapa primero y recién después inserta el <mark>,
-// para que un nombre con caracteres especiales no rompa el HTML.
-function highlight(text,q){
-  const safe=esc(text);
-  if(!q)return safe;
-  const i=text.toLowerCase().indexOf(q);
-  if(i<0)return safe;
-  return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length));
+// Resalta los términos buscados. Escapa primero y recién después inserta el <mark>,
+// para que un nombre con caracteres especiales no rompa el HTML. Trabaja sobre la
+// versión sin acentos para poder resaltar "Matemática" habiendo buscado "matematica".
+function highlight(text,tokens){
+  if(!tokens||!tokens.length)return esc(text);
+  const {folded,map}=foldMap(text);
+  const ranges=[];
+  tokens.forEach(t=>{
+    if(!t)return;
+    let from=0,i;
+    while((i=folded.indexOf(t,from))>=0){ranges.push([map[i],map[i+t.length]]);from=i+t.length;}
+  });
+  if(!ranges.length)return esc(text);
+  ranges.sort((a,b)=>a[0]-b[0]);
+  const merged=[];
+  ranges.forEach(r=>{
+    const last=merged[merged.length-1];
+    if(last&&r[0]<=last[1])last[1]=Math.max(last[1],r[1]);
+    else merged.push([r[0],r[1]]);
+  });
+  let out="",cur=0;
+  merged.forEach(([a,b])=>{out+=esc(text.slice(cur,a))+"<mark>"+esc(text.slice(a,b))+"</mark>";cur=b;});
+  return out+esc(text.slice(cur));
+}
+// Descarga genérica: un solo lugar que crea el <a>, dispara el click y libera la URL.
+function download(blob,filename){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),0);
+}
+// CSV con BOM y punto y coma: así Excel en español lo abre en columnas sin importar.
+function exportCSV(){
+  const rows=filteredRows();
+  if(!rows.length){toast("No hay materias que exportar con este filtro");return;}
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const head=["Codigo","Materia","Anio","Estado","Disponibilidad","Nota","Intermedio"];
+  const body=rows.map(s=>[
+    String(s.codigo).padStart(4,"0"),s.nombre,s.anio,STATE_LABEL[s.condicion],
+    s.disponibilidad,s.nota>0?String(s.nota).replace(".",","):"",s.intermedio?"si":"no"
+  ].map(q).join(";"));
+  const csv=String.fromCharCode(0xFEFF)+[head.map(q).join(";"),...body].join("\r\n");
+  download(new Blob([csv],{type:"text/csv;charset=utf-8"}),"legajo-"+new Date().toISOString().slice(0,10)+".csv");
+  toast(rows.length+" materia"+(rows.length===1?"":"s")+" exportada"+(rows.length===1?"":"s")+" a CSV");
 }
 function renderSidebar(){
-  const list=$("filelist"),q=($("sideSearch").value||"").trim().toLowerCase();
+  const raw=($("sideSearch").value||"").trim();
+  const tokens=searchTokens(raw);
+  const q=tokens.length;
+  // El grafo resalta lo mismo que la búsqueda del explorador.
+  state.sideTokens=tokens;
+  const list=$("filelist");
   list.innerHTML="";
   let shown=0;
   ZONES.forEach((z,zi)=>{
     const all=state.subjects.filter(s=>s.anio===z);
-    const items=q?all.filter(s=>s.nombre.toLowerCase().includes(q)||String(s.codigo).includes(q)):all;
+    const items=q?all.filter(s=>matchSubject(s,tokens)):all;
     if(!items.length) return;
     shown+=items.length;
     const done=all.filter(s=>s.condicion==="Aprobada").length;
@@ -1207,7 +1750,7 @@ function renderSidebar(){
     items.forEach(s=>{const el=document.createElement("button");el.type="button";
       el.className="note"+(state.selected===s.codigo?" active":"");
       el.title=s.nombre+" · "+STATE_LABEL[s.condicion];
-      el.innerHTML='<span class="nd" style="background:'+stateColor(s.condicion)+'"></span><span class="nt">'+highlight(s.nombre,q)+'</span>';
+      el.innerHTML='<span class="nd" style="background:'+stateColor(s.condicion)+'"></span><span class="nt">'+highlight(s.nombre,tokens)+'</span>';
       el.addEventListener("click",()=>{select(s.codigo);openEdit(s.codigo);});
       box.appendChild(el);});
     folder.appendChild(box);list.appendChild(folder);
@@ -1215,9 +1758,10 @@ function renderSidebar(){
   if(!shown){
     const empty=document.createElement("div");
     empty.style.cssText="padding:18px 12px;font-size:12.5px;color:var(--muted);font-style:italic;";
-    empty.textContent=q?'Ninguna materia coincide con "'+($("sideSearch").value||"").trim()+'".':"Sin materias.";
+    empty.textContent=q?'Ninguna materia coincide con "'+raw+'".':"Sin materias.";
     list.appendChild(empty);
   }
+  if(GRAPH)GRAPH.redraw();
 }
 const collapsed=[false,false,false,false,false,false];
 
@@ -1225,11 +1769,49 @@ function select(code){ state.selected=code; if(GRAPH)GRAPH.select(code); renderS
 // recalcDerived() va acá adentro: aprobar una materia cambia la disponibilidad de
 // todas las que dependen de ella, y antes eso sólo se recalculaba al abrir Cronograma,
 // así que la tabla y el grafo quedaban mostrando datos viejos.
-function renderAll(changed){ recalcDerived(); renderStats(); renderYears(); renderTable(); renderSidebar(); if(GRAPH)GRAPH.sync(changed); }
+function renderAll(changed){
+  recalcDerived();
+  renderStats(); renderYears(); renderHist(); renderTable(); renderSidebar();
+  // El planificador y el cronograma dependen de lo aprobado: si no se refrescan,
+  // quedan mostrando recomendaciones y disponibilidades viejas al volver a la pestaña.
+  if(document.querySelector('.pane.active')?.dataset.pane==="planner")renderPlanner();
+  if(document.querySelector('.pane.active')?.dataset.pane==="cronograma"){renderSched();renderSubPills();}
+  if(GRAPH)GRAPH.sync(changed);
+}
 
 /* ===================== GRAPH ===================== */
 let GRAPH=null;
-const gopts={arrows:true,fade:.78,size:1,thick:1,fCenter:.7,fRepel:1.4,fLink:.85,fDist:.8,animate:false};
+const GOPTS_DEF={arrows:true,hiDisp:false,dimDone:false,fade:.78,size:1,thick:1,fCenter:.7,fRepel:1.4,fLink:.9,fDist:.8};
+// Los ajustes del grafo se guardan: antes se perdían en cada recarga y además los
+// sliders del panel arrancaban desfasados de los valores reales (el de "umbral de
+// texto" mostraba 0.5 cuando el valor efectivo era 0.78).
+// `animate` queda fuera a propósito: es un modo momentáneo, no una preferencia.
+const gopts=Object.assign({},GOPTS_DEF,{animate:false},(()=>{
+  const saved=loadJSON("-gopts",null);
+  if(!saved)return {};
+  const out={};
+  Object.keys(GOPTS_DEF).forEach(k=>{
+    const v=saved[k];
+    if(typeof GOPTS_DEF[k]==="boolean"){if(typeof v==="boolean")out[k]=v;}
+    else if(Number.isFinite(v)&&v>=0&&v<=4)out[k]=v;
+  });
+  return out;
+})());
+function saveGopts(){const o={};Object.keys(GOPTS_DEF).forEach(k=>{o[k]=gopts[k];});write(KEY+"-gopts",o);}
+const GOPTS_RANGES=[["cFade","vFade","fade",2],["cSize","vSize","size",1],["cThick","vThick","thick",1],
+  ["fCenter","vCenter","fCenter",1],["fRepel","vRepel","fRepel",1],["fLink","vLink","fLink",1],["fDist","vDist","fDist",1]];
+const GOPTS_SWITCHES=[["cArrows","arrows"],["cDisp","hiDisp"],["cDim","dimDone"]];
+function applyGoptsToUI(){
+  GOPTS_RANGES.forEach(([rid,vid,key,dec])=>{
+    const el=$(rid);if(el)el.value=Math.round(gopts[key]*100);
+    const lb=$(vid);if(lb)lb.textContent=gopts[key].toFixed(dec);
+  });
+  GOPTS_SWITCHES.forEach(([id,key])=>{
+    const el=$(id);if(!el)return;
+    el.classList.toggle("on",!!gopts[key]);
+    el.setAttribute("aria-checked",gopts[key]?"true":"false");
+  });
+}
 function buildGraph(){
   const canvas=$("graph");if(!canvas)return null;
   const ctx=canvas.getContext&&canvas.getContext("2d");if(!ctx)return null;
@@ -1267,7 +1849,9 @@ function buildGraph(){
     });
     syncColors();
   }
-  function syncColors(){state.subjects.forEach(s=>{const n=byId["s"+s.codigo];if(n){n.color=stateColor(s.condicion);n.cond=s.condicion;n.done=s.condicion==="Aprobada";n.disp=s.disponibilidad==="Disponible";n.inter=s.intermedio;n.nota=s.nota;}});}
+  // `hay` se cachea acá porque draw() corre 60 veces por segundo y normalizar el
+  // nombre por nodo en cada frame para el resaltado de búsqueda sería tirar trabajo.
+  function syncColors(){state.subjects.forEach(s=>{const n=byId["s"+s.codigo];if(n){n.color=stateColor(s.condicion);n.cond=s.condicion;n.done=s.condicion==="Aprobada";n.disp=s.disponibilidad==="Disponible";n.inter=s.intermedio;n.nota=s.nota;n.hay=deacc(s.nombre)+" "+s.codigo;}});}
   function resize(){const r=canvas.getBoundingClientRect();W=r.width;H=r.height;if(W<2||H<2)return;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
   function nr(n){return n.baseR*gopts.size;}
   function step(){
@@ -1341,9 +1925,18 @@ function buildGraph(){
       ctx.lineWidth=((inChain||act)?1.8:0.85)*gopts.thick;ctx.stroke();
       if(gopts.arrows){ctx.strokeStyle=inChain?(chainMiss?"rgba(226,77,66,.95)":"rgba(232,178,62,.9)"):act?"rgba(242,104,92,.9)":"rgba(162,142,140,.32)";ctx.lineWidth=1*gopts.thick;arrow(a,b,nr(b));}});
     const labelAlpha=Math.max(0,Math.min(1,(cam.scale-(gopts.fade*1.1))/0.3));
+    // Lo que se busca en el explorador se resalta también acá: sin esto había que
+    // encontrar la materia a ojo entre 63 nodos.
+    const _tk=state.sideTokens||[];
     nodes.forEach(n=>{
       if(!nodeVis(n)){return;}
-      const dim=chain?(!chain.allIds.has(n.id)&&n.id!=="s"+hover.codigo):(hi&&!hi.has(n.id)),r=nr(n),sel=n.type==="subject"&&state.selected===n.codigo;
+      const r=nr(n),sel=n.type==="subject"&&state.selected===n.codigo;
+      const hit=_tk.length>0&&n.hay!=null&&_tk.every(t=>n.hay.includes(t));
+      let dim=chain?(!chain.allIds.has(n.id)&&n.id!=="s"+hover.codigo):(hi&&!hi.has(n.id));
+      if(!chain&&!hi&&!sel){
+        if(_tk.length&&!hit)dim=true;                       // fuera de la búsqueda
+        else if(gopts.dimDone&&n.done&&!hit)dim=true;       // ya aprobada
+      }
       const isMiss=chain&&chain.missIds.has(n.id), isDone=chain&&chain.doneIds.has(n.id), isTarget=chain&&n.id==="s"+hover.codigo;
       const nc=isMiss?"#E24D42":isDone?"#E8B23E":n.color;
       const glow=isMiss?14:isDone?8:(n.done?8:0);
@@ -1352,7 +1945,16 @@ function buildGraph(){
       ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=sel?"#FFE9D6":(dim?"rgba(90,90,110,.35)":nc);ctx.globalAlpha=dim?.4:(pend&&!isTarget?.70:1);ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0;
       
       if(n.inter&&!dim){ctx.beginPath();ctx.arc(n.x,n.y,r+2.4,0,Math.PI*2);ctx.strokeStyle="rgba(242,104,92,.75)";ctx.lineWidth=1;ctx.stroke();}
-      const hovd=hover&&n===hover;let la=(hovd||sel?1:labelAlpha);
+      // Anillo exterior: materias que ya podés cursar y resultados de la búsqueda.
+      if(gopts.hiDisp&&!n.done&&n.disp&&!dim&&!chain){
+        ctx.beginPath();ctx.arc(n.x,n.y,r+5,0,Math.PI*2);
+        ctx.strokeStyle="rgba(232,178,62,.85)";ctx.lineWidth=1.4;ctx.stroke();
+      }
+      if(hit){
+        ctx.beginPath();ctx.arc(n.x,n.y,r+7.5,0,Math.PI*2);
+        ctx.strokeStyle="#FFE9D6";ctx.lineWidth=1.6;ctx.stroke();
+      }
+      const hovd=hover&&n===hover;let la=(hovd||sel||hit?1:labelAlpha);
       if(dim)la*=.4;
       if(la>0.04){ctx.globalAlpha=la;ctx.font="500 10px 'Inter',sans-serif";
         ctx.fillStyle="#D8C9C6";ctx.textAlign="center";ctx.textBaseline="top";
@@ -1450,6 +2052,10 @@ function syncModal(s){
   const disp=s.disponibilidad==="Disponible";
   const bd=$("swDispBadge");bd.textContent=disp?"✓ Sí":"– No";bd.style.color=disp?"var(--done)":"var(--muted)";
   const bi=$("swInterBadge");bi.textContent=s.intermedio?"✓ Sí":"– No";bi.style.color=s.intermedio?"var(--done)":"var(--muted)";
+  const nota=$("derivedNote");
+  if(nota)nota.innerHTML=prereqsSinCargar(s.codigo)
+    ?'<b style="color:#E24D42">Esta materia no tiene correlativas cargadas en el plan</b>, así que figura como disponible por defecto. Verificá en el sistema de la facultad antes de anotarte.'
+    :"Disponibilidad y título intermedio se calculan solos a partir de las correlativas y del plan oficial.";
   const pre=PREREQS[s.codigo]||[],sec=$("prereqSection");
   if(pre.length>0&&s.condicion!=="Aprobada"){sec.style.display="block";
     $("prereqList").innerHTML=pre.map(p=>{const ps=state.subjects.find(z=>z.codigo===p);if(!ps)return"";
@@ -1510,6 +2116,7 @@ function directUnlocks(codigo, apSet, baseline, targetFilter){
 }
 function renderPlanner(){
   const n=Math.max(1,Math.min(8,parseInt($("planN").value)||4));
+  if(n!==state.planN){state.planN=n;write(KEY+"-planN",String(n));renderStats();}
   const apSet=new Set(state.subjects.filter(s=>s.condicion==="Aprobada").map(s=>s.codigo));
   const cursando=state.subjects.filter(s=>s.condicion==="Cursada");
   const available=state.subjects.filter(s=>s.condicion==="No aprobada"&&s.disponibilidad==="Disponible");
@@ -1527,8 +2134,13 @@ function renderPlanner(){
   // vez y sirve de referencia para medir el aporte de cada candidata.
   const baseline=habilitadasCon(apSet);
   const isInterS=x=>INTERMEDIO_CODES.has(x.codigo);
-  // Desempate estable: a igual desbloqueo, primero la del año más bajo y luego por código.
-  const byScore=(a,b)=>b.score-a.score||ZONES.indexOf(a.s.anio)-ZONES.indexOf(b.s.anio)||a.s.codigo-b.s.codigo;
+  const {count,depth}=forwardStats();
+  // Desempate estable: a igual desbloqueo inmediato gana la que destraba más materias
+  // en total (cadena larga), después la del año más bajo y por último el código.
+  const byScore=(a,b)=>b.score-a.score
+    ||(count.get(b.s.codigo)||0)-(count.get(a.s.codigo)||0)
+    ||ZONES.indexOf(a.s.anio)-ZONES.indexOf(b.s.anio)
+    ||a.s.codigo-b.s.codigo;
   // recomendación título intermedio
   const interScored=available.filter(isInterS)
     .map(s=>({s,score:directUnlocks(s.codigo,apSet,baseline,isInterS)}))
@@ -1543,19 +2155,46 @@ function renderPlanner(){
   // recomendación graduación
   const gradScored=available.map(s=>({s,score:directUnlocks(s.codigo,apSet,baseline,null)}))
     .sort(byScore).slice(0,n);
+  // Proyección: cuánto falta a este ritmo, para el título y para el intermedio.
+  const prGrad=proyeccion(n);
+  const interCodes=interAll.map(s=>s.codigo);
+  const prInter=interPend.length?proyeccion(n,interCodes):{cuatris:0,bloqueadas:0};
+  // Dos cuatrimestres = un año. Sólo se aclara cuando el número de años es informativo.
+  const anios=c=>{
+    if(c==null||c<4)return "";
+    const y=c/2;
+    return " (~"+(Number.isInteger(y)?y:y.toFixed(1))+" años)";
+  };
+  $("planProj").innerHTML = prGrad.cuatris==null
+    ? 'No pude estimar la duración: hay materias sin camino de correlativas completo en los datos.'
+    : 'A <b>'+n+'</b> materia'+(n===1?'':'s')+' por cuatrimestre te faltan <b>~'+prGrad.cuatris+'</b> cuatrimestre'
+      +(prGrad.cuatris===1?'':'s')+esc(anios(prGrad.cuatris))+' para recibirte'
+      +(interPend.length
+        ? ' · el título intermedio llegaría en <b>~'+prInter.cuatris+'</b> cuatrimestre'+(prInter.cuatris===1?'':'s')+'.'
+        : ' · ya tenés todo lo del título intermedio.')
+      +'<br><span style="color:var(--faint)">Estimación por correlativas: no mira la oferta ni los choques de horario.</span>';
   function renderList(listId, scored, isInter){
     const el=$(listId);
     if(!scored.length){el.innerHTML='<div class="plan-empty">No hay materias disponibles para este objetivo.</div>';return;}
     el.innerHTML=scored.map((x,i)=>{
       const s=x.s,inInter=INTERMEDIO_CODES.has(s.codigo);
-      const badge=isInter?(inInter?'':'<span style="font-size:10px;color:var(--muted)"> (habilita intermedio)</span>')
-        :(inInter?'<span style="font-size:10px;color:var(--done)"> ✓ intermedio</span>':'');
-      const unl=x.score;
+      const unl=x.score, total=count.get(s.codigo)||0, prof=depth.get(s.codigo)||0;
+      const sinOferta=ofertaDe(s.codigo).length===0;
+      const badges=[
+        isInter
+          ? (inInter?'':'<span class="pbg pbg-inter">habilita el intermedio</span>')
+          : (inInter?'<span class="pbg pbg-inter">✓ intermedio</span>':''),
+        total>unl?'<span class="pbg">'+total+' en toda la cadena</span>':'',
+        prof>=3?'<span class="pbg pbg-chain">cadena de '+prof+' niveles</span>':'',
+        sinOferta?'<span class="pbg pbg-noof">sin comisiones en '+esc(state.ofertaNombre)+'</span>':'',
+        prereqsSinCargar(s.codigo)?'<span class="pbg pbg-noof">correlativas sin cargar</span>':''
+      ].filter(Boolean).join('');
       return`<button type="button" class="prec-card" data-open="${s.codigo}">
         <div class="prec-num">${i+1}</div>
         <div class="prec-body">
-          <div class="prec-name">${esc(s.nombre)}${badge}</div>
+          <div class="prec-name">${esc(s.nombre)}</div>
           <div class="prec-meta">Código ${String(s.codigo).padStart(4,'0')} · ${esc(s.anio)} · ${unl>0?'<b>habilita '+unl+' materia'+(unl===1?'':'s')+'</b>':'no habilita nuevas'}</div>
+          ${badges?`<div class="prec-badges">${badges}</div>`:''}
         </div>
       </button>`;
     }).join('');
@@ -1594,33 +2233,61 @@ $("tabbar").addEventListener("keydown",e=>{
 });
 
 /* ===================== FILTERS / SORT / SEARCH ===================== */
-document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));c.classList.add("active");state.filter=c.dataset.f;renderTable();}));
+document.querySelectorAll(".chip[data-f]").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip[data-f]").forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false");});
+  c.classList.add("active");c.setAttribute("aria-pressed","true");
+  state.filter=c.dataset.f;persistView();renderTable();
+}));
 $("search").addEventListener("input",e=>{state.search=e.target.value.trim();renderTable();});
+$("btnCsv").addEventListener("click",exportCSV);
 $("planN").addEventListener("input",()=>renderPlanner());
 $("sideSearch").addEventListener("input",renderSidebar);
-document.querySelectorAll("th[data-s]").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.s;if(state.sortKey===k)state.sortAsc=!state.sortAsc;else{state.sortKey=k;state.sortAsc=true;}document.querySelectorAll("th .ar").forEach(a=>a.textContent="");th.querySelector(".ar").textContent=state.sortAsc?"▲":"▼";renderTable();}));
+// Indicador de orden: flecha visible + aria-sort, y se refleja el orden restaurado
+// de la sesión anterior en vez de arrancar sin ninguna marca.
+function syncSortUI(){
+  document.querySelectorAll("th[data-s]").forEach(th=>{
+    const on=th.dataset.s===state.sortKey;
+    th.querySelector(".ar").textContent=on?(state.sortAsc?"▲":"▼"):"";
+    th.setAttribute("aria-sort",on?(state.sortAsc?"ascending":"descending"):"none");
+  });
+}
+document.querySelectorAll("th[data-s]").forEach(th=>th.addEventListener("click",()=>{
+  const k=th.dataset.s;
+  if(state.sortKey===k)state.sortAsc=!state.sortAsc;else{state.sortKey=k;state.sortAsc=true;}
+  persistView();syncSortUI();renderTable();
+}));
 $("collapseAll").addEventListener("click",()=>{const anyOpen=collapsed.some(c=>!c);for(let i=0;i<collapsed.length;i++)collapsed[i]=anyOpen;renderSidebar();});
 
 /* ===================== GRAPH CONTROLS ===================== */
-function bindRange(id,valId,fn,fmt){const el=$(id);el.addEventListener("input",()=>{const v=+el.value;fn(v);if(valId)$(valId).textContent=fmt?fmt(v):v;if(GRAPH)GRAPH.redraw();});}
-bindRange("cFade","vFade",v=>gopts.fade=v/100,v=>(v/100).toFixed(2));
-bindRange("cSize","vSize",v=>gopts.size=v/100,v=>(v/100).toFixed(1));
-bindRange("cThick","vThick",v=>gopts.thick=v/100,v=>(v/100).toFixed(1));
-function reheatRange(id,valId,fn,fmt){const el=$(id);el.addEventListener("input",()=>{const v=+el.value;fn(v);if(valId)$(valId).textContent=fmt?fmt(v):v;if(GRAPH)GRAPH.reheat();});}
-reheatRange("fCenter","vCenter",v=>gopts.fCenter=v/100,v=>(v/100).toFixed(1));
-reheatRange("fRepel","vRepel",v=>gopts.fRepel=v/100,v=>(v/100).toFixed(1));
-reheatRange("fLink","vLink",v=>gopts.fLink=v/100,v=>(v/100).toFixed(1));
-reheatRange("fDist","vDist",v=>gopts.fDist=v/100,v=>(v/100).toFixed(1));
-$("cArrows").addEventListener("click",()=>{gopts.arrows=!gopts.arrows;$("cArrows").classList.toggle("on",gopts.arrows);if(GRAPH)GRAPH.redraw();});
-$("cArrows").addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();$("cArrows").click();}});
+// Los sliders comparten forma: valor/100 al gopt, etiqueta con los decimales que
+// corresponden y guardado. Los de fuerzas además recalientan la simulación.
+function bindGopt(rid,vid,key,dec,reheat){
+  const el=$(rid);if(!el)return;
+  el.addEventListener("input",()=>{
+    gopts[key]=(+el.value)/100;
+    const lb=$(vid);if(lb)lb.textContent=gopts[key].toFixed(dec);
+    saveGopts();
+    if(GRAPH){if(reheat)GRAPH.reheat();else GRAPH.redraw();}
+  });
+}
+GOPTS_RANGES.forEach(([rid,vid,key,dec])=>bindGopt(rid,vid,key,dec,rid[0]==="f"));
+GOPTS_SWITCHES.forEach(([id,key])=>{
+  const el=$(id);if(!el)return;
+  const toggle=()=>{
+    gopts[key]=!gopts[key];
+    el.classList.toggle("on",gopts[key]);
+    el.setAttribute("aria-checked",gopts[key]?"true":"false");
+    saveGopts();
+    if(GRAPH)GRAPH.redraw();
+  };
+  el.addEventListener("click",toggle);
+  el.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();toggle();}});
+});
 $("cAnimate").addEventListener("click",()=>{const on=!gopts.animate;if(GRAPH)GRAPH.setAnimate(on);$("cAnimate").textContent=on?"Detener":"Animar";$("cAnimate").style.background=on?"var(--surface-3)":"";$("cAnimate").style.color=on?"var(--text)":"";});
 document.querySelectorAll(".rsec .rh").forEach(h=>h.addEventListener("click",()=>h.parentElement.classList.toggle("collapsed")));
 $("rpReset").addEventListener("click",()=>{
-  gopts.arrows=true;gopts.fade=.78;gopts.size=1;gopts.thick=1;gopts.fCenter=.7;gopts.fRepel=1.4;gopts.fLink=.85;gopts.fDist=.8;
-  $("cArrows").classList.add("on");
-  [["cFade",78],["cSize",100],["cThick",100],["fCenter",70],["fRepel",140],["fLink",90],["fDist",80]].forEach(([id,v])=>$(id).value=v);
-  ["vFade","vSize","vThick","vCenter","vRepel","vLink","vDist"].forEach((id,i)=>{const vals=[0.78,1,1,0.7,1.4,0.9,0.8];$(id).textContent=vals[i].toFixed(vals[i]%1===0?1:2);});
-  $("vFade").textContent="0.78";
+  Object.assign(gopts,GOPTS_DEF);
+  applyGoptsToUI();saveGopts();
   if(GRAPH)GRAPH.reheat();toast("Controles restablecidos");
 });
 $("reheatBtn2").addEventListener("click",()=>{if(GRAPH)GRAPH.reheat();});
@@ -1672,6 +2339,9 @@ $("fileInput").addEventListener("change",e=>{
       if(Array.isArray(d.oferta)&&d.oferta.length){state.oferta=d.oferta;state.ofertaNombre=d.ofertaNombre||state.ofertaNombre;persistOferta();}
       // Los campos derivados del archivo pueden estar viejos: se recalculan siempre.
       recalcDerived();
+      // Un backup viejo guarda los días como nombres de materia: se convierten a
+      // código + comisión con las materias recién importadas.
+      migrateSchedOptions();
       state.expandedRows.clear();state.autoSelected.clear();
       persist();persistSched();
       if(GRAPH)GRAPH.rebuild();
@@ -1685,7 +2355,7 @@ $("fileInput").addEventListener("change",e=>{
 $("btnReset").addEventListener("click",()=>{
   if(!confirm("¿Volver a los datos originales de tu planilla?\n\nSe pierden los cambios de estado y notas que hayas hecho. Conviene exportar un backup antes."))return;
   state.subjects=normalizeAll(JSON.parse(JSON.stringify(SEED)));
-  state.schedOptions=[{id:1,name:"Opción 1",days:["Física II","Requisitos Avanzados","Gestión de las Organizaciones","","",""]}];
+  state.schedOptions=[{id:1,name:"Opción 1",days:[[],[],[],[],[],[]]}];
   recalcDerived();
   state.expandedRows.clear();state.autoSelected.clear();
   persist();persistSched();
@@ -1788,17 +2458,22 @@ $("soloDelDia").addEventListener("change",e=>{
   renderSched();
 });
 $("addSchedOpt").addEventListener("click",()=>{
-  state.schedOptions.push({id:Date.now(),name:"Opción "+(state.schedOptions.length+1),days:["","","","","",""]});
+  state.schedOptions.push({id:nextOptId(),name:"Opción "+(state.schedOptions.length+1),days:[[],[],[],[],[],[]]});
   persistSched();renderSched();
   setTimeout(()=>$("addSchedOpt").scrollIntoView({behavior:"smooth",block:"end"}),60);
 });
 // Filtros de año del grafo
 document.querySelectorAll(".yr-f").forEach(btn=>{
+  btn.setAttribute("aria-pressed",state.graphYears.has(+btn.dataset.yi)?"true":"false");
+  btn.classList.toggle("on",state.graphYears.has(+btn.dataset.yi));
   btn.addEventListener("click",()=>{
     const yi=+btn.dataset.yi;
     if(state.graphYears.has(yi)){
       if(state.graphYears.size>1){state.graphYears.delete(yi);btn.classList.remove("on");}
+      else{toast("Tiene que quedar al menos un año visible");return;}
     }else{state.graphYears.add(yi);btn.classList.add("on");}
+    btn.setAttribute("aria-pressed",state.graphYears.has(yi)?"true":"false");
+    persistGraphYears();
     if(GRAPH)GRAPH.redraw();
   });
 });
@@ -1806,13 +2481,41 @@ let toastT;function toast(m){const t=$("toast");t.textContent=m;t.classList.add(
 
 /* count-up + year fill when Avance opens */
 function countUp(el,to,o){o=o||{};const dec=o.decimals||0,dur=o.dur||1000,small=o.small||"";const start=performance.now(),ease=t=>1-Math.pow(1-t,3);(function fr(now){const p=Math.min(1,(now-start)/dur),v=to*ease(p);const num=dec?v.toFixed(dec):Math.round(v);el.innerHTML=num+(small?"<small>"+small+"</small>":"");if(p<1)requestAnimationFrame(fr);})(start);}
-function revealAvance(){renderYears();if(REDUCED)return;const d=stats();
-  countUp($("sPct"),d.pct,{dur:1000,small:"%"});countUp($("sProm"),d.prom,{decimals:2,dur:1000});countUp($("sAprob"),d.ap,{dur:900,small:" / "+d.t});countUp($("sDisp"),d.disp,{dur:800});countUp($("sInter"),d.interDone,{dur:1000,small:" / "+d.inter});
-  const fills=$("years").querySelectorAll(".fill"),wanted=[];ZONES.forEach(z=>{const it=state.subjects.filter(s=>s.anio===z);if(it.length){const dn=it.filter(s=>s.condicion==="Aprobada").length;wanted.push(Math.round(dn/it.length*100));}});
-  fills.forEach((f,i)=>{f.style.transitionDelay=(i*0.08)+"s";f.style.width="0%";requestAnimationFrame(()=>requestAnimationFrame(()=>f.style.width=wanted[i]+"%"));});}
+function revealAvance(){
+  renderYears();renderHist();
+  if(REDUCED)return;
+  const d=stats();
+  countUp($("sPct"),d.pct,{dur:1000,small:"%"});countUp($("sProm"),d.prom,{decimals:2,dur:1000});
+  countUp($("sAprob"),d.ap,{dur:900,small:" / "+d.t});countUp($("sDisp"),d.disp,{dur:800});
+  countUp($("sInter"),d.interDone,{dur:1000,small:" / "+d.inter});countUp($("sCurs"),d.cu,{dur:700});
+  // Cada año tiene tres tramos apilados: se guardan los anchos que dejó renderYears()
+  // y se reproducen desde cero, en cascada.
+  [...$("years").querySelectorAll(".yr")].forEach((row,i)=>{
+    const fills=[...row.querySelectorAll(".fill")];
+    const wanted=fills.map(f=>f.style.width);
+    fills.forEach(f=>{f.style.transitionDelay=(i*0.08)+"s";f.style.width="0%";});
+    requestAnimationFrame(()=>requestAnimationFrame(()=>fills.forEach((f,k)=>{f.style.width=wanted[k];})));
+  });
+  const bars=[...$("hist").querySelectorAll(".bar")];
+  bars.forEach((b,i)=>{const w=b.style.height;b.style.transitionDelay=(i*0.05)+"s";b.style.height="0%";
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.height=w;}));});
+}
 
 /* ===================== INIT ===================== */
 recalcDerived();
+// Se normaliza y se vuelve a guardar una sola vez, así el formato viejo (nombres de
+// materia) no tiene que re-migrarse en cada carga.
+migrateSchedOptions();
+persistSched();
+// Se refleja el filtro y el orden restaurados de la sesión anterior.
+document.querySelectorAll(".chip[data-f]").forEach(c=>{
+  const on=c.dataset.f===state.filter;
+  c.classList.toggle("active",on);
+  c.setAttribute("aria-pressed",on?"true":"false");
+});
+syncSortUI();
+$("planN").value=state.planN;
+applyGoptsToUI();
 GRAPH=buildGraph();
 renderAll(); renderSched(); renderOfertaBar();
 if(GRAPH) GRAPH.init();
